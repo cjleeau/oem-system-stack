@@ -39,3 +39,13 @@ svg { width: 100%; height: 80vh; }
 .node-rect {
   filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
 }
+
+svg text {
+  fill: #F9FAFB !important;
+}
+
+svg text {
+  paint-order: stroke;
+  stroke: rgba(0,0,0,0.85);
+  stroke-width: 3px;
+}
