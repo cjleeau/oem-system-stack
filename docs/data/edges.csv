@@ -1,10 +1,196 @@
 id,source,target,relation,confidence,region,notes
-eu_e1,eu_vw_group,eu_vw_os,CONTROLS,medium,europe,
-eu_e2,eu_vw_os,eu_vw_ota,PROCESSES,medium,europe,
-eu_e3,eu_vw_ota,eu_vw_tcu,EXPOSES DATA,soft,europe,
-eu_e4,eu_vw_tcu,eu_vw_carrier,ROUTES DATA,medium,europe,
-eu_e5,eu_vw_carrier,eu_vw_cloud,ROUTES DATA,soft,europe,
-eu_e6,eu_vw_cloud,eu_vw_stream,INGESTS,medium,europe,
-eu_e7,eu_vw_stream,eu_vw_datalake,STORES,medium,europe,
-eu_e8,eu_vw_gdpr,eu_vw_cloud,REGULATORY COMPLIANCE,hard,europe,
-eu_e9,eu_vw_datalake,eu_vw_api,EXPOSES DATA,medium,europe,
+e1,europe_volkswagen_group__holdco,europe_volkswagen_group__os,CONTROLS,medium,europe,
+e2,europe_volkswagen_group__os,europe_volkswagen_group__ota,PROCESSES,medium,europe,OS coordinates update policy + packages
+e3,europe_volkswagen_group__ota,europe_volkswagen_group__tcu,EXPOSES DATA,soft,europe,Update status + device telemetry
+e4,europe_volkswagen_group__tcu,europe_volkswagen_group__carrier,ROUTES DATA,medium,europe,Vehicle-to-cloud transport
+e5,europe_volkswagen_group__carrier,europe_volkswagen_group__cloud,ROUTES DATA,soft,europe,Carrier backhaul to cloud
+e6,europe_volkswagen_group__cloud,europe_volkswagen_group__stream,INGESTS,medium,europe,Cloud ingestion endpoints
+e7,europe_volkswagen_group__stream,europe_volkswagen_group__lake,STORES,medium,europe,Durable storage
+e8,europe_volkswagen_group__gov,europe_volkswagen_group__cloud,REGULATORY COMPLIANCE,hard,europe,
+e9,europe_volkswagen_group__reg,europe_volkswagen_group__ota,MANDATORY REPORTING,hard,europe,Update governance / reporting obligations
+e10,europe_volkswagen_group__lake,europe_volkswagen_group__api,EXPOSES DATA,medium,europe,APIs over vehicle/telemetry data products
+e11,europe_mercedes_benz_group__holdco,europe_mercedes_benz_group__os,CONTROLS,medium,europe,
+e12,europe_mercedes_benz_group__os,europe_mercedes_benz_group__ota,PROCESSES,medium,europe,OS coordinates update policy + packages
+e13,europe_mercedes_benz_group__ota,europe_mercedes_benz_group__tcu,EXPOSES DATA,soft,europe,Update status + device telemetry
+e14,europe_mercedes_benz_group__tcu,europe_mercedes_benz_group__carrier,ROUTES DATA,medium,europe,Vehicle-to-cloud transport
+e15,europe_mercedes_benz_group__carrier,europe_mercedes_benz_group__cloud,ROUTES DATA,soft,europe,Carrier backhaul to cloud
+e16,europe_mercedes_benz_group__cloud,europe_mercedes_benz_group__stream,INGESTS,medium,europe,Cloud ingestion endpoints
+e17,europe_mercedes_benz_group__stream,europe_mercedes_benz_group__lake,STORES,medium,europe,Durable storage
+e18,europe_mercedes_benz_group__gov,europe_mercedes_benz_group__cloud,REGULATORY COMPLIANCE,hard,europe,
+e19,europe_mercedes_benz_group__reg,europe_mercedes_benz_group__ota,MANDATORY REPORTING,hard,europe,Update governance / reporting obligations
+e20,europe_mercedes_benz_group__lake,europe_mercedes_benz_group__api,EXPOSES DATA,medium,europe,APIs over vehicle/telemetry data products
+e21,europe_bmw_group__holdco,europe_bmw_group__os,CONTROLS,medium,europe,
+e22,europe_bmw_group__os,europe_bmw_group__ota,PROCESSES,medium,europe,OS coordinates update policy + packages
+e23,europe_bmw_group__ota,europe_bmw_group__tcu,EXPOSES DATA,soft,europe,Update status + device telemetry
+e24,europe_bmw_group__tcu,europe_bmw_group__carrier,ROUTES DATA,medium,europe,Vehicle-to-cloud transport
+e25,europe_bmw_group__carrier,europe_bmw_group__cloud,ROUTES DATA,soft,europe,Carrier backhaul to cloud
+e26,europe_bmw_group__cloud,europe_bmw_group__stream,INGESTS,medium,europe,Cloud ingestion endpoints
+e27,europe_bmw_group__stream,europe_bmw_group__lake,STORES,medium,europe,Durable storage
+e28,europe_bmw_group__gov,europe_bmw_group__cloud,REGULATORY COMPLIANCE,hard,europe,
+e29,europe_bmw_group__reg,europe_bmw_group__ota,MANDATORY REPORTING,hard,europe,Update governance / reporting obligations
+e30,europe_bmw_group__lake,europe_bmw_group__api,EXPOSES DATA,medium,europe,APIs over vehicle/telemetry data products
+e31,europe_stellantis__holdco,europe_stellantis__os,CONTROLS,medium,europe,
+e32,europe_stellantis__os,europe_stellantis__ota,PROCESSES,medium,europe,OS coordinates update policy + packages
+e33,europe_stellantis__ota,europe_stellantis__tcu,EXPOSES DATA,soft,europe,Update status + device telemetry
+e34,europe_stellantis__tcu,europe_stellantis__carrier,ROUTES DATA,medium,europe,Vehicle-to-cloud transport
+e35,europe_stellantis__carrier,europe_stellantis__cloud,ROUTES DATA,soft,europe,Carrier backhaul to cloud
+e36,europe_stellantis__cloud,europe_stellantis__stream,INGESTS,medium,europe,Cloud ingestion endpoints
+e37,europe_stellantis__stream,europe_stellantis__lake,STORES,medium,europe,Durable storage
+e38,europe_stellantis__gov,europe_stellantis__cloud,REGULATORY COMPLIANCE,hard,europe,
+e39,europe_stellantis__reg,europe_stellantis__ota,MANDATORY REPORTING,hard,europe,Update governance / reporting obligations
+e40,europe_stellantis__lake,europe_stellantis__api,EXPOSES DATA,medium,europe,APIs over vehicle/telemetry data products
+e41,europe_renault_group__holdco,europe_renault_group__os,CONTROLS,medium,europe,
+e42,europe_renault_group__os,europe_renault_group__ota,PROCESSES,medium,europe,OS coordinates update policy + packages
+e43,europe_renault_group__ota,europe_renault_group__tcu,EXPOSES DATA,soft,europe,Update status + device telemetry
+e44,europe_renault_group__tcu,europe_renault_group__carrier,ROUTES DATA,medium,europe,Vehicle-to-cloud transport
+e45,europe_renault_group__carrier,europe_renault_group__cloud,ROUTES DATA,soft,europe,Carrier backhaul to cloud
+e46,europe_renault_group__cloud,europe_renault_group__stream,INGESTS,medium,europe,Cloud ingestion endpoints
+e47,europe_renault_group__stream,europe_renault_group__lake,STORES,medium,europe,Durable storage
+e48,europe_renault_group__gov,europe_renault_group__cloud,REGULATORY COMPLIANCE,hard,europe,
+e49,europe_renault_group__reg,europe_renault_group__ota,MANDATORY REPORTING,hard,europe,Update governance / reporting obligations
+e50,europe_renault_group__lake,europe_renault_group__api,EXPOSES DATA,medium,europe,APIs over vehicle/telemetry data products
+e51,china_saic_motor__holdco,china_saic_motor__os,CONTROLS,medium,china,
+e52,china_saic_motor__os,china_saic_motor__ota,PROCESSES,medium,china,OS coordinates update policy + packages
+e53,china_saic_motor__ota,china_saic_motor__tcu,EXPOSES DATA,soft,china,Update status + device telemetry
+e54,china_saic_motor__tcu,china_saic_motor__carrier,ROUTES DATA,medium,china,Vehicle-to-cloud transport
+e55,china_saic_motor__carrier,china_saic_motor__cloud,ROUTES DATA,soft,china,Carrier backhaul to cloud
+e56,china_saic_motor__cloud,china_saic_motor__stream,INGESTS,medium,china,Cloud ingestion endpoints
+e57,china_saic_motor__stream,china_saic_motor__lake,STORES,medium,china,Durable storage
+e58,china_saic_motor__gov,china_saic_motor__cloud,REGULATORY COMPLIANCE,hard,china,
+e59,china_saic_motor__reg,china_saic_motor__ota,MANDATORY REPORTING,hard,china,Update governance / reporting obligations
+e60,china_saic_motor__lake,china_saic_motor__api,EXPOSES DATA,medium,china,APIs over vehicle/telemetry data products
+e61,china_saic_motor__tcu,china_saic_motor__gateway,ROUTES DATA,hard,china,Domestic compliance routing
+e62,china_saic_motor__gateway,china_saic_motor__carrier,ROUTES DATA,hard,china,Domestic carrier handoff
+e63,china_saic_motor__gov,china_saic_motor__lake,DATA LOCALIZATION REQUIRED,hard,china,Telemetry stored/processed domestically
+e64,china_geely_holding_group__holdco,china_geely_holding_group__os,CONTROLS,medium,china,
+e65,china_geely_holding_group__os,china_geely_holding_group__ota,PROCESSES,medium,china,OS coordinates update policy + packages
+e66,china_geely_holding_group__ota,china_geely_holding_group__tcu,EXPOSES DATA,soft,china,Update status + device telemetry
+e67,china_geely_holding_group__tcu,china_geely_holding_group__carrier,ROUTES DATA,medium,china,Vehicle-to-cloud transport
+e68,china_geely_holding_group__carrier,china_geely_holding_group__cloud,ROUTES DATA,soft,china,Carrier backhaul to cloud
+e69,china_geely_holding_group__cloud,china_geely_holding_group__stream,INGESTS,medium,china,Cloud ingestion endpoints
+e70,china_geely_holding_group__stream,china_geely_holding_group__lake,STORES,medium,china,Durable storage
+e71,china_geely_holding_group__gov,china_geely_holding_group__cloud,REGULATORY COMPLIANCE,hard,china,
+e72,china_geely_holding_group__reg,china_geely_holding_group__ota,MANDATORY REPORTING,hard,china,Update governance / reporting obligations
+e73,china_geely_holding_group__lake,china_geely_holding_group__api,EXPOSES DATA,medium,china,APIs over vehicle/telemetry data products
+e74,china_geely_holding_group__tcu,china_geely_holding_group__gateway,ROUTES DATA,hard,china,Domestic compliance routing
+e75,china_geely_holding_group__gateway,china_geely_holding_group__carrier,ROUTES DATA,hard,china,Domestic carrier handoff
+e76,china_geely_holding_group__gov,china_geely_holding_group__lake,DATA LOCALIZATION REQUIRED,hard,china,Telemetry stored/processed domestically
+e77,china_byd__holdco,china_byd__os,CONTROLS,medium,china,
+e78,china_byd__os,china_byd__ota,PROCESSES,medium,china,OS coordinates update policy + packages
+e79,china_byd__ota,china_byd__tcu,EXPOSES DATA,soft,china,Update status + device telemetry
+e80,china_byd__tcu,china_byd__carrier,ROUTES DATA,medium,china,Vehicle-to-cloud transport
+e81,china_byd__carrier,china_byd__cloud,ROUTES DATA,soft,china,Carrier backhaul to cloud
+e82,china_byd__cloud,china_byd__stream,INGESTS,medium,china,Cloud ingestion endpoints
+e83,china_byd__stream,china_byd__lake,STORES,medium,china,Durable storage
+e84,china_byd__gov,china_byd__cloud,REGULATORY COMPLIANCE,hard,china,
+e85,china_byd__reg,china_byd__ota,MANDATORY REPORTING,hard,china,Update governance / reporting obligations
+e86,china_byd__lake,china_byd__api,EXPOSES DATA,medium,china,APIs over vehicle/telemetry data products
+e87,china_byd__tcu,china_byd__gateway,ROUTES DATA,hard,china,Domestic compliance routing
+e88,china_byd__gateway,china_byd__carrier,ROUTES DATA,hard,china,Domestic carrier handoff
+e89,china_byd__gov,china_byd__lake,DATA LOCALIZATION REQUIRED,hard,china,Telemetry stored/processed domestically
+e90,china_changan_automobile__holdco,china_changan_automobile__os,CONTROLS,medium,china,
+e91,china_changan_automobile__os,china_changan_automobile__ota,PROCESSES,medium,china,OS coordinates update policy + packages
+e92,china_changan_automobile__ota,china_changan_automobile__tcu,EXPOSES DATA,soft,china,Update status + device telemetry
+e93,china_changan_automobile__tcu,china_changan_automobile__carrier,ROUTES DATA,medium,china,Vehicle-to-cloud transport
+e94,china_changan_automobile__carrier,china_changan_automobile__cloud,ROUTES DATA,soft,china,Carrier backhaul to cloud
+e95,china_changan_automobile__cloud,china_changan_automobile__stream,INGESTS,medium,china,Cloud ingestion endpoints
+e96,china_changan_automobile__stream,china_changan_automobile__lake,STORES,medium,china,Durable storage
+e97,china_changan_automobile__gov,china_changan_automobile__cloud,REGULATORY COMPLIANCE,hard,china,
+e98,china_changan_automobile__reg,china_changan_automobile__ota,MANDATORY REPORTING,hard,china,Update governance / reporting obligations
+e99,china_changan_automobile__lake,china_changan_automobile__api,EXPOSES DATA,medium,china,APIs over vehicle/telemetry data products
+e100,china_changan_automobile__tcu,china_changan_automobile__gateway,ROUTES DATA,hard,china,Domestic compliance routing
+e101,china_changan_automobile__gateway,china_changan_automobile__carrier,ROUTES DATA,hard,china,Domestic carrier handoff
+e102,china_changan_automobile__gov,china_changan_automobile__lake,DATA LOCALIZATION REQUIRED,hard,china,Telemetry stored/processed domestically
+e103,china_great_wall_motor__holdco,china_great_wall_motor__os,CONTROLS,medium,china,
+e104,china_great_wall_motor__os,china_great_wall_motor__ota,PROCESSES,medium,china,OS coordinates update policy + packages
+e105,china_great_wall_motor__ota,china_great_wall_motor__tcu,EXPOSES DATA,soft,china,Update status + device telemetry
+e106,china_great_wall_motor__tcu,china_great_wall_motor__carrier,ROUTES DATA,medium,china,Vehicle-to-cloud transport
+e107,china_great_wall_motor__carrier,china_great_wall_motor__cloud,ROUTES DATA,soft,china,Carrier backhaul to cloud
+e108,china_great_wall_motor__cloud,china_great_wall_motor__stream,INGESTS,medium,china,Cloud ingestion endpoints
+e109,china_great_wall_motor__stream,china_great_wall_motor__lake,STORES,medium,china,Durable storage
+e110,china_great_wall_motor__gov,china_great_wall_motor__cloud,REGULATORY COMPLIANCE,hard,china,
+e111,china_great_wall_motor__reg,china_great_wall_motor__ota,MANDATORY REPORTING,hard,china,Update governance / reporting obligations
+e112,china_great_wall_motor__lake,china_great_wall_motor__api,EXPOSES DATA,medium,china,APIs over vehicle/telemetry data products
+e113,china_great_wall_motor__tcu,china_great_wall_motor__gateway,ROUTES DATA,hard,china,Domestic compliance routing
+e114,china_great_wall_motor__gateway,china_great_wall_motor__carrier,ROUTES DATA,hard,china,Domestic carrier handoff
+e115,china_great_wall_motor__gov,china_great_wall_motor__lake,DATA LOCALIZATION REQUIRED,hard,china,Telemetry stored/processed domestically
+e116,us_general_motors__holdco,us_general_motors__os,CONTROLS,medium,us,
+e117,us_general_motors__os,us_general_motors__ota,PROCESSES,medium,us,OS coordinates update policy + packages
+e118,us_general_motors__ota,us_general_motors__tcu,EXPOSES DATA,soft,us,Update status + device telemetry
+e119,us_general_motors__tcu,us_general_motors__carrier,ROUTES DATA,medium,us,Vehicle-to-cloud transport
+e120,us_general_motors__carrier,us_general_motors__cloud,ROUTES DATA,soft,us,Carrier backhaul to cloud
+e121,us_general_motors__cloud,us_general_motors__stream,INGESTS,medium,us,Cloud ingestion endpoints
+e122,us_general_motors__stream,us_general_motors__lake,STORES,medium,us,Durable storage
+e123,us_general_motors__gov,us_general_motors__cloud,REGULATORY COMPLIANCE,hard,us,
+e124,us_general_motors__reg,us_general_motors__ota,MANDATORY REPORTING,hard,us,Update governance / reporting obligations
+e125,us_general_motors__lake,us_general_motors__api,EXPOSES DATA,medium,us,APIs over vehicle/telemetry data products
+e126,us_ford_motor_company__holdco,us_ford_motor_company__os,CONTROLS,medium,us,
+e127,us_ford_motor_company__os,us_ford_motor_company__ota,PROCESSES,medium,us,OS coordinates update policy + packages
+e128,us_ford_motor_company__ota,us_ford_motor_company__tcu,EXPOSES DATA,soft,us,Update status + device telemetry
+e129,us_ford_motor_company__tcu,us_ford_motor_company__carrier,ROUTES DATA,medium,us,Vehicle-to-cloud transport
+e130,us_ford_motor_company__carrier,us_ford_motor_company__cloud,ROUTES DATA,soft,us,Carrier backhaul to cloud
+e131,us_ford_motor_company__cloud,us_ford_motor_company__stream,INGESTS,medium,us,Cloud ingestion endpoints
+e132,us_ford_motor_company__stream,us_ford_motor_company__lake,STORES,medium,us,Durable storage
+e133,us_ford_motor_company__gov,us_ford_motor_company__cloud,REGULATORY COMPLIANCE,hard,us,
+e134,us_ford_motor_company__reg,us_ford_motor_company__ota,MANDATORY REPORTING,hard,us,Update governance / reporting obligations
+e135,us_ford_motor_company__lake,us_ford_motor_company__api,EXPOSES DATA,medium,us,APIs over vehicle/telemetry data products
+e136,us_tesla__holdco,us_tesla__os,CONTROLS,medium,us,
+e137,us_tesla__os,us_tesla__ota,PROCESSES,medium,us,OS coordinates update policy + packages
+e138,us_tesla__ota,us_tesla__tcu,EXPOSES DATA,soft,us,Update status + device telemetry
+e139,us_tesla__tcu,us_tesla__carrier,ROUTES DATA,medium,us,Vehicle-to-cloud transport
+e140,us_tesla__carrier,us_tesla__cloud,ROUTES DATA,soft,us,Carrier backhaul to cloud
+e141,us_tesla__cloud,us_tesla__stream,INGESTS,medium,us,Cloud ingestion endpoints
+e142,us_tesla__stream,us_tesla__lake,STORES,medium,us,Durable storage
+e143,us_tesla__gov,us_tesla__cloud,REGULATORY COMPLIANCE,hard,us,
+e144,us_tesla__reg,us_tesla__ota,MANDATORY REPORTING,hard,us,Update governance / reporting obligations
+e145,us_tesla__lake,us_tesla__api,EXPOSES DATA,medium,us,APIs over vehicle/telemetry data products
+e146,us_rivian__holdco,us_rivian__os,CONTROLS,medium,us,
+e147,us_rivian__os,us_rivian__ota,PROCESSES,medium,us,OS coordinates update policy + packages
+e148,us_rivian__ota,us_rivian__tcu,EXPOSES DATA,soft,us,Update status + device telemetry
+e149,us_rivian__tcu,us_rivian__carrier,ROUTES DATA,medium,us,Vehicle-to-cloud transport
+e150,us_rivian__carrier,us_rivian__cloud,ROUTES DATA,soft,us,Carrier backhaul to cloud
+e151,us_rivian__cloud,us_rivian__stream,INGESTS,medium,us,Cloud ingestion endpoints
+e152,us_rivian__stream,us_rivian__lake,STORES,medium,us,Durable storage
+e153,us_rivian__gov,us_rivian__cloud,REGULATORY COMPLIANCE,hard,us,
+e154,us_rivian__reg,us_rivian__ota,MANDATORY REPORTING,hard,us,Update governance / reporting obligations
+e155,us_rivian__lake,us_rivian__api,EXPOSES DATA,medium,us,APIs over vehicle/telemetry data products
+e156,korea_hyundai_motor_group__holdco,korea_hyundai_motor_group__os,CONTROLS,medium,korea,
+e157,korea_hyundai_motor_group__os,korea_hyundai_motor_group__ota,PROCESSES,medium,korea,OS coordinates update policy + packages
+e158,korea_hyundai_motor_group__ota,korea_hyundai_motor_group__tcu,EXPOSES DATA,soft,korea,Update status + device telemetry
+e159,korea_hyundai_motor_group__tcu,korea_hyundai_motor_group__carrier,ROUTES DATA,medium,korea,Vehicle-to-cloud transport
+e160,korea_hyundai_motor_group__carrier,korea_hyundai_motor_group__cloud,ROUTES DATA,soft,korea,Carrier backhaul to cloud
+e161,korea_hyundai_motor_group__cloud,korea_hyundai_motor_group__stream,INGESTS,medium,korea,Cloud ingestion endpoints
+e162,korea_hyundai_motor_group__stream,korea_hyundai_motor_group__lake,STORES,medium,korea,Durable storage
+e163,korea_hyundai_motor_group__gov,korea_hyundai_motor_group__cloud,REGULATORY COMPLIANCE,hard,korea,
+e164,korea_hyundai_motor_group__reg,korea_hyundai_motor_group__ota,MANDATORY REPORTING,hard,korea,Update governance / reporting obligations
+e165,korea_hyundai_motor_group__lake,korea_hyundai_motor_group__api,EXPOSES DATA,medium,korea,APIs over vehicle/telemetry data products
+e166,japan_toyota_motor_corporation__holdco,japan_toyota_motor_corporation__os,CONTROLS,medium,japan,
+e167,japan_toyota_motor_corporation__os,japan_toyota_motor_corporation__ota,PROCESSES,medium,japan,OS coordinates update policy + packages
+e168,japan_toyota_motor_corporation__ota,japan_toyota_motor_corporation__tcu,EXPOSES DATA,soft,japan,Update status + device telemetry
+e169,japan_toyota_motor_corporation__tcu,japan_toyota_motor_corporation__carrier,ROUTES DATA,medium,japan,Vehicle-to-cloud transport
+e170,japan_toyota_motor_corporation__carrier,japan_toyota_motor_corporation__cloud,ROUTES DATA,soft,japan,Carrier backhaul to cloud
+e171,japan_toyota_motor_corporation__cloud,japan_toyota_motor_corporation__stream,INGESTS,medium,japan,Cloud ingestion endpoints
+e172,japan_toyota_motor_corporation__stream,japan_toyota_motor_corporation__lake,STORES,medium,japan,Durable storage
+e173,japan_toyota_motor_corporation__gov,japan_toyota_motor_corporation__cloud,REGULATORY COMPLIANCE,hard,japan,
+e174,japan_toyota_motor_corporation__reg,japan_toyota_motor_corporation__ota,MANDATORY REPORTING,hard,japan,Update governance / reporting obligations
+e175,japan_toyota_motor_corporation__lake,japan_toyota_motor_corporation__api,EXPOSES DATA,medium,japan,APIs over vehicle/telemetry data products
+e176,japan_honda_motor_co_ltd__holdco,japan_honda_motor_co_ltd__os,CONTROLS,medium,japan,
+e177,japan_honda_motor_co_ltd__os,japan_honda_motor_co_ltd__ota,PROCESSES,medium,japan,OS coordinates update policy + packages
+e178,japan_honda_motor_co_ltd__ota,japan_honda_motor_co_ltd__tcu,EXPOSES DATA,soft,japan,Update status + device telemetry
+e179,japan_honda_motor_co_ltd__tcu,japan_honda_motor_co_ltd__carrier,ROUTES DATA,medium,japan,Vehicle-to-cloud transport
+e180,japan_honda_motor_co_ltd__carrier,japan_honda_motor_co_ltd__cloud,ROUTES DATA,soft,japan,Carrier backhaul to cloud
+e181,japan_honda_motor_co_ltd__cloud,japan_honda_motor_co_ltd__stream,INGESTS,medium,japan,Cloud ingestion endpoints
+e182,japan_honda_motor_co_ltd__stream,japan_honda_motor_co_ltd__lake,STORES,medium,japan,Durable storage
+e183,japan_honda_motor_co_ltd__gov,japan_honda_motor_co_ltd__cloud,REGULATORY COMPLIANCE,hard,japan,
+e184,japan_honda_motor_co_ltd__reg,japan_honda_motor_co_ltd__ota,MANDATORY REPORTING,hard,japan,Update governance / reporting obligations
+e185,japan_honda_motor_co_ltd__lake,japan_honda_motor_co_ltd__api,EXPOSES DATA,medium,japan,APIs over vehicle/telemetry data products
+e186,japan_nissan_motor_co_ltd__holdco,japan_nissan_motor_co_ltd__os,CONTROLS,medium,japan,
+e187,japan_nissan_motor_co_ltd__os,japan_nissan_motor_co_ltd__ota,PROCESSES,medium,japan,OS coordinates update policy + packages
+e188,japan_nissan_motor_co_ltd__ota,japan_nissan_motor_co_ltd__tcu,EXPOSES DATA,soft,japan,Update status + device telemetry
+e189,japan_nissan_motor_co_ltd__tcu,japan_nissan_motor_co_ltd__carrier,ROUTES DATA,medium,japan,Vehicle-to-cloud transport
+e190,japan_nissan_motor_co_ltd__carrier,japan_nissan_motor_co_ltd__cloud,ROUTES DATA,soft,japan,Carrier backhaul to cloud
+e191,japan_nissan_motor_co_ltd__cloud,japan_nissan_motor_co_ltd__stream,INGESTS,medium,japan,Cloud ingestion endpoints
+e192,japan_nissan_motor_co_ltd__stream,japan_nissan_motor_co_ltd__lake,STORES,medium,japan,Durable storage
+e193,japan_nissan_motor_co_ltd__gov,japan_nissan_motor_co_ltd__cloud,REGULATORY COMPLIANCE,hard,japan,
+e194,japan_nissan_motor_co_ltd__reg,japan_nissan_motor_co_ltd__ota,MANDATORY REPORTING,hard,japan,Update governance / reporting obligations
+e195,japan_nissan_motor_co_ltd__lake,japan_nissan_motor_co_ltd__api,EXPOSES DATA,medium,japan,APIs over vehicle/telemetry data products

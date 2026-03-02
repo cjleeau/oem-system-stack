@@ -1,60 +1,204 @@
 id,label,region,layer,oem_group,node_type,control_boundary,confidence,notes
-eu_vw_group,Volkswagen Group,europe,Ownership & Brand Stack,Volkswagen Group,HOLDCO,oem,hard,OEM group parent
-eu_mb_group,Mercedes-Benz Group,europe,Ownership & Brand Stack,Mercedes-Benz Group,HOLDCO,oem,hard,OEM group parent
-eu_bmw_group,BMW Group,europe,Ownership & Brand Stack,BMW Group,HOLDCO,oem,hard,OEM group parent
-eu_stellantis_group,Stellantis,europe,Ownership & Brand Stack,Stellantis,HOLDCO,oem,hard,OEM group parent
-eu_renault_group,Renault Group,europe,Ownership & Brand Stack,Renault Group,HOLDCO,oem,hard,OEM group parent
-
-eu_vw_os,Vehicle OS Platform (VW),europe,Vehicle OS & Middleware,Volkswagen Group,OS,oem,medium,Internal OS/middleware layer
-eu_mb_os,MB.OS (Mercedes),europe,Vehicle OS & Middleware,Mercedes-Benz Group,OS,oem,medium,Internal OS/middleware layer
-eu_bmw_os,BMW OS Platform,europe,Vehicle OS & Middleware,BMW Group,OS,oem,medium,Internal OS/middleware layer
-eu_stellantis_os,Stellantis Vehicle OS Platform,europe,Vehicle OS & Middleware,Stellantis,OS,oem,medium,Internal OS/middleware layer
-eu_renault_os,Renault Vehicle OS Platform,europe,Vehicle OS & Middleware,Renault Group,OS,oem,medium,Internal OS/middleware layer
-
-eu_vw_ota,OTA Update Service (VW),europe,OTA & Software Update Infrastructure,Volkswagen Group,OTA,oem,medium,Software update orchestration
-eu_mb_ota,OTA Update Service (Mercedes),europe,OTA & Software Update Infrastructure,Mercedes-Benz Group,OTA,oem,medium,Software update orchestration
-eu_bmw_ota,OTA Update Service (BMW),europe,OTA & Software Update Infrastructure,BMW Group,OTA,oem,medium,Software update orchestration
-eu_stellantis_ota,OTA Update Service (Stellantis),europe,OTA & Software Update Infrastructure,Stellantis,OTA,oem,medium,Software update orchestration
-eu_renault_ota,OTA Update Service (Renault),europe,OTA & Software Update Infrastructure,Renault Group,OTA,oem,medium,Software update orchestration
-
-eu_vw_tcu,Telematics Control Unit (VW),europe,Telematics & TCU,Volkswagen Group,ExternalPartner,oem,medium,Vehicle telemetry gateway
-eu_mb_tcu,Telematics Control Unit (Mercedes),europe,Telematics & TCU,Mercedes-Benz Group,ExternalPartner,oem,medium,Vehicle telemetry gateway
-eu_bmw_tcu,Telematics Control Unit (BMW),europe,Telematics & TCU,BMW Group,ExternalPartner,oem,medium,Vehicle telemetry gateway
-eu_stellantis_tcu,Telematics Control Unit (Stellantis),europe,Telematics & TCU,Stellantis,ExternalPartner,oem,medium,Vehicle telemetry gateway
-eu_renault_tcu,Telematics Control Unit (Renault),europe,Telematics & TCU,Renault Group,ExternalPartner,oem,medium,Vehicle telemetry gateway
-
-eu_vw_carrier,EU Carrier / MVNO (VW),europe,Connectivity Providers,Volkswagen Group,Connectivity,external,soft,Carrier partnerships vary by market
-eu_mb_carrier,EU Carrier / MVNO (Mercedes),europe,Connectivity Providers,Mercedes-Benz Group,Connectivity,external,soft,Carrier partnerships vary by market
-eu_bmw_carrier,EU Carrier / MVNO (BMW),europe,Connectivity Providers,BMW Group,Connectivity,external,soft,Carrier partnerships vary by market
-eu_stellantis_carrier,EU Carrier / MVNO (Stellantis),europe,Connectivity Providers,Stellantis,Connectivity,external,soft,Carrier partnerships vary by market
-eu_renault_carrier,EU Carrier / MVNO (Renault),europe,Connectivity Providers,Renault Group,Connectivity,external,soft,Carrier partnerships vary by market
-
-eu_vw_cloud,Cloud Hosting (VW),europe,Cloud Infrastructure,Volkswagen Group,Cloud,external,soft,Cloud mix varies
-eu_mb_cloud,Cloud Hosting (Mercedes),europe,Cloud Infrastructure,Mercedes-Benz Group,Cloud,external,soft,Cloud mix varies
-eu_bmw_cloud,Cloud Hosting (BMW),europe,Cloud Infrastructure,BMW Group,Cloud,external,soft,Cloud mix varies
-eu_stellantis_cloud,Cloud Hosting (Stellantis),europe,Cloud Infrastructure,Stellantis,Cloud,external,soft,Cloud mix varies
-eu_renault_cloud,Cloud Hosting (Renault),europe,Cloud Infrastructure,Renault Group,Cloud,external,soft,Cloud mix varies
-
-eu_vw_stream,Streaming Layer (VW),europe,Streaming & Data Lake,Volkswagen Group,DataPlatform,oem,medium,Streaming backbone
-eu_mb_stream,Streaming Layer (Mercedes),europe,Streaming & Data Lake,Mercedes-Benz Group,DataPlatform,oem,medium,Streaming backbone
-eu_bmw_stream,Streaming Layer (BMW),europe,Streaming & Data Lake,BMW Group,DataPlatform,oem,medium,Streaming backbone
-eu_stellantis_stream,Streaming Layer (Stellantis),europe,Streaming & Data Lake,Stellantis,DataPlatform,oem,medium,Streaming backbone
-eu_renault_stream,Streaming Layer (Renault),europe,Streaming & Data Lake,Renault Group,DataPlatform,oem,medium,Streaming backbone
-
-eu_vw_datalake,Data Lakehouse (VW),europe,Streaming & Data Lake,Volkswagen Group,DataPlatform,oem,medium,Long-term telemetry storage
-eu_mb_datalake,Data Lakehouse (Mercedes),europe,Streaming & Data Lake,Mercedes-Benz Group,DataPlatform,oem,medium,Long-term telemetry storage
-eu_bmw_datalake,Data Lakehouse (BMW),europe,Streaming & Data Lake,BMW Group,DataPlatform,oem,medium,Long-term telemetry storage
-eu_stellantis_datalake,Data Lakehouse (Stellantis),europe,Streaming & Data Lake,Stellantis,DataPlatform,oem,medium,Long-term telemetry storage
-eu_renault_datalake,Data Lakehouse (Renault),europe,Streaming & Data Lake,Renault Group,DataPlatform,oem,medium,Long-term telemetry storage
-
-eu_vw_gdpr,GDPR Controls (VW),europe,Data Governance & Sovereignty,Volkswagen Group,Governance,regulatory,hard,Consent controls
-eu_mb_gdpr,GDPR Controls (Mercedes),europe,Data Governance & Sovereignty,Mercedes-Benz Group,Governance,regulatory,hard,Consent controls
-eu_bmw_gdpr,GDPR Controls (BMW),europe,Data Governance & Sovereignty,BMW Group,Governance,regulatory,hard,Consent controls
-eu_stellantis_gdpr,GDPR Controls (Stellantis),europe,Data Governance & Sovereignty,Stellantis,Governance,regulatory,hard,Consent controls
-eu_renault_gdpr,GDPR Controls (Renault),europe,Data Governance & Sovereignty,Renault Group,Governance,regulatory,hard,Consent controls
-
-eu_vw_api,Product APIs (VW),europe,Product APIs,Volkswagen Group,API,oem,medium,API surface
-eu_mb_api,Product APIs (Mercedes),europe,Product APIs,Mercedes-Benz Group,API,oem,medium,API surface
-eu_bmw_api,Product APIs (BMW),europe,Product APIs,BMW Group,API,oem,medium,API surface
-eu_stellantis_api,Product APIs (Stellantis),europe,Product APIs,Stellantis,API,oem,medium,API surface
-eu_renault_api,Product APIs (Renault),europe,Product APIs,Renault Group,API,oem,medium,API surface
+europe_volkswagen_group__holdco,Volkswagen Group,europe,Ownership & Brand Stack,Volkswagen Group,HOLDCO,oem,hard,OEM group parent
+europe_volkswagen_group__os,VW Vehicle OS Platform,europe,Vehicle OS & Middleware,Volkswagen Group,OS,oem,medium,In-vehicle OS/middleware layer
+europe_volkswagen_group__ota,VW OTA Service,europe,OTA & Software Update Infrastructure,Volkswagen Group,OTA,oem,medium,Update orchestration + policy
+europe_volkswagen_group__tcu,VW Telematics Gateway,europe,Telematics & TCU,Volkswagen Group,Telematics,oem,medium,Vehicle telemetry gateway
+europe_volkswagen_group__carrier,EU Carrier/MVNO (VW),europe,Connectivity Providers,Volkswagen Group,Connectivity,external,soft,Carrier partnerships vary by market
+europe_volkswagen_group__cloud,Cloud Hosting (VW),europe,Cloud Infrastructure,Volkswagen Group,Cloud,external,soft,Cloud mix varies by program
+europe_volkswagen_group__stream,Streaming Layer (VW),europe,Streaming & Data Lake,Volkswagen Group,DataPlatform,oem,medium,Ingestion + streaming layer
+europe_volkswagen_group__lake,Data Lakehouse (VW),europe,Streaming & Data Lake,Volkswagen Group,DataPlatform,oem,medium,Long-term storage + lakehouse
+europe_volkswagen_group__gov,Data Governance Controls (GDPR),europe,Data Governance & Sovereignty,Volkswagen Group,Governance,regulatory,hard,Consent/retention/access + localization rules
+europe_volkswagen_group__reg,Regulators (UNECE WP.29 R155/R156),europe,Regulators,Volkswagen Group,Regulator,regulatory,hard,Cybersecurity + software update governance / mandatory reporting
+europe_volkswagen_group__api,Product APIs (Volkswagen Group),europe,Product APIs,Volkswagen Group,API,oem,medium,External + internal API surface
+europe_mercedes_benz_group__holdco,Mercedes-Benz Group,europe,Ownership & Brand Stack,Mercedes-Benz Group,HOLDCO,oem,hard,OEM group parent
+europe_mercedes_benz_group__os,MB.OS Platform,europe,Vehicle OS & Middleware,Mercedes-Benz Group,OS,oem,medium,In-vehicle OS/middleware layer
+europe_mercedes_benz_group__ota,MB OTA Service,europe,OTA & Software Update Infrastructure,Mercedes-Benz Group,OTA,oem,medium,Update orchestration + policy
+europe_mercedes_benz_group__tcu,MB Telematics Gateway,europe,Telematics & TCU,Mercedes-Benz Group,Telematics,oem,medium,Vehicle telemetry gateway
+europe_mercedes_benz_group__carrier,EU Carrier/MVNO (MB),europe,Connectivity Providers,Mercedes-Benz Group,Connectivity,external,soft,Carrier partnerships vary by market
+europe_mercedes_benz_group__cloud,Cloud Hosting (MB),europe,Cloud Infrastructure,Mercedes-Benz Group,Cloud,external,soft,Cloud mix varies by program
+europe_mercedes_benz_group__stream,Streaming Layer (MB),europe,Streaming & Data Lake,Mercedes-Benz Group,DataPlatform,oem,medium,Ingestion + streaming layer
+europe_mercedes_benz_group__lake,Data Lakehouse (MB),europe,Streaming & Data Lake,Mercedes-Benz Group,DataPlatform,oem,medium,Long-term storage + lakehouse
+europe_mercedes_benz_group__gov,Data Governance Controls (GDPR),europe,Data Governance & Sovereignty,Mercedes-Benz Group,Governance,regulatory,hard,Consent/retention/access + localization rules
+europe_mercedes_benz_group__reg,Regulators (UNECE WP.29 R155/R156),europe,Regulators,Mercedes-Benz Group,Regulator,regulatory,hard,Cybersecurity + software update governance / mandatory reporting
+europe_mercedes_benz_group__api,Product APIs (Mercedes-Benz Group),europe,Product APIs,Mercedes-Benz Group,API,oem,medium,External + internal API surface
+europe_bmw_group__holdco,BMW Group,europe,Ownership & Brand Stack,BMW Group,HOLDCO,oem,hard,OEM group parent
+europe_bmw_group__os,BMW OS Platform,europe,Vehicle OS & Middleware,BMW Group,OS,oem,medium,In-vehicle OS/middleware layer
+europe_bmw_group__ota,BMW OTA Service,europe,OTA & Software Update Infrastructure,BMW Group,OTA,oem,medium,Update orchestration + policy
+europe_bmw_group__tcu,BMW Telematics Gateway,europe,Telematics & TCU,BMW Group,Telematics,oem,medium,Vehicle telemetry gateway
+europe_bmw_group__carrier,EU Carrier/MVNO (BMW),europe,Connectivity Providers,BMW Group,Connectivity,external,soft,Carrier partnerships vary by market
+europe_bmw_group__cloud,Cloud Hosting (BMW),europe,Cloud Infrastructure,BMW Group,Cloud,external,soft,Cloud mix varies by program
+europe_bmw_group__stream,Streaming Layer (BMW),europe,Streaming & Data Lake,BMW Group,DataPlatform,oem,medium,Ingestion + streaming layer
+europe_bmw_group__lake,Data Lakehouse (BMW),europe,Streaming & Data Lake,BMW Group,DataPlatform,oem,medium,Long-term storage + lakehouse
+europe_bmw_group__gov,Data Governance Controls (GDPR),europe,Data Governance & Sovereignty,BMW Group,Governance,regulatory,hard,Consent/retention/access + localization rules
+europe_bmw_group__reg,Regulators (UNECE WP.29 R155/R156),europe,Regulators,BMW Group,Regulator,regulatory,hard,Cybersecurity + software update governance / mandatory reporting
+europe_bmw_group__api,Product APIs (BMW Group),europe,Product APIs,BMW Group,API,oem,medium,External + internal API surface
+europe_stellantis__holdco,Stellantis,europe,Ownership & Brand Stack,Stellantis,HOLDCO,oem,hard,OEM group parent
+europe_stellantis__os,Stellantis Vehicle OS Platform,europe,Vehicle OS & Middleware,Stellantis,OS,oem,medium,In-vehicle OS/middleware layer
+europe_stellantis__ota,Stellantis OTA Service,europe,OTA & Software Update Infrastructure,Stellantis,OTA,oem,medium,Update orchestration + policy
+europe_stellantis__tcu,Stellantis Telematics Gateway,europe,Telematics & TCU,Stellantis,Telematics,oem,medium,Vehicle telemetry gateway
+europe_stellantis__carrier,EU Carrier/MVNO (Stellantis),europe,Connectivity Providers,Stellantis,Connectivity,external,soft,Carrier partnerships vary by market
+europe_stellantis__cloud,Cloud Hosting (Stellantis),europe,Cloud Infrastructure,Stellantis,Cloud,external,soft,Cloud mix varies by program
+europe_stellantis__stream,Streaming Layer (Stellantis),europe,Streaming & Data Lake,Stellantis,DataPlatform,oem,medium,Ingestion + streaming layer
+europe_stellantis__lake,Data Lakehouse (Stellantis),europe,Streaming & Data Lake,Stellantis,DataPlatform,oem,medium,Long-term storage + lakehouse
+europe_stellantis__gov,Data Governance Controls (GDPR),europe,Data Governance & Sovereignty,Stellantis,Governance,regulatory,hard,Consent/retention/access + localization rules
+europe_stellantis__reg,Regulators (UNECE WP.29 R155/R156),europe,Regulators,Stellantis,Regulator,regulatory,hard,Cybersecurity + software update governance / mandatory reporting
+europe_stellantis__api,Product APIs (Stellantis),europe,Product APIs,Stellantis,API,oem,medium,External + internal API surface
+europe_renault_group__holdco,Renault Group,europe,Ownership & Brand Stack,Renault Group,HOLDCO,oem,hard,OEM group parent
+europe_renault_group__os,Renault Vehicle OS Platform,europe,Vehicle OS & Middleware,Renault Group,OS,oem,medium,In-vehicle OS/middleware layer
+europe_renault_group__ota,Renault OTA Service,europe,OTA & Software Update Infrastructure,Renault Group,OTA,oem,medium,Update orchestration + policy
+europe_renault_group__tcu,Renault Telematics Gateway,europe,Telematics & TCU,Renault Group,Telematics,oem,medium,Vehicle telemetry gateway
+europe_renault_group__carrier,EU Carrier/MVNO (Renault),europe,Connectivity Providers,Renault Group,Connectivity,external,soft,Carrier partnerships vary by market
+europe_renault_group__cloud,Cloud Hosting (Renault),europe,Cloud Infrastructure,Renault Group,Cloud,external,soft,Cloud mix varies by program
+europe_renault_group__stream,Streaming Layer (Renault),europe,Streaming & Data Lake,Renault Group,DataPlatform,oem,medium,Ingestion + streaming layer
+europe_renault_group__lake,Data Lakehouse (Renault),europe,Streaming & Data Lake,Renault Group,DataPlatform,oem,medium,Long-term storage + lakehouse
+europe_renault_group__gov,Data Governance Controls (GDPR),europe,Data Governance & Sovereignty,Renault Group,Governance,regulatory,hard,Consent/retention/access + localization rules
+europe_renault_group__reg,Regulators (UNECE WP.29 R155/R156),europe,Regulators,Renault Group,Regulator,regulatory,hard,Cybersecurity + software update governance / mandatory reporting
+europe_renault_group__api,Product APIs (Renault Group),europe,Product APIs,Renault Group,API,oem,medium,External + internal API surface
+china_saic_motor__holdco,SAIC Motor,china,Ownership & Brand Stack,SAIC Motor,HOLDCO,oem,hard,OEM group parent
+china_saic_motor__os,SAIC Vehicle OS Platform,china,Vehicle OS & Middleware,SAIC Motor,OS,oem,medium,In-vehicle OS/middleware layer
+china_saic_motor__ota,SAIC OTA Service,china,OTA & Software Update Infrastructure,SAIC Motor,OTA,oem,medium,Update orchestration + policy
+china_saic_motor__tcu,SAIC Telematics Gateway,china,Telematics & TCU,SAIC Motor,Telematics,oem,medium,Vehicle telemetry gateway
+china_saic_motor__carrier,China Mobile/Unicom MVNO (SAIC),china,Connectivity Providers,SAIC Motor,Connectivity,external,soft,Carrier partnerships vary by market
+china_saic_motor__cloud,Alibaba Cloud (SAIC),china,Cloud Infrastructure,SAIC Motor,Cloud,external,soft,Cloud mix varies by program
+china_saic_motor__stream,Streaming Layer (SAIC),china,Streaming & Data Lake,SAIC Motor,DataPlatform,oem,medium,Ingestion + streaming layer
+china_saic_motor__lake,Data Lakehouse (SAIC),china,Streaming & Data Lake,SAIC Motor,DataPlatform,oem,medium,Long-term storage + lakehouse
+china_saic_motor__gov,Data Governance Controls (PIPL/CSL/DSL),china,Data Governance & Sovereignty,SAIC Motor,Governance,regulatory,hard,Consent/retention/access + localization rules
+china_saic_motor__reg,Regulators (MIIT Telemetry Reporting),china,Regulators,SAIC Motor,Regulator,regulatory,hard,Cybersecurity + software update governance / mandatory reporting
+china_saic_motor__api,Product APIs (SAIC Motor),china,Product APIs,SAIC Motor,API,oem,medium,External + internal API surface
+china_saic_motor__gateway,China Compliance Gateway,china,Connectivity Providers,SAIC Motor,Governance,regulatory,hard,Domestic routing/monitoring + localization enforcement
+china_geely_holding_group__holdco,Geely Holding Group,china,Ownership & Brand Stack,Geely Holding Group,HOLDCO,oem,hard,OEM group parent
+china_geely_holding_group__os,Geely Vehicle OS Platform,china,Vehicle OS & Middleware,Geely Holding Group,OS,oem,medium,In-vehicle OS/middleware layer
+china_geely_holding_group__ota,Geely OTA Service,china,OTA & Software Update Infrastructure,Geely Holding Group,OTA,oem,medium,Update orchestration + policy
+china_geely_holding_group__tcu,Geely Telematics Gateway,china,Telematics & TCU,Geely Holding Group,Telematics,oem,medium,Vehicle telemetry gateway
+china_geely_holding_group__carrier,China Mobile/Unicom MVNO (Geely),china,Connectivity Providers,Geely Holding Group,Connectivity,external,soft,Carrier partnerships vary by market
+china_geely_holding_group__cloud,Alibaba/Tencent Cloud (Geely),china,Cloud Infrastructure,Geely Holding Group,Cloud,external,soft,Cloud mix varies by program
+china_geely_holding_group__stream,Streaming Layer (Geely),china,Streaming & Data Lake,Geely Holding Group,DataPlatform,oem,medium,Ingestion + streaming layer
+china_geely_holding_group__lake,Data Lakehouse (Geely),china,Streaming & Data Lake,Geely Holding Group,DataPlatform,oem,medium,Long-term storage + lakehouse
+china_geely_holding_group__gov,Data Governance Controls (PIPL/CSL/DSL),china,Data Governance & Sovereignty,Geely Holding Group,Governance,regulatory,hard,Consent/retention/access + localization rules
+china_geely_holding_group__reg,Regulators (MIIT Telemetry Reporting),china,Regulators,Geely Holding Group,Regulator,regulatory,hard,Cybersecurity + software update governance / mandatory reporting
+china_geely_holding_group__api,Product APIs (Geely Holding Group),china,Product APIs,Geely Holding Group,API,oem,medium,External + internal API surface
+china_geely_holding_group__gateway,China Compliance Gateway,china,Connectivity Providers,Geely Holding Group,Governance,regulatory,hard,Domestic routing/monitoring + localization enforcement
+china_byd__holdco,BYD,china,Ownership & Brand Stack,BYD,HOLDCO,oem,hard,OEM group parent
+china_byd__os,BYD Vehicle OS Platform,china,Vehicle OS & Middleware,BYD,OS,oem,medium,In-vehicle OS/middleware layer
+china_byd__ota,BYD OTA Service,china,OTA & Software Update Infrastructure,BYD,OTA,oem,medium,Update orchestration + policy
+china_byd__tcu,BYD Telematics Gateway,china,Telematics & TCU,BYD,Telematics,oem,medium,Vehicle telemetry gateway
+china_byd__carrier,China Mobile/Unicom MVNO (BYD),china,Connectivity Providers,BYD,Connectivity,external,soft,Carrier partnerships vary by market
+china_byd__cloud,Alibaba/Tencent Cloud (BYD),china,Cloud Infrastructure,BYD,Cloud,external,soft,Cloud mix varies by program
+china_byd__stream,Streaming Layer (BYD),china,Streaming & Data Lake,BYD,DataPlatform,oem,medium,Ingestion + streaming layer
+china_byd__lake,Data Lakehouse (BYD),china,Streaming & Data Lake,BYD,DataPlatform,oem,medium,Long-term storage + lakehouse
+china_byd__gov,Data Governance Controls (PIPL/CSL/DSL),china,Data Governance & Sovereignty,BYD,Governance,regulatory,hard,Consent/retention/access + localization rules
+china_byd__reg,Regulators (MIIT Telemetry Reporting),china,Regulators,BYD,Regulator,regulatory,hard,Cybersecurity + software update governance / mandatory reporting
+china_byd__api,Product APIs (BYD),china,Product APIs,BYD,API,oem,medium,External + internal API surface
+china_byd__gateway,China Compliance Gateway,china,Connectivity Providers,BYD,Governance,regulatory,hard,Domestic routing/monitoring + localization enforcement
+china_changan_automobile__holdco,Changan Automobile,china,Ownership & Brand Stack,Changan Automobile,HOLDCO,oem,hard,OEM group parent
+china_changan_automobile__os,Changan Vehicle OS Platform,china,Vehicle OS & Middleware,Changan Automobile,OS,oem,medium,In-vehicle OS/middleware layer
+china_changan_automobile__ota,Changan OTA Service,china,OTA & Software Update Infrastructure,Changan Automobile,OTA,oem,medium,Update orchestration + policy
+china_changan_automobile__tcu,Changan Telematics Gateway,china,Telematics & TCU,Changan Automobile,Telematics,oem,medium,Vehicle telemetry gateway
+china_changan_automobile__carrier,China Mobile/Unicom MVNO (Changan),china,Connectivity Providers,Changan Automobile,Connectivity,external,soft,Carrier partnerships vary by market
+china_changan_automobile__cloud,Alibaba/Tencent Cloud (Changan),china,Cloud Infrastructure,Changan Automobile,Cloud,external,soft,Cloud mix varies by program
+china_changan_automobile__stream,Streaming Layer (Changan),china,Streaming & Data Lake,Changan Automobile,DataPlatform,oem,medium,Ingestion + streaming layer
+china_changan_automobile__lake,Data Lakehouse (Changan),china,Streaming & Data Lake,Changan Automobile,DataPlatform,oem,medium,Long-term storage + lakehouse
+china_changan_automobile__gov,Data Governance Controls (PIPL/CSL/DSL),china,Data Governance & Sovereignty,Changan Automobile,Governance,regulatory,hard,Consent/retention/access + localization rules
+china_changan_automobile__reg,Regulators (MIIT Telemetry Reporting),china,Regulators,Changan Automobile,Regulator,regulatory,hard,Cybersecurity + software update governance / mandatory reporting
+china_changan_automobile__api,Product APIs (Changan Automobile),china,Product APIs,Changan Automobile,API,oem,medium,External + internal API surface
+china_changan_automobile__gateway,China Compliance Gateway,china,Connectivity Providers,Changan Automobile,Governance,regulatory,hard,Domestic routing/monitoring + localization enforcement
+china_great_wall_motor__holdco,Great Wall Motor,china,Ownership & Brand Stack,Great Wall Motor,HOLDCO,oem,hard,OEM group parent
+china_great_wall_motor__os,GWM Vehicle OS Platform,china,Vehicle OS & Middleware,Great Wall Motor,OS,oem,medium,In-vehicle OS/middleware layer
+china_great_wall_motor__ota,GWM OTA Service,china,OTA & Software Update Infrastructure,Great Wall Motor,OTA,oem,medium,Update orchestration + policy
+china_great_wall_motor__tcu,GWM Telematics Gateway,china,Telematics & TCU,Great Wall Motor,Telematics,oem,medium,Vehicle telemetry gateway
+china_great_wall_motor__carrier,China Mobile/Unicom MVNO (GWM),china,Connectivity Providers,Great Wall Motor,Connectivity,external,soft,Carrier partnerships vary by market
+china_great_wall_motor__cloud,Alibaba/Tencent Cloud (GWM),china,Cloud Infrastructure,Great Wall Motor,Cloud,external,soft,Cloud mix varies by program
+china_great_wall_motor__stream,Streaming Layer (GWM),china,Streaming & Data Lake,Great Wall Motor,DataPlatform,oem,medium,Ingestion + streaming layer
+china_great_wall_motor__lake,Data Lakehouse (GWM),china,Streaming & Data Lake,Great Wall Motor,DataPlatform,oem,medium,Long-term storage + lakehouse
+china_great_wall_motor__gov,Data Governance Controls (PIPL/CSL/DSL),china,Data Governance & Sovereignty,Great Wall Motor,Governance,regulatory,hard,Consent/retention/access + localization rules
+china_great_wall_motor__reg,Regulators (MIIT Telemetry Reporting),china,Regulators,Great Wall Motor,Regulator,regulatory,hard,Cybersecurity + software update governance / mandatory reporting
+china_great_wall_motor__api,Product APIs (Great Wall Motor),china,Product APIs,Great Wall Motor,API,oem,medium,External + internal API surface
+china_great_wall_motor__gateway,China Compliance Gateway,china,Connectivity Providers,Great Wall Motor,Governance,regulatory,hard,Domestic routing/monitoring + localization enforcement
+us_general_motors__holdco,General Motors,us,Ownership & Brand Stack,General Motors,HOLDCO,oem,hard,OEM group parent
+us_general_motors__os,GM Vehicle OS Platform,us,Vehicle OS & Middleware,General Motors,OS,oem,medium,In-vehicle OS/middleware layer
+us_general_motors__ota,GM OTA Service,us,OTA & Software Update Infrastructure,General Motors,OTA,oem,medium,Update orchestration + policy
+us_general_motors__tcu,GM Telematics Gateway,us,Telematics & TCU,General Motors,Telematics,oem,medium,Vehicle telemetry gateway
+us_general_motors__carrier,US Carrier/MVNO (GM),us,Connectivity Providers,General Motors,Connectivity,external,soft,Carrier partnerships vary by market
+us_general_motors__cloud,Cloud Hosting (GM),us,Cloud Infrastructure,General Motors,Cloud,external,soft,Cloud mix varies by program
+us_general_motors__stream,Streaming Layer (GM),us,Streaming & Data Lake,General Motors,DataPlatform,oem,medium,Ingestion + streaming layer
+us_general_motors__lake,Data Lakehouse (GM),us,Streaming & Data Lake,General Motors,DataPlatform,oem,medium,Long-term storage + lakehouse
+us_general_motors__gov,Data Governance Controls (State Privacy (CCPA etc.)),us,Data Governance & Sovereignty,General Motors,Governance,regulatory,hard,Consent/retention/access + localization rules
+us_general_motors__reg,Regulators (Cyber/Update Best Practice),us,Regulators,General Motors,Regulator,regulatory,hard,Cybersecurity + software update governance / mandatory reporting
+us_general_motors__api,Product APIs (General Motors),us,Product APIs,General Motors,API,oem,medium,External + internal API surface
+us_ford_motor_company__holdco,Ford Motor Company,us,Ownership & Brand Stack,Ford Motor Company,HOLDCO,oem,hard,OEM group parent
+us_ford_motor_company__os,Ford Vehicle OS Platform,us,Vehicle OS & Middleware,Ford Motor Company,OS,oem,medium,In-vehicle OS/middleware layer
+us_ford_motor_company__ota,Ford OTA Service,us,OTA & Software Update Infrastructure,Ford Motor Company,OTA,oem,medium,Update orchestration + policy
+us_ford_motor_company__tcu,Ford Telematics Gateway,us,Telematics & TCU,Ford Motor Company,Telematics,oem,medium,Vehicle telemetry gateway
+us_ford_motor_company__carrier,US Carrier/MVNO (Ford),us,Connectivity Providers,Ford Motor Company,Connectivity,external,soft,Carrier partnerships vary by market
+us_ford_motor_company__cloud,Cloud Hosting (Ford),us,Cloud Infrastructure,Ford Motor Company,Cloud,external,soft,Cloud mix varies by program
+us_ford_motor_company__stream,Streaming Layer (Ford),us,Streaming & Data Lake,Ford Motor Company,DataPlatform,oem,medium,Ingestion + streaming layer
+us_ford_motor_company__lake,Data Lakehouse (Ford),us,Streaming & Data Lake,Ford Motor Company,DataPlatform,oem,medium,Long-term storage + lakehouse
+us_ford_motor_company__gov,Data Governance Controls (State Privacy (CCPA etc.)),us,Data Governance & Sovereignty,Ford Motor Company,Governance,regulatory,hard,Consent/retention/access + localization rules
+us_ford_motor_company__reg,Regulators (Cyber/Update Best Practice),us,Regulators,Ford Motor Company,Regulator,regulatory,hard,Cybersecurity + software update governance / mandatory reporting
+us_ford_motor_company__api,Product APIs (Ford Motor Company),us,Product APIs,Ford Motor Company,API,oem,medium,External + internal API surface
+us_tesla__holdco,Tesla,us,Ownership & Brand Stack,Tesla,HOLDCO,oem,hard,OEM group parent
+us_tesla__os,Tesla Vehicle OS Platform,us,Vehicle OS & Middleware,Tesla,OS,oem,medium,In-vehicle OS/middleware layer
+us_tesla__ota,Tesla OTA Service,us,OTA & Software Update Infrastructure,Tesla,OTA,oem,medium,Update orchestration + policy
+us_tesla__tcu,Tesla Telematics Gateway,us,Telematics & TCU,Tesla,Telematics,oem,medium,Vehicle telemetry gateway
+us_tesla__carrier,US Carrier/MVNO (Tesla),us,Connectivity Providers,Tesla,Connectivity,external,soft,Carrier partnerships vary by market
+us_tesla__cloud,Cloud Hosting (Tesla),us,Cloud Infrastructure,Tesla,Cloud,external,soft,Cloud mix varies by program
+us_tesla__stream,Streaming Layer (Tesla),us,Streaming & Data Lake,Tesla,DataPlatform,oem,medium,Ingestion + streaming layer
+us_tesla__lake,Data Lakehouse (Tesla),us,Streaming & Data Lake,Tesla,DataPlatform,oem,medium,Long-term storage + lakehouse
+us_tesla__gov,Data Governance Controls (State Privacy (CCPA etc.)),us,Data Governance & Sovereignty,Tesla,Governance,regulatory,hard,Consent/retention/access + localization rules
+us_tesla__reg,Regulators (Cyber/Update Best Practice),us,Regulators,Tesla,Regulator,regulatory,hard,Cybersecurity + software update governance / mandatory reporting
+us_tesla__api,Product APIs (Tesla),us,Product APIs,Tesla,API,oem,medium,External + internal API surface
+us_rivian__holdco,Rivian,us,Ownership & Brand Stack,Rivian,HOLDCO,oem,hard,OEM group parent
+us_rivian__os,Rivian Vehicle OS Platform,us,Vehicle OS & Middleware,Rivian,OS,oem,medium,In-vehicle OS/middleware layer
+us_rivian__ota,Rivian OTA Service,us,OTA & Software Update Infrastructure,Rivian,OTA,oem,medium,Update orchestration + policy
+us_rivian__tcu,Rivian Telematics Gateway,us,Telematics & TCU,Rivian,Telematics,oem,medium,Vehicle telemetry gateway
+us_rivian__carrier,US Carrier/MVNO (Rivian),us,Connectivity Providers,Rivian,Connectivity,external,soft,Carrier partnerships vary by market
+us_rivian__cloud,Cloud Hosting (Rivian),us,Cloud Infrastructure,Rivian,Cloud,external,soft,Cloud mix varies by program
+us_rivian__stream,Streaming Layer (Rivian),us,Streaming & Data Lake,Rivian,DataPlatform,oem,medium,Ingestion + streaming layer
+us_rivian__lake,Data Lakehouse (Rivian),us,Streaming & Data Lake,Rivian,DataPlatform,oem,medium,Long-term storage + lakehouse
+us_rivian__gov,Data Governance Controls (State Privacy (CCPA etc.)),us,Data Governance & Sovereignty,Rivian,Governance,regulatory,hard,Consent/retention/access + localization rules
+us_rivian__reg,Regulators (Cyber/Update Best Practice),us,Regulators,Rivian,Regulator,regulatory,hard,Cybersecurity + software update governance / mandatory reporting
+us_rivian__api,Product APIs (Rivian),us,Product APIs,Rivian,API,oem,medium,External + internal API surface
+korea_hyundai_motor_group__holdco,Hyundai Motor Group,korea,Ownership & Brand Stack,Hyundai Motor Group,HOLDCO,oem,hard,OEM group parent
+korea_hyundai_motor_group__os,HMG Vehicle OS Platform,korea,Vehicle OS & Middleware,Hyundai Motor Group,OS,oem,medium,In-vehicle OS/middleware layer
+korea_hyundai_motor_group__ota,HMG OTA Service,korea,OTA & Software Update Infrastructure,Hyundai Motor Group,OTA,oem,medium,Update orchestration + policy
+korea_hyundai_motor_group__tcu,HMG Telematics Gateway,korea,Telematics & TCU,Hyundai Motor Group,Telematics,oem,medium,Vehicle telemetry gateway
+korea_hyundai_motor_group__carrier,KR Carrier/MVNO (HMG),korea,Connectivity Providers,Hyundai Motor Group,Connectivity,external,soft,Carrier partnerships vary by market
+korea_hyundai_motor_group__cloud,Cloud Hosting (HMG),korea,Cloud Infrastructure,Hyundai Motor Group,Cloud,external,soft,Cloud mix varies by program
+korea_hyundai_motor_group__stream,Streaming Layer (HMG),korea,Streaming & Data Lake,Hyundai Motor Group,DataPlatform,oem,medium,Ingestion + streaming layer
+korea_hyundai_motor_group__lake,Data Lakehouse (HMG),korea,Streaming & Data Lake,Hyundai Motor Group,DataPlatform,oem,medium,Long-term storage + lakehouse
+korea_hyundai_motor_group__gov,Data Governance Controls (PIPA),korea,Data Governance & Sovereignty,Hyundai Motor Group,Governance,regulatory,hard,Consent/retention/access + localization rules
+korea_hyundai_motor_group__reg,Regulators (Cyber/Update Best Practice),korea,Regulators,Hyundai Motor Group,Regulator,regulatory,hard,Cybersecurity + software update governance / mandatory reporting
+korea_hyundai_motor_group__api,Product APIs (Hyundai Motor Group),korea,Product APIs,Hyundai Motor Group,API,oem,medium,External + internal API surface
+japan_toyota_motor_corporation__holdco,Toyota Motor Corporation,japan,Ownership & Brand Stack,Toyota Motor Corporation,HOLDCO,oem,hard,OEM group parent
+japan_toyota_motor_corporation__os,Toyota Vehicle OS Platform,japan,Vehicle OS & Middleware,Toyota Motor Corporation,OS,oem,medium,In-vehicle OS/middleware layer
+japan_toyota_motor_corporation__ota,Toyota OTA Service,japan,OTA & Software Update Infrastructure,Toyota Motor Corporation,OTA,oem,medium,Update orchestration + policy
+japan_toyota_motor_corporation__tcu,Toyota Telematics Gateway,japan,Telematics & TCU,Toyota Motor Corporation,Telematics,oem,medium,Vehicle telemetry gateway
+japan_toyota_motor_corporation__carrier,JP Carrier/MVNO (Toyota),japan,Connectivity Providers,Toyota Motor Corporation,Connectivity,external,soft,Carrier partnerships vary by market
+japan_toyota_motor_corporation__cloud,Cloud Hosting (Toyota),japan,Cloud Infrastructure,Toyota Motor Corporation,Cloud,external,soft,Cloud mix varies by program
+japan_toyota_motor_corporation__stream,Streaming Layer (Toyota),japan,Streaming & Data Lake,Toyota Motor Corporation,DataPlatform,oem,medium,Ingestion + streaming layer
+japan_toyota_motor_corporation__lake,Data Lakehouse (Toyota),japan,Streaming & Data Lake,Toyota Motor Corporation,DataPlatform,oem,medium,Long-term storage + lakehouse
+japan_toyota_motor_corporation__gov,Data Governance Controls (APPI),japan,Data Governance & Sovereignty,Toyota Motor Corporation,Governance,regulatory,hard,Consent/retention/access + localization rules
+japan_toyota_motor_corporation__reg,Regulators (Cyber/Update Best Practice),japan,Regulators,Toyota Motor Corporation,Regulator,regulatory,hard,Cybersecurity + software update governance / mandatory reporting
+japan_toyota_motor_corporation__api,Product APIs (Toyota Motor Corporation),japan,Product APIs,Toyota Motor Corporation,API,oem,medium,External + internal API surface
+japan_honda_motor_co_ltd__holdco,"Honda Motor Co., Ltd.",japan,Ownership & Brand Stack,"Honda Motor Co., Ltd.",HOLDCO,oem,hard,OEM group parent
+japan_honda_motor_co_ltd__os,Honda Vehicle OS Platform,japan,Vehicle OS & Middleware,"Honda Motor Co., Ltd.",OS,oem,medium,In-vehicle OS/middleware layer
+japan_honda_motor_co_ltd__ota,Honda OTA Service,japan,OTA & Software Update Infrastructure,"Honda Motor Co., Ltd.",OTA,oem,medium,Update orchestration + policy
+japan_honda_motor_co_ltd__tcu,Honda Telematics Gateway,japan,Telematics & TCU,"Honda Motor Co., Ltd.",Telematics,oem,medium,Vehicle telemetry gateway
+japan_honda_motor_co_ltd__carrier,JP Carrier/MVNO (Honda),japan,Connectivity Providers,"Honda Motor Co., Ltd.",Connectivity,external,soft,Carrier partnerships vary by market
+japan_honda_motor_co_ltd__cloud,Cloud Hosting (Honda),japan,Cloud Infrastructure,"Honda Motor Co., Ltd.",Cloud,external,soft,Cloud mix varies by program
+japan_honda_motor_co_ltd__stream,Streaming Layer (Honda),japan,Streaming & Data Lake,"Honda Motor Co., Ltd.",DataPlatform,oem,medium,Ingestion + streaming layer
+japan_honda_motor_co_ltd__lake,Data Lakehouse (Honda),japan,Streaming & Data Lake,"Honda Motor Co., Ltd.",DataPlatform,oem,medium,Long-term storage + lakehouse
+japan_honda_motor_co_ltd__gov,Data Governance Controls (APPI),japan,Data Governance & Sovereignty,"Honda Motor Co., Ltd.",Governance,regulatory,hard,Consent/retention/access + localization rules
+japan_honda_motor_co_ltd__reg,Regulators (Cyber/Update Best Practice),japan,Regulators,"Honda Motor Co., Ltd.",Regulator,regulatory,hard,Cybersecurity + software update governance / mandatory reporting
+japan_honda_motor_co_ltd__api,"Product APIs (Honda Motor Co., Ltd.)",japan,Product APIs,"Honda Motor Co., Ltd.",API,oem,medium,External + internal API surface
+japan_nissan_motor_co_ltd__holdco,"Nissan Motor Co., Ltd.",japan,Ownership & Brand Stack,"Nissan Motor Co., Ltd.",HOLDCO,oem,hard,OEM group parent
+japan_nissan_motor_co_ltd__os,Nissan Vehicle OS Platform,japan,Vehicle OS & Middleware,"Nissan Motor Co., Ltd.",OS,oem,medium,In-vehicle OS/middleware layer
+japan_nissan_motor_co_ltd__ota,Nissan OTA Service,japan,OTA & Software Update Infrastructure,"Nissan Motor Co., Ltd.",OTA,oem,medium,Update orchestration + policy
+japan_nissan_motor_co_ltd__tcu,Nissan Telematics Gateway,japan,Telematics & TCU,"Nissan Motor Co., Ltd.",Telematics,oem,medium,Vehicle telemetry gateway
+japan_nissan_motor_co_ltd__carrier,JP Carrier/MVNO (Nissan),japan,Connectivity Providers,"Nissan Motor Co., Ltd.",Connectivity,external,soft,Carrier partnerships vary by market
+japan_nissan_motor_co_ltd__cloud,Cloud Hosting (Nissan),japan,Cloud Infrastructure,"Nissan Motor Co., Ltd.",Cloud,external,soft,Cloud mix varies by program
+japan_nissan_motor_co_ltd__stream,Streaming Layer (Nissan),japan,Streaming & Data Lake,"Nissan Motor Co., Ltd.",DataPlatform,oem,medium,Ingestion + streaming layer
+japan_nissan_motor_co_ltd__lake,Data Lakehouse (Nissan),japan,Streaming & Data Lake,"Nissan Motor Co., Ltd.",DataPlatform,oem,medium,Long-term storage + lakehouse
+japan_nissan_motor_co_ltd__gov,Data Governance Controls (APPI),japan,Data Governance & Sovereignty,"Nissan Motor Co., Ltd.",Governance,regulatory,hard,Consent/retention/access + localization rules
+japan_nissan_motor_co_ltd__reg,Regulators (Cyber/Update Best Practice),japan,Regulators,"Nissan Motor Co., Ltd.",Regulator,regulatory,hard,Cybersecurity + software update governance / mandatory reporting
+japan_nissan_motor_co_ltd__api,"Product APIs (Nissan Motor Co., Ltd.)",japan,Product APIs,"Nissan Motor Co., Ltd.",API,oem,medium,External + internal API surface
