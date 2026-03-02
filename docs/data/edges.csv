@@ -1,55 +1,10 @@
 id,source,target,relation,confidence,region,notes
 eu_e1,eu_vw_group,eu_vw_os,CONTROLS,medium,europe,
-eu_e2,eu_vw_os,eu_vw_ota,PROCESSES,medium,europe,OS coordinates update policies
-eu_e3,eu_vw_ota,eu_vw_tcu,EXPOSES DATA,soft,europe,Update status + device telemetry
-eu_e4,eu_vw_tcu,eu_vw_carrier,ROUTES DATA,medium,europe,Vehicle-to-cloud transport
-eu_e5,eu_vw_carrier,eu_vw_cloud,ROUTES DATA,soft,europe,Carrier backhaul to cloud
-eu_e6,eu_vw_cloud,eu_vw_stream,INGESTS,medium,europe,Cloud ingestion endpoint
-eu_e7,eu_vw_stream,eu_vw_datalake,STORES,medium,europe,Long-term storage
+eu_e2,eu_vw_os,eu_vw_ota,PROCESSES,medium,europe,
+eu_e3,eu_vw_ota,eu_vw_tcu,EXPOSES DATA,soft,europe,
+eu_e4,eu_vw_tcu,eu_vw_carrier,ROUTES DATA,medium,europe,
+eu_e5,eu_vw_carrier,eu_vw_cloud,ROUTES DATA,soft,europe,
+eu_e6,eu_vw_cloud,eu_vw_stream,INGESTS,medium,europe,
+eu_e7,eu_vw_stream,eu_vw_datalake,STORES,medium,europe,
 eu_e8,eu_vw_gdpr,eu_vw_cloud,REGULATORY COMPLIANCE,hard,europe,
-eu_e9,eu_vw_wp29,eu_vw_ota,MANDATORY REPORTING,hard,europe,Software update governance
-eu_e10,eu_vw_datalake,eu_vw_api,EXPOSES DATA,medium,europe,API products over telemetry/vehicle data
-
-eu_e11,eu_mb_group,eu_mb_os,CONTROLS,medium,europe,
-eu_e12,eu_mb_os,eu_mb_ota,PROCESSES,medium,europe,
-eu_e13,eu_mb_ota,eu_mb_tcu,EXPOSES DATA,soft,europe,
-eu_e14,eu_mb_tcu,eu_mb_carrier,ROUTES DATA,medium,europe,
-eu_e15,eu_mb_carrier,eu_mb_cloud,ROUTES DATA,soft,europe,
-eu_e16,eu_mb_cloud,eu_mb_stream,INGESTS,medium,europe,
-eu_e17,eu_mb_stream,eu_mb_datalake,STORES,medium,europe,
-eu_e18,eu_mb_gdpr,eu_mb_cloud,REGULATORY COMPLIANCE,hard,europe,
-eu_e19,eu_mb_wp29,eu_mb_ota,MANDATORY REPORTING,hard,europe,
-eu_e20,eu_mb_datalake,eu_mb_api,EXPOSES DATA,medium,europe,
-
-eu_e21,eu_bmw_group,eu_bmw_os,CONTROLS,medium,europe,
-eu_e22,eu_bmw_os,eu_bmw_ota,PROCESSES,medium,europe,
-eu_e23,eu_bmw_ota,eu_bmw_tcu,EXPOSES DATA,soft,europe,
-eu_e24,eu_bmw_tcu,eu_bmw_carrier,ROUTES DATA,medium,europe,
-eu_e25,eu_bmw_carrier,eu_bmw_cloud,ROUTES DATA,soft,europe,
-eu_e26,eu_bmw_cloud,eu_bmw_stream,INGESTS,medium,europe,
-eu_e27,eu_bmw_stream,eu_bmw_datalake,STORES,medium,europe,
-eu_e28,eu_bmw_gdpr,eu_bmw_cloud,REGULATORY COMPLIANCE,hard,europe,
-eu_e29,eu_bmw_wp29,eu_bmw_ota,MANDATORY REPORTING,hard,europe,
-eu_e30,eu_bmw_datalake,eu_bmw_api,EXPOSES DATA,medium,europe,
-
-eu_e31,eu_stellantis_group,eu_stellantis_os,CONTROLS,medium,europe,
-eu_e32,eu_stellantis_os,eu_stellantis_ota,PROCESSES,medium,europe,
-eu_e33,eu_stellantis_ota,eu_stellantis_tcu,EXPOSES DATA,soft,europe,
-eu_e34,eu_stellantis_tcu,eu_stellantis_carrier,ROUTES DATA,medium,europe,
-eu_e35,eu_stellantis_carrier,eu_stellantis_cloud,ROUTES DATA,soft,europe,
-eu_e36,eu_stellantis_cloud,eu_stellantis_stream,INGESTS,medium,europe,
-eu_e37,eu_stellantis_stream,eu_stellantis_datalake,STORES,medium,europe,
-eu_e38,eu_stellantis_gdpr,eu_stellantis_cloud,REGULATORY COMPLIANCE,hard,europe,
-eu_e39,eu_stellantis_wp29,eu_stellantis_ota,MANDATORY REPORTING,hard,europe,
-eu_e40,eu_stellantis_datalake,eu_stellantis_api,EXPOSES DATA,medium,europe,
-
-eu_e41,eu_renault_group,eu_renault_os,CONTROLS,medium,europe,
-eu_e42,eu_renault_os,eu_renault_ota,PROCESSES,medium,europe,
-eu_e43,eu_renault_ota,eu_renault_tcu,EXPOSES DATA,soft,europe,
-eu_e44,eu_renault_tcu,eu_renault_carrier,ROUTES DATA,medium,europe,
-eu_e45,eu_renault_carrier,eu_renault_cloud,ROUTES DATA,soft,europe,
-eu_e46,eu_renault_cloud,eu_renault_stream,INGESTS,medium,europe,
-eu_e47,eu_renault_stream,eu_renault_datalake,STORES,medium,europe,
-eu_e48,eu_renault_gdpr,eu_renault_cloud,REGULATORY COMPLIANCE,hard,europe,
-eu_e49,eu_renault_wp29,eu_renault_ota,MANDATORY REPORTING,hard,europe,
-eu_e50,eu_renault_datalake,eu_renault_api,EXPOSES DATA,medium,europe,
+eu_e9,eu_vw_datalake,eu_vw_api,EXPOSES DATA,medium,europe,
