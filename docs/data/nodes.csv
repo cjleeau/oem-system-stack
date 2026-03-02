@@ -1,19 +1,66 @@
 id,label,region,layer,oem_group,node_type,control_boundary,confidence,notes
-eu_vw,Volkswagen Group,europe,Ownership & Brand Stack,Volkswagen Group,HOLDCO,oem,hard,
-eu_cariad,CARIAD OS,europe,Vehicle OS & Middleware,Volkswagen Group,OS,oem,medium,Internal software platform
-eu_bosch_vw,Bosch,europe,Tier-1 Hardware Suppliers,Volkswagen Group,Supplier,external,medium,Multi-OEM Tier-1
-eu_catl_vw,CATL,europe,Battery & Cell Suppliers,Volkswagen Group,Battery,external,soft,Battery supply (varies by model/market)
-eu_aws_vw,AWS,europe,Cloud Infrastructure,Volkswagen Group,Cloud,external,soft,Cloud hosting (program dependent)
-eu_gdpr_vw,GDPR Compliance Engine,europe,Data Governance & Sovereignty,Volkswagen Group,Governance,regulatory,hard,EU data protection controls
-cn_saic,SAIC Motor,china,Ownership & Brand Stack,SAIC Motor,HOLDCO,oem,hard,
-cn_gateway_saic,China Compliance Gateway,china,Connectivity Providers,SAIC Motor,Governance,regulatory,hard,Domestic routing / monitoring
-cn_alibaba_saic,Alibaba Cloud,china,Cloud Infrastructure,SAIC Motor,Cloud,external,hard,Domestic cloud provider
-cn_miit_saic,MIIT Compliance,china,Data Governance & Sovereignty,SAIC Motor,Governance,regulatory,hard,Mandatory reporting
-us_tesla,Tesla,us,Ownership & Brand Stack,Tesla,OEM,oem,hard,Single-brand vertically integrated
-us_fsd,Tesla FSD Chip,us,Semiconductor & Compute,Tesla,Semiconductor,oem,medium,Internal compute
-us_supercharger,Tesla Supercharger Network,us,Energy & Charging,Tesla,Energy,oem,hard,Owned charging network
-jp_toyota,Toyota Motor Corporation,japan,Ownership & Brand Stack,Toyota Motor Corporation,HOLDCO,oem,hard,
-jp_denso,Denso,japan,Tier-1 Hardware Suppliers,Toyota Motor Corporation,Supplier,external,hard,Tier-1 anchor
-jp_renesas,Renesas,japan,Semiconductor & Compute,Toyota Motor Corporation,Semiconductor,external,hard,Semiconductor anchor
-kr_hmg,Hyundai Motor Group,korea,Ownership & Brand Stack,Hyundai Motor Group,HOLDCO,oem,hard,
-kr_mobis,Hyundai Mobis,korea,Tier-1 Hardware Suppliers,Hyundai Motor Group,Supplier,oem,hard,Vertical integration
+eu_vw_group,Volkswagen Group,europe,Ownership & Brand Stack,Volkswagen Group,HOLDCO,oem,hard,OEM group parent
+eu_mb_group,Mercedes-Benz Group,europe,Ownership & Brand Stack,Mercedes-Benz Group,HOLDCO,oem,hard,OEM group parent
+eu_bmw_group,BMW Group,europe,Ownership & Brand Stack,BMW Group,HOLDCO,oem,hard,OEM group parent
+eu_stellantis_group,Stellantis,europe,Ownership & Brand Stack,Stellantis,HOLDCO,oem,hard,OEM group parent
+eu_renault_group,Renault Group,europe,Ownership & Brand Stack,Renault Group,HOLDCO,oem,hard,OEM group parent
+
+eu_vw_os,Vehicle OS Platform (VW),europe,Vehicle OS & Middleware,Volkswagen Group,OS,oem,medium,Internal OS/middleware layer
+eu_mb_os,MB.OS (Mercedes),europe,Vehicle OS & Middleware,Mercedes-Benz Group,OS,oem,medium,Internal OS/middleware layer
+eu_bmw_os,BMW OS Platform,europe,Vehicle OS & Middleware,BMW Group,OS,oem,medium,Internal OS/middleware layer
+eu_stellantis_os,Stellantis Vehicle OS Platform,europe,Vehicle OS & Middleware,Stellantis,OS,oem,medium,Internal OS/middleware layer
+eu_renault_os,Renault Vehicle OS Platform,europe,Vehicle OS & Middleware,Renault Group,OS,oem,medium,Internal OS/middleware layer
+
+eu_vw_ota,OTA Update Service (VW),europe,OTA & Software Update Infrastructure,Volkswagen Group,OTA,oem,medium,Software update orchestration
+eu_mb_ota,OTA Update Service (Mercedes),europe,OTA & Software Update Infrastructure,Mercedes-Benz Group,OTA,oem,medium,Software update orchestration
+eu_bmw_ota,OTA Update Service (BMW),europe,OTA & Software Update Infrastructure,BMW Group,OTA,oem,medium,Software update orchestration
+eu_stellantis_ota,OTA Update Service (Stellantis),europe,OTA & Software Update Infrastructure,Stellantis,OTA,oem,medium,Software update orchestration
+eu_renault_ota,OTA Update Service (Renault),europe,OTA & Software Update Infrastructure,Renault Group,OTA,oem,medium,Software update orchestration
+
+eu_vw_tcu,Telematics Control Unit (VW),europe,Telematics & TCU,Volkswagen Group,ExternalPartner,oem,medium,Vehicle telemetry gateway (in-vehicle)
+eu_mb_tcu,Telematics Control Unit (Mercedes),europe,Telematics & TCU,Mercedes-Benz Group,ExternalPartner,oem,medium,Vehicle telemetry gateway (in-vehicle)
+eu_bmw_tcu,Telematics Control Unit (BMW),europe,Telematics & TCU,BMW Group,ExternalPartner,oem,medium,Vehicle telemetry gateway (in-vehicle)
+eu_stellantis_tcu,Telematics Control Unit (Stellantis),europe,Telematics & TCU,Stellantis,ExternalPartner,oem,medium,Vehicle telemetry gateway (in-vehicle)
+eu_renault_tcu,Telematics Control Unit (Renault),europe,Telematics & TCU,Renault Group,ExternalPartner,oem,medium,Vehicle telemetry gateway (in-vehicle)
+
+eu_vw_carrier,EU Carrier / MVNO (VW),europe,Connectivity Providers,Volkswagen Group,Connectivity,external,soft,Carrier partnerships vary by market
+eu_mb_carrier,EU Carrier / MVNO (Mercedes),europe,Connectivity Providers,Mercedes-Benz Group,Connectivity,external,soft,Carrier partnerships vary by market
+eu_bmw_carrier,EU Carrier / MVNO (BMW),europe,Connectivity Providers,BMW Group,Connectivity,external,soft,Carrier partnerships vary by market
+eu_stellantis_carrier,EU Carrier / MVNO (Stellantis),europe,Connectivity Providers,Stellantis,Connectivity,external,soft,Carrier partnerships vary by market
+eu_renault_carrier,EU Carrier / MVNO (Renault),europe,Connectivity Providers,Renault Group,Connectivity,external,soft,Carrier partnerships vary by market
+
+eu_vw_cloud,Cloud Hosting (VW),europe,Cloud Infrastructure,Volkswagen Group,Cloud,external,soft,Cloud mix varies (program dependent)
+eu_mb_cloud,Cloud Hosting (Mercedes),europe,Cloud Infrastructure,Mercedes-Benz Group,Cloud,external,soft,Cloud mix varies (program dependent)
+eu_bmw_cloud,Cloud Hosting (BMW),europe,Cloud Infrastructure,BMW Group,Cloud,external,soft,Cloud mix varies (program dependent)
+eu_stellantis_cloud,Cloud Hosting (Stellantis),europe,Cloud Infrastructure,Stellantis,Cloud,external,soft,Cloud mix varies (program dependent)
+eu_renault_cloud,Cloud Hosting (Renault),europe,Cloud Infrastructure,Renault Group,Cloud,external,soft,Cloud mix varies (program dependent)
+
+eu_vw_stream,Streaming Layer (VW),europe,Streaming & Data Lake,Volkswagen Group,DataPlatform,oem,medium,Ingestion + streaming + storage backbone
+eu_mb_stream,Streaming Layer (Mercedes),europe,Streaming & Data Lake,Mercedes-Benz Group,DataPlatform,oem,medium,Ingestion + streaming + storage backbone
+eu_bmw_stream,Streaming Layer (BMW),europe,Streaming & Data Lake,BMW Group,DataPlatform,oem,medium,Ingestion + streaming + storage backbone
+eu_stellantis_stream,Streaming Layer (Stellantis),europe,Streaming & Data Lake,Stellantis,DataPlatform,oem,medium,Ingestion + streaming + storage backbone
+eu_renault_stream,Streaming Layer (Renault),europe,Streaming & Data Lake,Renault Group,DataPlatform,oem,medium,Ingestion + streaming + storage backbone
+
+eu_vw_datalake,Data Lakehouse (VW),europe,Streaming & Data Lake,Volkswagen Group,DataPlatform,oem,medium,Long-term telemetry + product data storage
+eu_mb_datalake,Data Lakehouse (Mercedes),europe,Streaming & Data Lake,Mercedes-Benz Group,DataPlatform,oem,medium,Long-term telemetry + product data storage
+eu_bmw_datalake,Data Lakehouse (BMW),europe,Streaming & Data Lake,BMW Group,DataPlatform,oem,medium,Long-term telemetry + product data storage
+eu_stellantis_datalake,Data Lakehouse (Stellantis),europe,Streaming & Data Lake,Stellantis,DataPlatform,oem,medium,Long-term telemetry + product data storage
+eu_renault_datalake,Data Lakehouse (Renault),europe,Streaming & Data Lake,Renault Group,DataPlatform,oem,medium,Long-term telemetry + product data storage
+
+eu_vw_gdpr,GDPR Controls (VW),europe,Data Governance & Sovereignty,Volkswagen Group,Governance,regulatory,hard,Consent + retention + access controls
+eu_mb_gdpr,GDPR Controls (Mercedes),europe,Data Governance & Sovereignty,Mercedes-Benz Group,Governance,regulatory,hard,Consent + retention + access controls
+eu_bmw_gdpr,GDPR Controls (BMW),europe,Data Governance & Sovereignty,BMW Group,Governance,regulatory,hard,Consent + retention + access controls
+eu_stellantis_gdpr,GDPR Controls (Stellantis),europe,Data Governance & Sovereignty,Stellantis,Governance,regulatory,hard,Consent + retention + access controls
+eu_renault_gdpr,GDPR Controls (Renault),europe,Data Governance & Sovereignty,Renault Group,Governance,regulatory,hard,Consent + retention + access controls
+
+eu_vw_wp29,UNECE WP.29 R155/R156 (VW),europe,Data Governance & Sovereignty,Volkswagen Group,Governance,regulatory,hard,Cybersecurity + software update management requirements
+eu_mb_wp29,UNECE WP.29 R155/R156 (Mercedes),europe,Data Governance & Sovereignty,Mercedes-Benz Group,Governance,regulatory,hard,Cybersecurity + software update management requirements
+eu_bmw_wp29,UNECE WP.29 R155/R156 (BMW),europe,Data Governance & Sovereignty,BMW Group,Governance,regulatory,hard,Cybersecurity + software update management requirements
+eu_stellantis_wp29,UNECE WP.29 R155/R156 (Stellantis),europe,Data Governance & Sovereignty,Stellantis,Governance,regulatory,hard,Cybersecurity + software update management requirements
+eu_renault_wp29,UNECE WP.29 R155/R156 (Renault),europe,Data Governance & Sovereignty,Renault Group,Governance,regulatory,hard,Cybersecurity + software update management requirements
+
+eu_vw_api,Product APIs (VW),europe,Product APIs,Volkswagen Group,API,oem,medium,External + internal API surface (apps, partners)
+eu_mb_api,Product APIs (Mercedes),europe,Product APIs,Mercedes-Benz Group,API,oem,medium,External + internal API surface (apps, partners)
+eu_bmw_api,Product APIs (BMW),europe,Product APIs,BMW Group,API,oem,medium,External + internal API surface (apps, partners)
+eu_stellantis_api,Product APIs (Stellantis),europe,Product APIs,Stellantis,API,oem,medium,External + internal API surface (apps, partners)
+eu_renault_api,Product APIs (Renault),europe,Product APIs,Renault Group,API,oem,medium,External + internal API surface (apps, partners)
