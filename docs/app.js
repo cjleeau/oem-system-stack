@@ -163,9 +163,9 @@ function render(nodesAll, edgesAll) {
 }
 
 function nodeFill(d){
-  if (d.control_boundary === "regulatory") return "rgba(255,170,80,.35)";
-  if (d.control_boundary === "external") return "rgba(140,160,255,.18)";
-  return "rgba(80,140,255,.30)";
+  if (d.control_boundary === "regulatory") return "#F4A261";     // strong amber
+  if (d.control_boundary === "external") return "#6C8CFF";       // brighter blue
+  return "#3B82F6";                                              // OEM blue
 }
 
 function edgeDash(e){
@@ -222,7 +222,7 @@ function renderGrid(nodes, edges, cols){
       const c = cols.indexOf(col);
       const x0 = margin.left + c*cellW + 10;
       const y0 = margin.top + r*cellH + 10;
-      const boxH = 18;
+      const boxH = 24;
 
       list.slice(0,3).forEach((n,i)=>{
         pos.set(n.id, {x:x0, y:y0 + i*(boxH+6), w:cellW-20, h:boxH});
@@ -235,8 +235,8 @@ function renderGrid(nodes, edges, cols){
     .data(edges).join("path")
     .attr("class","edge")
     .attr("fill","none")
-    .attr("stroke","rgba(200,200,200,.8)")
-    .attr("stroke-width", 1)
+    .attr("stroke","#9CA3AF")
+    .attr("stroke-width", 1.5)
     .style("stroke-dasharray", edgeDash)
     .attr("d", e=>{
       const a = pos.get(e.source), b = pos.get(e.target);
@@ -266,10 +266,10 @@ function renderGrid(nodes, edges, cols){
     .attr("width", d=>pos.get(d.id).w)
     .attr("height", d=>pos.get(d.id).h)
     .attr("fill", nodeFill)
-    .attr("stroke","rgba(255,255,255,.14)");
-
+    .attr("stroke","rgba(255,255,255,.35)");
+  
   nodeSel.select("text")
-    .attr("x", 10).attr("y", 13)
+    .attr("x", 10).attr("y", 16)
     .attr("font-size", 10).attr("opacity", .92)
     .text(d=>d.label);
 
