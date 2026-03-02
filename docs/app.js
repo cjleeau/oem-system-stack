@@ -1,186 +1,521 @@
-const width = 1400;
-const height = 900;
+// Global OEM System Stack — D3 (Grid + Network) — CSV driven
+
+const LAYERS = [
+  "Ownership & Brand Stack",
+  "Tier-1 Hardware Suppliers",
+  "Battery & Cell Suppliers",
+  "Semiconductor & Compute",
+  "Vehicle OS & Middleware",
+  "OTA & Software Update Infrastructure",
+  "Telematics & TCU",
+  "Connectivity Providers",
+  "Cloud Infrastructure",
+  "Streaming & Data Lake",
+  "Data Governance & Sovereignty",
+  "AI / Analytics",
+  "Product APIs",
+  "Dealer Systems",
+  "Finance & Insurance",
+  "External Insurance & Risk Ecosystem",
+  "Fleet & Enterprise Integrations",
+  "Regulators",
+  "Energy & Charging"
+];
+
+const TELEMETRY_RELATIONS = new Set([
+  "ROUTES DATA","INGESTS","STREAMS","STORES","PROCESSES","EXPOSES DATA",
+  "HOSTS TELEMETRY","DATA LOCALIZATION REQUIRED","MANDATORY REPORTING"
+]);
 
 const vizEl = d3.select("#viz");
-let allNodes = [];
-let allEdges = [];
+const tooltip = d3.select("#tooltip");
 
-Promise.all([
-  d3.csv("data/nodes.csv"),
-  d3.csv("data/edges.csv")
-]).then(([nodes, edges]) => {
-  allNodes = nodes;
-  allEdges = edges;
-  render();
-});
+const state = {
+  view: "grid",
+  region: "all",
+  oem: "all",
+  layer: "all",
+  type: "all",
+  confidence: "all",
+  search: "",
+  telemetryOnly: false
+};
 
-function render() {
-  const view = document.querySelector(".view-toggle .active")?.dataset.view || "grid";
-  vizEl.selectAll("*").remove();
-  if (view === "network") renderNetwork();
-  else renderGrid();
+function uniq(arr) { return Array.from(new Set(arr)).sort((a,b)=>a.localeCompare(b)); }
+
+function initSelect(selector, values, onChange) {
+  const sel = d3.select(selector);
+  sel.selectAll("option").remove();
+  sel.append("option").attr("value","all").text("All");
+  values.forEach(v => sel.append("option").attr("value", v).text(v));
+  sel.on("change", function(){ onChange(this.value); });
 }
 
-/* -------------------------
-   NODE COLOR
--------------------------- */
+function norm(s){ return (s ?? "").toString().trim().toLowerCase(); }
+
+function matchesFilters(n) {
+  if (state.region !== "all" && n.region !== state.region) return false;
+  if (state.oem !== "all" && n.oem_group !== state.oem) return false;
+  if (state.layer !== "all" && n.layer !== state.layer) return false;
+  if (state.type !== "all" && n.node_type !== state.type) return false;
+  if (state.confidence !== "all" && n.confidence !== state.confidence) return false;
+  if (state.search) {
+    const q = norm(state.search);
+    const hay = norm(`${n.label} ${n.id} ${n.notes ?? ""}`);
+    if (!hay.includes(q)) return false;
+  }
+  return true;
+}
+
+function filterEdges(edges, nodeById) {
+  return edges
+    .filter(e => nodeById.has(e.source) && nodeById.has(e.target))
+    .filter(e => !state.telemetryOnly || TELEMETRY_RELATIONS.has((e.relation||"").trim()));
+}
+
+function showTip(evt, d) {
+  tooltip.style("display","block")
+    .style("left", (evt.pageX + 12) + "px")
+    .style("top", (evt.pageY + 12) + "px")
+    .html(`
+      <div><strong>${d.label}</strong></div>
+      <div style="opacity:.8">${d.region} • ${d.layer}</div>
+      <div style="opacity:.8">${d.node_type} • ${d.control_boundary} • ${d.confidence}</div>
+      ${d.notes ? `<div style="margin-top:6px;opacity:.75">${d.notes}</div>` : ""}
+    `);
+}
+function hideTip(){ tooltip.style("display","none"); }
+
+// ----- VISUAL HELPERS -----
 
 function nodeFill(d){
-  if (d.control_boundary === "regulatory") return "#F4A261";
-  if (d.control_boundary === "external") return "#6C8CFF";
-  return "#3B82F6";
+  // Stronger contrast palette for dark background
+  if (d.control_boundary === "regulatory") return "#F4A261"; // amber
+  if (d.control_boundary === "external") return "#6C8CFF";   // brighter blue
+  return "#3B82F6";                                         // OEM blue
 }
 
-/* -------------------------
-   GRID VIEW
--------------------------- */
+function edgeDash(e){
+  return (e.confidence === "hard") ? "0" : "5 4";
+}
 
-function renderGrid(){
+function applyReadableText(textSel, opts = {}) {
+  // Forces readable labels even if CSS tries to override
+  const size = opts.size ?? 12;
+  const fill = opts.fill ?? "#F9FAFB";
+  const stroke = opts.stroke ?? "rgba(0,0,0,0.85)";
+  const strokeWidth = opts.strokeWidth ?? 3;
 
-  const svg = vizEl.append("svg")
-    .attr("viewBox", `0 0 ${width} ${height}`);
+  textSel
+    .attr("font-size", size)
+    .attr("opacity", 1)
+    .attr("fill", fill)
+    .attr("stroke", stroke)
+    .attr("stroke-width", strokeWidth)
+    .attr("paint-order", "stroke");
+}
+
+// ----- LOAD DATA -----
+
+Promise.all([
+  d3.csv("data/nodes.csv", d3.autoType),
+  d3.csv("data/edges.csv", d3.autoType)
+]).then(([nodesRaw, edgesRaw]) => {
+
+  const nodesAll = nodesRaw.map(d => ({
+    ...d,
+    region: (d.region ?? "").toString().trim(),
+    layer: (d.layer ?? "").toString().trim(),
+    oem_group: (d.oem_group ?? "").toString().trim(),
+    node_type: (d.node_type ?? "").toString().trim(),
+    control_boundary: (d.control_boundary ?? "").toString().trim(),
+    confidence: (d.confidence ?? "").toString().trim(),
+    notes: d.notes ?? ""
+  }))
+  .map(d => ({...d, layerIndex: LAYERS.indexOf(d.layer)}))
+  .filter(d => d.layerIndex >= 0);
+
+  const edgesAll = edgesRaw.map(e => ({
+    ...e,
+    source: (e.source ?? "").toString().trim(),
+    target: (e.target ?? "").toString().trim(),
+    relation: (e.relation ?? "").toString().trim(),
+    confidence: (e.confidence ?? "").toString().trim(),
+    region: (e.region ?? "").toString().trim(),
+    notes: e.notes ?? ""
+  }));
+
+  // Controls
+  initSelect("#region", uniq(nodesAll.map(d => d.region)), v => { state.region=v; render(nodesAll, edgesAll); });
+  initSelect("#oem", uniq(nodesAll.map(d => d.oem_group)), v => { state.oem=v; render(nodesAll, edgesAll); });
+  initSelect("#layer", LAYERS, v => { state.layer=v; render(nodesAll, edgesAll); });
+  initSelect("#type", uniq(nodesAll.map(d => d.node_type)), v => { state.type=v; render(nodesAll, edgesAll); });
+  initSelect("#confidence", uniq(nodesAll.map(d => d.confidence)), v => { state.confidence=v; render(nodesAll, edgesAll); });
+
+  d3.select("#search").on("input", function(){ state.search=this.value; render(nodesAll, edgesAll); });
+  d3.select("#telemetryOnly").on("change", function(){ state.telemetryOnly=this.checked; render(nodesAll, edgesAll); });
+
+  d3.select("#reset").on("click", () => {
+    Object.assign(state, { region:"all", oem:"all", layer:"all", type:"all", confidence:"all", search:"", telemetryOnly:false });
+    d3.select("#region").property("value","all");
+    d3.select("#oem").property("value","all");
+    d3.select("#layer").property("value","all");
+    d3.select("#type").property("value","all");
+    d3.select("#confidence").property("value","all");
+    d3.select("#search").property("value","");
+    d3.select("#telemetryOnly").property("checked", false);
+    render(nodesAll, edgesAll);
+  });
+
+  // Tabs
+  function setView(v){
+    state.view = v;
+    d3.select("#tab-grid").classed("active", v==="grid");
+    d3.select("#tab-network").classed("active", v==="network");
+    render(nodesAll, edgesAll);
+  }
+  d3.select("#tab-grid").on("click", ()=>setView("grid"));
+  d3.select("#tab-network").on("click", ()=>setView("network"));
+
+  render(nodesAll, edgesAll);
+});
+
+function render(nodesAll, edgesAll) {
+  vizEl.selectAll("*").remove();
+
+  const nodes = nodesAll.filter(matchesFilters);
+  const cols = uniq(nodes.map(d => d.oem_group));
+
+  const nodeById = new Map(nodes.map(d => [d.id, d]));
+  const edges = filterEdges(edgesAll, nodeById);
+
+  if (state.view === "network") {
+    renderNetwork(nodes, edges);
+  } else {
+    renderGrid(nodes, edges, cols);
+  }
+}
+
+// ----- GRID VIEW -----
+
+function renderGrid(nodes, edges, cols){
+  const margin = {top: 30, right: 20, bottom: 20, left: 220};
+  const cellW = 240;
+  const cellH = 78;
+
+  const w = margin.left + margin.right + cols.length * cellW;
+  const h = margin.top + margin.bottom + LAYERS.length * cellH;
+
+  const svg = vizEl.append("svg").attr("viewBox", `0 0 ${w} ${h}`);
+  svg.style("touch-action", "none");
+
+  // HIT AREA (behind everything, so pan works reliably)
+  svg.append("rect")
+    .attr("width", w)
+    .attr("height", h)
+    .attr("fill", "transparent")
+    .style("pointer-events", "all");
+
+  // Root group that gets zoom/pan transform
+  const gRoot = svg.append("g");
+
+  // Column headers
+  const headerSel = gRoot.append("g").selectAll("text")
+    .data(cols).join("text")
+    .attr("x", (d,i)=> margin.left + i*cellW + 8)
+    .attr("y", 20)
+    .text(d=>d);
+
+  applyReadableText(headerSel, { size: 13 });
+
+  // Row labels
+  const rowSel = gRoot.append("g").selectAll("text")
+    .data(LAYERS).join("text")
+    .attr("x", 12)
+    .attr("y", (d,i)=> margin.top + i*cellH + 48)
+    .text(d=>d);
+
+  applyReadableText(rowSel, { size: 12, fill: "#D1D5DB", stroke: "rgba(0,0,0,0.9)" });
+
+  // Grid
+  const grid = gRoot.append("g").attr("opacity", 0.28);
+  for (let r=0; r<LAYERS.length; r++){
+    for (let c=0; c<cols.length; c++){
+      grid.append("rect")
+        .attr("x", margin.left + c*cellW)
+        .attr("y", margin.top + r*cellH)
+        .attr("width", cellW)
+        .attr("height", cellH)
+        .attr("fill","none")
+        .attr("stroke","rgba(255,255,255,.10)");
+    }
+  }
+
+  // Cell stacking positions
+  const grouped = d3.group(nodes, d=>d.layer, d=>d.oem_group);
+  const pos = new Map();
+
+  for (const [layer, byCol] of grouped){
+    const r = LAYERS.indexOf(layer);
+    for (const [col, list] of byCol){
+      const c = cols.indexOf(col);
+      const x0 = margin.left + c*cellW + 10;
+      const y0 = margin.top + r*cellH + 10;
+      const boxH = 24;
+
+      list.slice(0,3).forEach((n,i)=>{
+        pos.set(n.id, {x:x0, y:y0 + i*(boxH+6), w:cellW-20, h:boxH});
+      });
+    }
+  }
+
+  // Edge layer
+  const edgeSel = gRoot.append("g").selectAll("path")
+    .data(edges).join("path")
+    .attr("class","edge")
+    .attr("fill","none")
+    .attr("stroke","#9CA3AF")
+    .attr("stroke-width", 1.5)
+    .attr("opacity", 0.85)
+    .style("stroke-dasharray", edgeDash)
+    .attr("d", e=>{
+      const a = pos.get(e.source), b = pos.get(e.target);
+      if (!a || !b) return "";
+      const x1 = a.x + a.w, y1 = a.y + a.h/2;
+      const x2 = b.x, y2 = b.y + b.h/2;
+      const mx = (x1+x2)/2;
+      return `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`;
+    });
+
+  // Node layer
+  const visibleNodes = nodes.filter(n=>pos.has(n.id));
+  const nodeSel = gRoot.append("g").selectAll("g.node")
+    .data(visibleNodes, d=>d.id)
+    .join(enter=>{
+      const g = enter.append("g").attr("class","node");
+      g.append("rect").attr("class","node-rect");
+      g.append("text").attr("class","node-label");
+      return g;
+    })
+    .attr("transform", d=>{
+      const p = pos.get(d.id);
+      return `translate(${p.x},${p.y})`;
+    });
+
+  nodeSel.select("rect")
+    .attr("width", d=>pos.get(d.id).w)
+    .attr("height", d=>pos.get(d.id).h)
+    .attr("fill", nodeFill)
+    .attr("stroke","rgba(255,255,255,.40)")
+    .attr("rx", 6);
+
+  const nodeText = nodeSel.select("text")
+    .attr("x", 10).attr("y", 16)
+    .text(d=>d.label);
+
+  applyReadableText(nodeText, { size: 12 });
+
+  // Hover highlight
+  const edgesByNode = new Map();
+  edges.forEach(e=>{
+    if (!edgesByNode.has(e.source)) edgesByNode.set(e.source, []);
+    if (!edgesByNode.has(e.target)) edgesByNode.set(e.target, []);
+    edgesByNode.get(e.source).push(e);
+    edgesByNode.get(e.target).push(e);
+  });
+
+  nodeSel
+    .on("mousemove", showTip)
+    .on("mouseleave", hideTip)
+    .on("mouseenter", (evt,d)=>{
+      const related = new Set([d.id]);
+      (edgesByNode.get(d.id)||[]).forEach(e=>{ related.add(e.source); related.add(e.target); });
+
+      nodeSel.classed("dim", n=>!related.has(n.id));
+      edgeSel.classed("dim", e=>!(related.has(e.source)&&related.has(e.target)))
+             .classed("highlight", e=>related.has(e.source)&&related.has(e.target));
+    })
+    .on("mouseleave.highlight", ()=>{
+      nodeSel.classed("dim", false);
+      edgeSel.classed("dim", false).classed("highlight", false);
+    });
+
+  // +N markers
+  for (const [layer, byCol] of grouped){
+    const r = LAYERS.indexOf(layer);
+    for (const [col, list] of byCol){
+      if (list.length<=3) continue;
+      const c = cols.indexOf(col);
+      const x = margin.left + c*cellW + 14;
+      const y = margin.top + r*cellH + 10 + 3*(24+6) + 10;
+
+      const moreText = gRoot.append("text")
+        .attr("x", x).attr("y", y)
+        .text(`+${list.length-3} more`);
+
+      applyReadableText(moreText, { size: 11, fill: "#D1D5DB" });
+    }
+  }
+
+  // Legend (fixed, not zoomed)
+  const legend = svg.append("text")
+    .attr("x", w-520)
+    .attr("y", h-12)
+    .text("Tip: hover a node to highlight relationships. Drag to pan. Scroll to zoom.");
+
+  applyReadableText(legend, { size: 11, fill: "#D1D5DB", stroke: "rgba(0,0,0,0.9)" });
+
+  // Zoom/pan
+  const zoom = d3.zoom()
+    .scaleExtent([0.6, 3.5])
+    .on("zoom", (event) => gRoot.attr("transform", event.transform));
+
+  svg.call(zoom);
+}
+
+// ----- NETWORK VIEW -----
+
+function renderNetwork(nodes, edges){
+  const w = 1400;
+  const h = 820;
+
+  const svg = vizEl.append("svg").attr("viewBox", `0 0 ${w} ${h}`);
+  svg.style("touch-action", "none");
+
+  // HIT AREA behind content
+  svg.append("rect")
+    .attr("width", w)
+    .attr("height", h)
+    .attr("fill", "transparent")
+    .style("pointer-events", "all");
 
   const gRoot = svg.append("g");
 
-  const regions = [...new Set(allNodes.map(d => d.region))];
-  const oemGroups = [...new Set(allNodes.map(d => d.oem_group))];
-  const layers = [...new Set(allNodes.map(d => d.layer))];
+  const regions = uniq(nodes.map(d=>d.region));
+  const xScale = d3.scalePoint().domain(regions).range([120, w-120]);
 
-  const colWidth = 240;
-  const rowHeight = 70;
+  const nodesLocal = nodes.map(d => ({
+    ...d,
+    x: xScale(d.region) + (Math.random()-0.5)*40,
+    y: h/2 + (Math.random()-0.5)*40
+  }));
 
-  const colX = {};
-  oemGroups.forEach((g,i)=> colX[g] = 200 + i * colWidth);
+  const nodeById = new Map(nodesLocal.map(d=>[d.id,d]));
+  const links = edges.map(e=>({
+    ...e,
+    source: nodeById.get(e.source),
+    target: nodeById.get(e.target)
+  })).filter(l=>l.source && l.target);
 
-  const rowY = {};
-  layers.forEach((l,i)=> rowY[l] = 120 + i * rowHeight);
-
-  // Layer labels
-  layers.forEach(l=>{
-    gRoot.append("text")
-      .attr("x", 20)
-      .attr("y", rowY[l] + 30)
-      .attr("fill", "#9CA3AF")
-      .attr("font-size", 12)
-      .text(l);
-  });
-
-  // OEM headers
-  oemGroups.forEach(g=>{
-    gRoot.append("text")
-      .attr("x", colX[g])
-      .attr("y", 70)
-      .attr("fill", "#F9FAFB")
-      .attr("font-size", 14)
-      .attr("font-weight", 600)
-      .text(g);
-  });
-
-  const nodes = gRoot.selectAll(".node")
-    .data(allNodes)
-    .enter()
-    .append("g")
-    .attr("class","node")
-    .attr("transform", d => 
-      `translate(${colX[d.oem_group]}, ${rowY[d.layer]})`
-    );
-
-  const boxW = 200;
-  const boxH = 24;
-
-  nodes.append("rect")
-    .attr("width", boxW)
-    .attr("height", boxH)
-    .attr("rx", 6)
-    .attr("fill", d => nodeFill(d))
-    .attr("stroke", "rgba(255,255,255,.35)");
-
-  nodes.append("text")
-    .attr("x", 10)
-    .attr("y", 16)
-    .attr("font-size", 12)
-    .attr("fill", "#F9FAFB")
-    .attr("stroke", "rgba(0,0,0,0.75)")
-    .attr("stroke-width", 3)
-    .attr("paint-order", "stroke")
-    .text(d => d.label);
-
-  svg.call(
-    d3.zoom()
-      .scaleExtent([0.6, 3.5])
-      .on("zoom", (event) => gRoot.attr("transform", event.transform))
-  );
-}
-
-/* -------------------------
-   NETWORK VIEW
--------------------------- */
-
-function renderNetwork(){
-
-  const svg = vizEl.append("svg")
-    .attr("viewBox", `0 0 ${width} ${height}`);
-
-  const gRoot = svg.append("g");
-
-  const link = gRoot.append("g")
+  const linkSel = gRoot.append("g")
+    .selectAll("line")
+    .data(links)
+    .join("line")
     .attr("stroke", "#9CA3AF")
     .attr("stroke-width", 1.5)
-    .selectAll("line")
-    .data(allEdges)
-    .enter()
-    .append("line");
+    .attr("opacity", 0.85)
+    .style("stroke-dasharray", edgeDash)
+    .attr("class","edge");
 
-  const node = gRoot.append("g")
+  const nodeSel = gRoot.append("g")
     .selectAll("g")
-    .data(allNodes)
-    .enter()
-    .append("g");
+    .data(nodesLocal, d=>d.id)
+    .join("g")
+    .attr("class","node")
+    .call(d3.drag()
+      .on("start", dragstarted)
+      .on("drag", dragged)
+      .on("end", dragended)
+    );
 
-  node.append("circle")
+  nodeSel.append("circle")
     .attr("r", 7)
-    .attr("fill", d => nodeFill(d));
+    .attr("fill", nodeFill)
+    .attr("stroke","rgba(255,255,255,.40)");
 
-  node.append("text")
-    .attr("x", 10)
+  const labelSel = nodeSel.append("text")
+    .attr("x", 12)
     .attr("y", 4)
-    .attr("font-size", 12)
-    .attr("fill", "#F9FAFB")
-    .attr("stroke", "rgba(0,0,0,0.75)")
-    .attr("stroke-width", 3)
-    .attr("paint-order", "stroke")
-    .text(d => d.label);
+    .text(d=>d.label);
 
-  const simulation = d3.forceSimulation(allNodes)
-    .force("link", d3.forceLink(allEdges).id(d => d.id).distance(80))
+  applyReadableText(labelSel, { size: 12 });
+
+  nodeSel
+    .on("mousemove", showTip)
+    .on("mouseleave", hideTip);
+
+  // Region labels (inside zoom group so they move with content)
+  const regionText = gRoot.append("g")
+    .selectAll("text")
+    .data(regions)
+    .join("text")
+    .attr("x", d=>xScale(d))
+    .attr("y", 24)
+    .attr("text-anchor","middle")
+    .text(d=>d.toUpperCase());
+
+  applyReadableText(regionText, { size: 12, fill: "#D1D5DB", stroke: "rgba(0,0,0,0.9)" });
+
+  const sim = d3.forceSimulation(nodesLocal)
+    .force("link", d3.forceLink(links).distance(90).strength(0.25))
     .force("charge", d3.forceManyBody().strength(-220))
-    .force("center", d3.forceCenter(width / 2, height / 2));
+    .force("collide", d3.forceCollide().radius(18))
+    .force("x", d3.forceX(d=>xScale(d.region)).strength(0.25))
+    .force("y", d3.forceY(h/2).strength(0.08));
 
-  simulation.on("tick", () => {
-    link
-      .attr("x1", d => d.source.x)
-      .attr("y1", d => d.source.y)
-      .attr("x2", d => d.target.x)
-      .attr("y2", d => d.target.y);
+  sim.on("tick", () => {
+    linkSel
+      .attr("x1", d=>d.source.x)
+      .attr("y1", d=>d.source.y)
+      .attr("x2", d=>d.target.x)
+      .attr("y2", d=>d.target.y);
 
-    node.attr("transform", d => `translate(${d.x},${d.y})`);
+    nodeSel.attr("transform", d=>`translate(${d.x},${d.y})`);
   });
 
-  svg.call(
-    d3.zoom()
-      .scaleExtent([0.6, 3.5])
-      .on("zoom", (event) => gRoot.attr("transform", event.transform))
-  );
+  // Hover highlight (network)
+  const linked = new Map();
+  links.forEach(l=>{
+    const a = l.source.id, b = l.target.id;
+    if (!linked.has(a)) linked.set(a, new Set());
+    if (!linked.has(b)) linked.set(b, new Set());
+    linked.get(a).add(b); linked.get(b).add(a);
+  });
+
+  nodeSel.on("mouseenter", (evt,d)=>{
+    const nbrs = linked.get(d.id) || new Set();
+    nodeSel.classed("dim", n => n.id!==d.id && !nbrs.has(n.id));
+    linkSel.classed("dim", l => !(l.source.id===d.id || l.target.id===d.id))
+           .classed("highlight", l => (l.source.id===d.id || l.target.id===d.id));
+  }).on("mouseleave.highlight", ()=>{
+    nodeSel.classed("dim", false);
+    linkSel.classed("dim", false).classed("highlight", false);
+  });
+
+  function dragstarted(event, d) {
+    if (!event.active) sim.alphaTarget(0.25).restart();
+    d.fx = d.x; d.fy = d.y;
+  }
+  function dragged(event, d) {
+    d.fx = event.x; d.fy = event.y;
+  }
+  function dragended(event, d) {
+    if (!event.active) sim.alphaTarget(0);
+    d.fx = null; d.fy = null;
+  }
+
+  // Legend (fixed)
+  const legend = svg.append("text")
+    .attr("x", w-520)
+    .attr("y", h-12)
+    .text("Tip: drag nodes. Drag background to pan. Scroll to zoom.");
+
+  applyReadableText(legend, { size: 11, fill: "#D1D5DB", stroke: "rgba(0,0,0,0.9)" });
+
+  // Zoom/pan (background)
+  const zoom = d3.zoom()
+    .scaleExtent([0.6, 3.5])
+    .on("zoom", (event) => gRoot.attr("transform", event.transform));
+
+  svg.call(zoom);
 }
-
-/* -------------------------
-   VIEW TOGGLE
--------------------------- */
-
-document.querySelectorAll(".view-toggle button").forEach(btn=>{
-  btn.addEventListener("click", ()=>{
-    document.querySelectorAll(".view-toggle button").forEach(b=>b.classList.remove("active"));
-    btn.classList.add("active");
-    render();
-  });
-});
