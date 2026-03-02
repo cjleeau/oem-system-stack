@@ -1,0 +1,19 @@
+id,label,region,layer,oem_group,node_type,control_boundary,confidence,notes
+eu_vw,Volkswagen Group,europe,Ownership & Brand Stack,Volkswagen Group,HOLDCO,oem,hard,
+eu_cariad,CARIAD OS,europe,Vehicle OS & Middleware,Volkswagen Group,OS,oem,medium,Internal software platform
+eu_bosch_vw,Bosch,europe,Tier-1 Hardware Suppliers,Volkswagen Group,Supplier,external,medium,Multi-OEM Tier-1
+eu_catl_vw,CATL,europe,Battery & Cell Suppliers,Volkswagen Group,Battery,external,soft,Battery supply (varies by model/market)
+eu_aws_vw,AWS,europe,Cloud Infrastructure,Volkswagen Group,Cloud,external,soft,Cloud hosting (program dependent)
+eu_gdpr_vw,GDPR Compliance Engine,europe,Data Governance & Sovereignty,Volkswagen Group,Governance,regulatory,hard,EU data protection controls
+cn_saic,SAIC Motor,china,Ownership & Brand Stack,SAIC Motor,HOLDCO,oem,hard,
+cn_gateway_saic,China Compliance Gateway,china,Connectivity Providers,SAIC Motor,Governance,regulatory,hard,Domestic routing / monitoring
+cn_alibaba_saic,Alibaba Cloud,china,Cloud Infrastructure,SAIC Motor,Cloud,external,hard,Domestic cloud provider
+cn_miit_saic,MIIT Compliance,china,Data Governance & Sovereignty,SAIC Motor,Governance,regulatory,hard,Mandatory reporting
+us_tesla,Tesla,us,Ownership & Brand Stack,Tesla,OEM,oem,hard,Single-brand vertically integrated
+us_fsd,Tesla FSD Chip,us,Semiconductor & Compute,Tesla,Semiconductor,oem,medium,Internal compute
+us_supercharger,Tesla Supercharger Network,us,Energy & Charging,Tesla,Energy,oem,hard,Owned charging network
+jp_toyota,Toyota Motor Corporation,japan,Ownership & Brand Stack,Toyota Motor Corporation,HOLDCO,oem,hard,
+jp_denso,Denso,japan,Tier-1 Hardware Suppliers,Toyota Motor Corporation,Supplier,external,hard,Tier-1 anchor
+jp_renesas,Renesas,japan,Semiconductor & Compute,Toyota Motor Corporation,Semiconductor,external,hard,Semiconductor anchor
+kr_hmg,Hyundai Motor Group,korea,Ownership & Brand Stack,Hyundai Motor Group,HOLDCO,oem,hard,
+kr_mobis,Hyundai Mobis,korea,Tier-1 Hardware Suppliers,Hyundai Motor Group,Supplier,oem,hard,Vertical integration

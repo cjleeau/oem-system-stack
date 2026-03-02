@@ -1,0 +1,12 @@
+id,source,target,relation,confidence,region,notes
+e1,eu_vw,eu_cariad,CONTROLS,medium,europe,
+e2,eu_bosch_vw,eu_cariad,SUPPLIES — Multi-Domain,medium,europe,
+e3,eu_aws_vw,eu_cariad,HOSTS TELEMETRY,soft,europe,
+e4,eu_gdpr_vw,eu_aws_vw,REGULATORY COMPLIANCE,hard,europe,
+e5,cn_gateway_saic,cn_alibaba_saic,DATA LOCALIZATION REQUIRED,hard,china,
+e6,cn_miit_saic,cn_alibaba_saic,MANDATORY REPORTING,hard,china,
+e7,us_tesla,us_fsd,CONTROLS,medium,us,
+e8,us_tesla,us_supercharger,OWNS,hard,us,
+e9,jp_denso,jp_toyota,SUPPLIES — Multi-Domain,hard,japan,
+e10,jp_renesas,jp_toyota,SUPPLIES — Embedded Systems,hard,japan,
+e11,kr_mobis,kr_hmg,CONTROLS,hard,korea,
