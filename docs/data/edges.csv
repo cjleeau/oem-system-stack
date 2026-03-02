@@ -1,196 +1,1335 @@
 id,source,target,relation,confidence,region,notes
 e1,europe_volkswagen_group__holdco,europe_volkswagen_group__os,CONTROLS,medium,europe,
-e2,europe_volkswagen_group__os,europe_volkswagen_group__ota,PROCESSES,medium,europe,OS coordinates update policy + packages
-e3,europe_volkswagen_group__ota,europe_volkswagen_group__tcu,EXPOSES DATA,soft,europe,Update status + device telemetry
-e4,europe_volkswagen_group__tcu,europe_volkswagen_group__carrier,ROUTES DATA,medium,europe,Vehicle-to-cloud transport
-e5,europe_volkswagen_group__carrier,europe_volkswagen_group__cloud,ROUTES DATA,soft,europe,Carrier backhaul to cloud
-e6,europe_volkswagen_group__cloud,europe_volkswagen_group__stream,INGESTS,medium,europe,Cloud ingestion endpoints
-e7,europe_volkswagen_group__stream,europe_volkswagen_group__lake,STORES,medium,europe,Durable storage
-e8,europe_volkswagen_group__gov,europe_volkswagen_group__cloud,REGULATORY COMPLIANCE,hard,europe,
-e9,europe_volkswagen_group__reg,europe_volkswagen_group__ota,MANDATORY REPORTING,hard,europe,Update governance / reporting obligations
-e10,europe_volkswagen_group__lake,europe_volkswagen_group__api,EXPOSES DATA,medium,europe,APIs over vehicle/telemetry data products
-e11,europe_mercedes_benz_group__holdco,europe_mercedes_benz_group__os,CONTROLS,medium,europe,
-e12,europe_mercedes_benz_group__os,europe_mercedes_benz_group__ota,PROCESSES,medium,europe,OS coordinates update policy + packages
-e13,europe_mercedes_benz_group__ota,europe_mercedes_benz_group__tcu,EXPOSES DATA,soft,europe,Update status + device telemetry
-e14,europe_mercedes_benz_group__tcu,europe_mercedes_benz_group__carrier,ROUTES DATA,medium,europe,Vehicle-to-cloud transport
-e15,europe_mercedes_benz_group__carrier,europe_mercedes_benz_group__cloud,ROUTES DATA,soft,europe,Carrier backhaul to cloud
-e16,europe_mercedes_benz_group__cloud,europe_mercedes_benz_group__stream,INGESTS,medium,europe,Cloud ingestion endpoints
-e17,europe_mercedes_benz_group__stream,europe_mercedes_benz_group__lake,STORES,medium,europe,Durable storage
-e18,europe_mercedes_benz_group__gov,europe_mercedes_benz_group__cloud,REGULATORY COMPLIANCE,hard,europe,
-e19,europe_mercedes_benz_group__reg,europe_mercedes_benz_group__ota,MANDATORY REPORTING,hard,europe,Update governance / reporting obligations
-e20,europe_mercedes_benz_group__lake,europe_mercedes_benz_group__api,EXPOSES DATA,medium,europe,APIs over vehicle/telemetry data products
-e21,europe_bmw_group__holdco,europe_bmw_group__os,CONTROLS,medium,europe,
-e22,europe_bmw_group__os,europe_bmw_group__ota,PROCESSES,medium,europe,OS coordinates update policy + packages
-e23,europe_bmw_group__ota,europe_bmw_group__tcu,EXPOSES DATA,soft,europe,Update status + device telemetry
-e24,europe_bmw_group__tcu,europe_bmw_group__carrier,ROUTES DATA,medium,europe,Vehicle-to-cloud transport
-e25,europe_bmw_group__carrier,europe_bmw_group__cloud,ROUTES DATA,soft,europe,Carrier backhaul to cloud
-e26,europe_bmw_group__cloud,europe_bmw_group__stream,INGESTS,medium,europe,Cloud ingestion endpoints
-e27,europe_bmw_group__stream,europe_bmw_group__lake,STORES,medium,europe,Durable storage
-e28,europe_bmw_group__gov,europe_bmw_group__cloud,REGULATORY COMPLIANCE,hard,europe,
-e29,europe_bmw_group__reg,europe_bmw_group__ota,MANDATORY REPORTING,hard,europe,Update governance / reporting obligations
-e30,europe_bmw_group__lake,europe_bmw_group__api,EXPOSES DATA,medium,europe,APIs over vehicle/telemetry data products
-e31,europe_stellantis__holdco,europe_stellantis__os,CONTROLS,medium,europe,
-e32,europe_stellantis__os,europe_stellantis__ota,PROCESSES,medium,europe,OS coordinates update policy + packages
-e33,europe_stellantis__ota,europe_stellantis__tcu,EXPOSES DATA,soft,europe,Update status + device telemetry
-e34,europe_stellantis__tcu,europe_stellantis__carrier,ROUTES DATA,medium,europe,Vehicle-to-cloud transport
-e35,europe_stellantis__carrier,europe_stellantis__cloud,ROUTES DATA,soft,europe,Carrier backhaul to cloud
-e36,europe_stellantis__cloud,europe_stellantis__stream,INGESTS,medium,europe,Cloud ingestion endpoints
-e37,europe_stellantis__stream,europe_stellantis__lake,STORES,medium,europe,Durable storage
-e38,europe_stellantis__gov,europe_stellantis__cloud,REGULATORY COMPLIANCE,hard,europe,
-e39,europe_stellantis__reg,europe_stellantis__ota,MANDATORY REPORTING,hard,europe,Update governance / reporting obligations
-e40,europe_stellantis__lake,europe_stellantis__api,EXPOSES DATA,medium,europe,APIs over vehicle/telemetry data products
-e41,europe_renault_group__holdco,europe_renault_group__os,CONTROLS,medium,europe,
-e42,europe_renault_group__os,europe_renault_group__ota,PROCESSES,medium,europe,OS coordinates update policy + packages
-e43,europe_renault_group__ota,europe_renault_group__tcu,EXPOSES DATA,soft,europe,Update status + device telemetry
-e44,europe_renault_group__tcu,europe_renault_group__carrier,ROUTES DATA,medium,europe,Vehicle-to-cloud transport
-e45,europe_renault_group__carrier,europe_renault_group__cloud,ROUTES DATA,soft,europe,Carrier backhaul to cloud
-e46,europe_renault_group__cloud,europe_renault_group__stream,INGESTS,medium,europe,Cloud ingestion endpoints
-e47,europe_renault_group__stream,europe_renault_group__lake,STORES,medium,europe,Durable storage
-e48,europe_renault_group__gov,europe_renault_group__cloud,REGULATORY COMPLIANCE,hard,europe,
-e49,europe_renault_group__reg,europe_renault_group__ota,MANDATORY REPORTING,hard,europe,Update governance / reporting obligations
-e50,europe_renault_group__lake,europe_renault_group__api,EXPOSES DATA,medium,europe,APIs over vehicle/telemetry data products
-e51,china_saic_motor__holdco,china_saic_motor__os,CONTROLS,medium,china,
-e52,china_saic_motor__os,china_saic_motor__ota,PROCESSES,medium,china,OS coordinates update policy + packages
-e53,china_saic_motor__ota,china_saic_motor__tcu,EXPOSES DATA,soft,china,Update status + device telemetry
-e54,china_saic_motor__tcu,china_saic_motor__carrier,ROUTES DATA,medium,china,Vehicle-to-cloud transport
-e55,china_saic_motor__carrier,china_saic_motor__cloud,ROUTES DATA,soft,china,Carrier backhaul to cloud
-e56,china_saic_motor__cloud,china_saic_motor__stream,INGESTS,medium,china,Cloud ingestion endpoints
-e57,china_saic_motor__stream,china_saic_motor__lake,STORES,medium,china,Durable storage
-e58,china_saic_motor__gov,china_saic_motor__cloud,REGULATORY COMPLIANCE,hard,china,
-e59,china_saic_motor__reg,china_saic_motor__ota,MANDATORY REPORTING,hard,china,Update governance / reporting obligations
-e60,china_saic_motor__lake,china_saic_motor__api,EXPOSES DATA,medium,china,APIs over vehicle/telemetry data products
-e61,china_saic_motor__tcu,china_saic_motor__gateway,ROUTES DATA,hard,china,Domestic compliance routing
-e62,china_saic_motor__gateway,china_saic_motor__carrier,ROUTES DATA,hard,china,Domestic carrier handoff
-e63,china_saic_motor__gov,china_saic_motor__lake,DATA LOCALIZATION REQUIRED,hard,china,Telemetry stored/processed domestically
-e64,china_geely_holding_group__holdco,china_geely_holding_group__os,CONTROLS,medium,china,
-e65,china_geely_holding_group__os,china_geely_holding_group__ota,PROCESSES,medium,china,OS coordinates update policy + packages
-e66,china_geely_holding_group__ota,china_geely_holding_group__tcu,EXPOSES DATA,soft,china,Update status + device telemetry
-e67,china_geely_holding_group__tcu,china_geely_holding_group__carrier,ROUTES DATA,medium,china,Vehicle-to-cloud transport
-e68,china_geely_holding_group__carrier,china_geely_holding_group__cloud,ROUTES DATA,soft,china,Carrier backhaul to cloud
-e69,china_geely_holding_group__cloud,china_geely_holding_group__stream,INGESTS,medium,china,Cloud ingestion endpoints
-e70,china_geely_holding_group__stream,china_geely_holding_group__lake,STORES,medium,china,Durable storage
-e71,china_geely_holding_group__gov,china_geely_holding_group__cloud,REGULATORY COMPLIANCE,hard,china,
-e72,china_geely_holding_group__reg,china_geely_holding_group__ota,MANDATORY REPORTING,hard,china,Update governance / reporting obligations
-e73,china_geely_holding_group__lake,china_geely_holding_group__api,EXPOSES DATA,medium,china,APIs over vehicle/telemetry data products
-e74,china_geely_holding_group__tcu,china_geely_holding_group__gateway,ROUTES DATA,hard,china,Domestic compliance routing
-e75,china_geely_holding_group__gateway,china_geely_holding_group__carrier,ROUTES DATA,hard,china,Domestic carrier handoff
-e76,china_geely_holding_group__gov,china_geely_holding_group__lake,DATA LOCALIZATION REQUIRED,hard,china,Telemetry stored/processed domestically
-e77,china_byd__holdco,china_byd__os,CONTROLS,medium,china,
-e78,china_byd__os,china_byd__ota,PROCESSES,medium,china,OS coordinates update policy + packages
-e79,china_byd__ota,china_byd__tcu,EXPOSES DATA,soft,china,Update status + device telemetry
-e80,china_byd__tcu,china_byd__carrier,ROUTES DATA,medium,china,Vehicle-to-cloud transport
-e81,china_byd__carrier,china_byd__cloud,ROUTES DATA,soft,china,Carrier backhaul to cloud
-e82,china_byd__cloud,china_byd__stream,INGESTS,medium,china,Cloud ingestion endpoints
-e83,china_byd__stream,china_byd__lake,STORES,medium,china,Durable storage
-e84,china_byd__gov,china_byd__cloud,REGULATORY COMPLIANCE,hard,china,
-e85,china_byd__reg,china_byd__ota,MANDATORY REPORTING,hard,china,Update governance / reporting obligations
-e86,china_byd__lake,china_byd__api,EXPOSES DATA,medium,china,APIs over vehicle/telemetry data products
-e87,china_byd__tcu,china_byd__gateway,ROUTES DATA,hard,china,Domestic compliance routing
-e88,china_byd__gateway,china_byd__carrier,ROUTES DATA,hard,china,Domestic carrier handoff
-e89,china_byd__gov,china_byd__lake,DATA LOCALIZATION REQUIRED,hard,china,Telemetry stored/processed domestically
-e90,china_changan_automobile__holdco,china_changan_automobile__os,CONTROLS,medium,china,
-e91,china_changan_automobile__os,china_changan_automobile__ota,PROCESSES,medium,china,OS coordinates update policy + packages
-e92,china_changan_automobile__ota,china_changan_automobile__tcu,EXPOSES DATA,soft,china,Update status + device telemetry
-e93,china_changan_automobile__tcu,china_changan_automobile__carrier,ROUTES DATA,medium,china,Vehicle-to-cloud transport
-e94,china_changan_automobile__carrier,china_changan_automobile__cloud,ROUTES DATA,soft,china,Carrier backhaul to cloud
-e95,china_changan_automobile__cloud,china_changan_automobile__stream,INGESTS,medium,china,Cloud ingestion endpoints
-e96,china_changan_automobile__stream,china_changan_automobile__lake,STORES,medium,china,Durable storage
-e97,china_changan_automobile__gov,china_changan_automobile__cloud,REGULATORY COMPLIANCE,hard,china,
-e98,china_changan_automobile__reg,china_changan_automobile__ota,MANDATORY REPORTING,hard,china,Update governance / reporting obligations
-e99,china_changan_automobile__lake,china_changan_automobile__api,EXPOSES DATA,medium,china,APIs over vehicle/telemetry data products
-e100,china_changan_automobile__tcu,china_changan_automobile__gateway,ROUTES DATA,hard,china,Domestic compliance routing
-e101,china_changan_automobile__gateway,china_changan_automobile__carrier,ROUTES DATA,hard,china,Domestic carrier handoff
-e102,china_changan_automobile__gov,china_changan_automobile__lake,DATA LOCALIZATION REQUIRED,hard,china,Telemetry stored/processed domestically
-e103,china_great_wall_motor__holdco,china_great_wall_motor__os,CONTROLS,medium,china,
-e104,china_great_wall_motor__os,china_great_wall_motor__ota,PROCESSES,medium,china,OS coordinates update policy + packages
-e105,china_great_wall_motor__ota,china_great_wall_motor__tcu,EXPOSES DATA,soft,china,Update status + device telemetry
-e106,china_great_wall_motor__tcu,china_great_wall_motor__carrier,ROUTES DATA,medium,china,Vehicle-to-cloud transport
-e107,china_great_wall_motor__carrier,china_great_wall_motor__cloud,ROUTES DATA,soft,china,Carrier backhaul to cloud
-e108,china_great_wall_motor__cloud,china_great_wall_motor__stream,INGESTS,medium,china,Cloud ingestion endpoints
-e109,china_great_wall_motor__stream,china_great_wall_motor__lake,STORES,medium,china,Durable storage
-e110,china_great_wall_motor__gov,china_great_wall_motor__cloud,REGULATORY COMPLIANCE,hard,china,
-e111,china_great_wall_motor__reg,china_great_wall_motor__ota,MANDATORY REPORTING,hard,china,Update governance / reporting obligations
-e112,china_great_wall_motor__lake,china_great_wall_motor__api,EXPOSES DATA,medium,china,APIs over vehicle/telemetry data products
-e113,china_great_wall_motor__tcu,china_great_wall_motor__gateway,ROUTES DATA,hard,china,Domestic compliance routing
-e114,china_great_wall_motor__gateway,china_great_wall_motor__carrier,ROUTES DATA,hard,china,Domestic carrier handoff
-e115,china_great_wall_motor__gov,china_great_wall_motor__lake,DATA LOCALIZATION REQUIRED,hard,china,Telemetry stored/processed domestically
-e116,us_general_motors__holdco,us_general_motors__os,CONTROLS,medium,us,
-e117,us_general_motors__os,us_general_motors__ota,PROCESSES,medium,us,OS coordinates update policy + packages
-e118,us_general_motors__ota,us_general_motors__tcu,EXPOSES DATA,soft,us,Update status + device telemetry
-e119,us_general_motors__tcu,us_general_motors__carrier,ROUTES DATA,medium,us,Vehicle-to-cloud transport
-e120,us_general_motors__carrier,us_general_motors__cloud,ROUTES DATA,soft,us,Carrier backhaul to cloud
-e121,us_general_motors__cloud,us_general_motors__stream,INGESTS,medium,us,Cloud ingestion endpoints
-e122,us_general_motors__stream,us_general_motors__lake,STORES,medium,us,Durable storage
-e123,us_general_motors__gov,us_general_motors__cloud,REGULATORY COMPLIANCE,hard,us,
-e124,us_general_motors__reg,us_general_motors__ota,MANDATORY REPORTING,hard,us,Update governance / reporting obligations
-e125,us_general_motors__lake,us_general_motors__api,EXPOSES DATA,medium,us,APIs over vehicle/telemetry data products
-e126,us_ford_motor_company__holdco,us_ford_motor_company__os,CONTROLS,medium,us,
-e127,us_ford_motor_company__os,us_ford_motor_company__ota,PROCESSES,medium,us,OS coordinates update policy + packages
-e128,us_ford_motor_company__ota,us_ford_motor_company__tcu,EXPOSES DATA,soft,us,Update status + device telemetry
-e129,us_ford_motor_company__tcu,us_ford_motor_company__carrier,ROUTES DATA,medium,us,Vehicle-to-cloud transport
-e130,us_ford_motor_company__carrier,us_ford_motor_company__cloud,ROUTES DATA,soft,us,Carrier backhaul to cloud
-e131,us_ford_motor_company__cloud,us_ford_motor_company__stream,INGESTS,medium,us,Cloud ingestion endpoints
-e132,us_ford_motor_company__stream,us_ford_motor_company__lake,STORES,medium,us,Durable storage
-e133,us_ford_motor_company__gov,us_ford_motor_company__cloud,REGULATORY COMPLIANCE,hard,us,
-e134,us_ford_motor_company__reg,us_ford_motor_company__ota,MANDATORY REPORTING,hard,us,Update governance / reporting obligations
-e135,us_ford_motor_company__lake,us_ford_motor_company__api,EXPOSES DATA,medium,us,APIs over vehicle/telemetry data products
-e136,us_tesla__holdco,us_tesla__os,CONTROLS,medium,us,
-e137,us_tesla__os,us_tesla__ota,PROCESSES,medium,us,OS coordinates update policy + packages
-e138,us_tesla__ota,us_tesla__tcu,EXPOSES DATA,soft,us,Update status + device telemetry
-e139,us_tesla__tcu,us_tesla__carrier,ROUTES DATA,medium,us,Vehicle-to-cloud transport
-e140,us_tesla__carrier,us_tesla__cloud,ROUTES DATA,soft,us,Carrier backhaul to cloud
-e141,us_tesla__cloud,us_tesla__stream,INGESTS,medium,us,Cloud ingestion endpoints
-e142,us_tesla__stream,us_tesla__lake,STORES,medium,us,Durable storage
-e143,us_tesla__gov,us_tesla__cloud,REGULATORY COMPLIANCE,hard,us,
-e144,us_tesla__reg,us_tesla__ota,MANDATORY REPORTING,hard,us,Update governance / reporting obligations
-e145,us_tesla__lake,us_tesla__api,EXPOSES DATA,medium,us,APIs over vehicle/telemetry data products
-e146,us_rivian__holdco,us_rivian__os,CONTROLS,medium,us,
-e147,us_rivian__os,us_rivian__ota,PROCESSES,medium,us,OS coordinates update policy + packages
-e148,us_rivian__ota,us_rivian__tcu,EXPOSES DATA,soft,us,Update status + device telemetry
-e149,us_rivian__tcu,us_rivian__carrier,ROUTES DATA,medium,us,Vehicle-to-cloud transport
-e150,us_rivian__carrier,us_rivian__cloud,ROUTES DATA,soft,us,Carrier backhaul to cloud
-e151,us_rivian__cloud,us_rivian__stream,INGESTS,medium,us,Cloud ingestion endpoints
-e152,us_rivian__stream,us_rivian__lake,STORES,medium,us,Durable storage
-e153,us_rivian__gov,us_rivian__cloud,REGULATORY COMPLIANCE,hard,us,
-e154,us_rivian__reg,us_rivian__ota,MANDATORY REPORTING,hard,us,Update governance / reporting obligations
-e155,us_rivian__lake,us_rivian__api,EXPOSES DATA,medium,us,APIs over vehicle/telemetry data products
-e156,korea_hyundai_motor_group__holdco,korea_hyundai_motor_group__os,CONTROLS,medium,korea,
-e157,korea_hyundai_motor_group__os,korea_hyundai_motor_group__ota,PROCESSES,medium,korea,OS coordinates update policy + packages
-e158,korea_hyundai_motor_group__ota,korea_hyundai_motor_group__tcu,EXPOSES DATA,soft,korea,Update status + device telemetry
-e159,korea_hyundai_motor_group__tcu,korea_hyundai_motor_group__carrier,ROUTES DATA,medium,korea,Vehicle-to-cloud transport
-e160,korea_hyundai_motor_group__carrier,korea_hyundai_motor_group__cloud,ROUTES DATA,soft,korea,Carrier backhaul to cloud
-e161,korea_hyundai_motor_group__cloud,korea_hyundai_motor_group__stream,INGESTS,medium,korea,Cloud ingestion endpoints
-e162,korea_hyundai_motor_group__stream,korea_hyundai_motor_group__lake,STORES,medium,korea,Durable storage
-e163,korea_hyundai_motor_group__gov,korea_hyundai_motor_group__cloud,REGULATORY COMPLIANCE,hard,korea,
-e164,korea_hyundai_motor_group__reg,korea_hyundai_motor_group__ota,MANDATORY REPORTING,hard,korea,Update governance / reporting obligations
-e165,korea_hyundai_motor_group__lake,korea_hyundai_motor_group__api,EXPOSES DATA,medium,korea,APIs over vehicle/telemetry data products
-e166,japan_toyota_motor_corporation__holdco,japan_toyota_motor_corporation__os,CONTROLS,medium,japan,
-e167,japan_toyota_motor_corporation__os,japan_toyota_motor_corporation__ota,PROCESSES,medium,japan,OS coordinates update policy + packages
-e168,japan_toyota_motor_corporation__ota,japan_toyota_motor_corporation__tcu,EXPOSES DATA,soft,japan,Update status + device telemetry
-e169,japan_toyota_motor_corporation__tcu,japan_toyota_motor_corporation__carrier,ROUTES DATA,medium,japan,Vehicle-to-cloud transport
-e170,japan_toyota_motor_corporation__carrier,japan_toyota_motor_corporation__cloud,ROUTES DATA,soft,japan,Carrier backhaul to cloud
-e171,japan_toyota_motor_corporation__cloud,japan_toyota_motor_corporation__stream,INGESTS,medium,japan,Cloud ingestion endpoints
-e172,japan_toyota_motor_corporation__stream,japan_toyota_motor_corporation__lake,STORES,medium,japan,Durable storage
-e173,japan_toyota_motor_corporation__gov,japan_toyota_motor_corporation__cloud,REGULATORY COMPLIANCE,hard,japan,
-e174,japan_toyota_motor_corporation__reg,japan_toyota_motor_corporation__ota,MANDATORY REPORTING,hard,japan,Update governance / reporting obligations
-e175,japan_toyota_motor_corporation__lake,japan_toyota_motor_corporation__api,EXPOSES DATA,medium,japan,APIs over vehicle/telemetry data products
-e176,japan_honda_motor_co_ltd__holdco,japan_honda_motor_co_ltd__os,CONTROLS,medium,japan,
-e177,japan_honda_motor_co_ltd__os,japan_honda_motor_co_ltd__ota,PROCESSES,medium,japan,OS coordinates update policy + packages
-e178,japan_honda_motor_co_ltd__ota,japan_honda_motor_co_ltd__tcu,EXPOSES DATA,soft,japan,Update status + device telemetry
-e179,japan_honda_motor_co_ltd__tcu,japan_honda_motor_co_ltd__carrier,ROUTES DATA,medium,japan,Vehicle-to-cloud transport
-e180,japan_honda_motor_co_ltd__carrier,japan_honda_motor_co_ltd__cloud,ROUTES DATA,soft,japan,Carrier backhaul to cloud
-e181,japan_honda_motor_co_ltd__cloud,japan_honda_motor_co_ltd__stream,INGESTS,medium,japan,Cloud ingestion endpoints
-e182,japan_honda_motor_co_ltd__stream,japan_honda_motor_co_ltd__lake,STORES,medium,japan,Durable storage
-e183,japan_honda_motor_co_ltd__gov,japan_honda_motor_co_ltd__cloud,REGULATORY COMPLIANCE,hard,japan,
-e184,japan_honda_motor_co_ltd__reg,japan_honda_motor_co_ltd__ota,MANDATORY REPORTING,hard,japan,Update governance / reporting obligations
-e185,japan_honda_motor_co_ltd__lake,japan_honda_motor_co_ltd__api,EXPOSES DATA,medium,japan,APIs over vehicle/telemetry data products
-e186,japan_nissan_motor_co_ltd__holdco,japan_nissan_motor_co_ltd__os,CONTROLS,medium,japan,
-e187,japan_nissan_motor_co_ltd__os,japan_nissan_motor_co_ltd__ota,PROCESSES,medium,japan,OS coordinates update policy + packages
-e188,japan_nissan_motor_co_ltd__ota,japan_nissan_motor_co_ltd__tcu,EXPOSES DATA,soft,japan,Update status + device telemetry
-e189,japan_nissan_motor_co_ltd__tcu,japan_nissan_motor_co_ltd__carrier,ROUTES DATA,medium,japan,Vehicle-to-cloud transport
-e190,japan_nissan_motor_co_ltd__carrier,japan_nissan_motor_co_ltd__cloud,ROUTES DATA,soft,japan,Carrier backhaul to cloud
-e191,japan_nissan_motor_co_ltd__cloud,japan_nissan_motor_co_ltd__stream,INGESTS,medium,japan,Cloud ingestion endpoints
-e192,japan_nissan_motor_co_ltd__stream,japan_nissan_motor_co_ltd__lake,STORES,medium,japan,Durable storage
-e193,japan_nissan_motor_co_ltd__gov,japan_nissan_motor_co_ltd__cloud,REGULATORY COMPLIANCE,hard,japan,
-e194,japan_nissan_motor_co_ltd__reg,japan_nissan_motor_co_ltd__ota,MANDATORY REPORTING,hard,japan,Update governance / reporting obligations
-e195,japan_nissan_motor_co_ltd__lake,japan_nissan_motor_co_ltd__api,EXPOSES DATA,medium,japan,APIs over vehicle/telemetry data products
+e2,europe_volkswagen_group__os,europe_volkswagen_group__ota,PROCESSES,medium,europe,
+e3,europe_volkswagen_group__ota,europe_volkswagen_group__tcu,EXPOSES DATA,soft,europe,
+e4,europe_volkswagen_group__tcu,europe_volkswagen_group__carrier,ROUTES DATA,medium,europe,
+e5,europe_volkswagen_group__carrier,europe_volkswagen_group__cloud,ROUTES DATA,soft,europe,
+e6,europe_volkswagen_group__cloud,europe_volkswagen_group__stream,INGESTS,medium,europe,
+e7,europe_volkswagen_group__stream,europe_volkswagen_group__lake,STORES,medium,europe,
+e8,europe_volkswagen_group__lake,europe_volkswagen_group__ai,FEEDS,medium,europe,
+e9,europe_volkswagen_group__lake,europe_volkswagen_group__api,EXPOSES DATA,medium,europe,
+e10,europe_volkswagen_group__gov,europe_volkswagen_group__cloud,REGULATORY COMPLIANCE,hard,europe,
+e11,europe_volkswagen_group__reg,europe_volkswagen_group__ota,MANDATORY REPORTING,hard,europe,
+e12,europe_volkswagen_group__api,europe_volkswagen_group__dms,INTEGRATES WITH,soft,europe,Dealer integration varies
+e13,europe_mercedes_benz_group__holdco,europe_mercedes_benz_group__os,CONTROLS,medium,europe,
+e14,europe_mercedes_benz_group__os,europe_mercedes_benz_group__ota,PROCESSES,medium,europe,
+e15,europe_mercedes_benz_group__ota,europe_mercedes_benz_group__tcu,EXPOSES DATA,soft,europe,
+e16,europe_mercedes_benz_group__tcu,europe_mercedes_benz_group__carrier,ROUTES DATA,medium,europe,
+e17,europe_mercedes_benz_group__carrier,europe_mercedes_benz_group__cloud,ROUTES DATA,soft,europe,
+e18,europe_mercedes_benz_group__cloud,europe_mercedes_benz_group__stream,INGESTS,medium,europe,
+e19,europe_mercedes_benz_group__stream,europe_mercedes_benz_group__lake,STORES,medium,europe,
+e20,europe_mercedes_benz_group__lake,europe_mercedes_benz_group__ai,FEEDS,medium,europe,
+e21,europe_mercedes_benz_group__lake,europe_mercedes_benz_group__api,EXPOSES DATA,medium,europe,
+e22,europe_mercedes_benz_group__gov,europe_mercedes_benz_group__cloud,REGULATORY COMPLIANCE,hard,europe,
+e23,europe_mercedes_benz_group__reg,europe_mercedes_benz_group__ota,MANDATORY REPORTING,hard,europe,
+e24,europe_mercedes_benz_group__api,europe_mercedes_benz_group__dms,INTEGRATES WITH,soft,europe,Dealer integration varies
+e25,europe_bmw_group__holdco,europe_bmw_group__os,CONTROLS,medium,europe,
+e26,europe_bmw_group__os,europe_bmw_group__ota,PROCESSES,medium,europe,
+e27,europe_bmw_group__ota,europe_bmw_group__tcu,EXPOSES DATA,soft,europe,
+e28,europe_bmw_group__tcu,europe_bmw_group__carrier,ROUTES DATA,medium,europe,
+e29,europe_bmw_group__carrier,europe_bmw_group__cloud,ROUTES DATA,soft,europe,
+e30,europe_bmw_group__cloud,europe_bmw_group__stream,INGESTS,medium,europe,
+e31,europe_bmw_group__stream,europe_bmw_group__lake,STORES,medium,europe,
+e32,europe_bmw_group__lake,europe_bmw_group__ai,FEEDS,medium,europe,
+e33,europe_bmw_group__lake,europe_bmw_group__api,EXPOSES DATA,medium,europe,
+e34,europe_bmw_group__gov,europe_bmw_group__cloud,REGULATORY COMPLIANCE,hard,europe,
+e35,europe_bmw_group__reg,europe_bmw_group__ota,MANDATORY REPORTING,hard,europe,
+e36,europe_bmw_group__api,europe_bmw_group__dms,INTEGRATES WITH,soft,europe,Dealer integration varies
+e37,europe_stellantis__holdco,europe_stellantis__os,CONTROLS,medium,europe,
+e38,europe_stellantis__os,europe_stellantis__ota,PROCESSES,medium,europe,
+e39,europe_stellantis__ota,europe_stellantis__tcu,EXPOSES DATA,soft,europe,
+e40,europe_stellantis__tcu,europe_stellantis__carrier,ROUTES DATA,medium,europe,
+e41,europe_stellantis__carrier,europe_stellantis__cloud,ROUTES DATA,soft,europe,
+e42,europe_stellantis__cloud,europe_stellantis__stream,INGESTS,medium,europe,
+e43,europe_stellantis__stream,europe_stellantis__lake,STORES,medium,europe,
+e44,europe_stellantis__lake,europe_stellantis__ai,FEEDS,medium,europe,
+e45,europe_stellantis__lake,europe_stellantis__api,EXPOSES DATA,medium,europe,
+e46,europe_stellantis__gov,europe_stellantis__cloud,REGULATORY COMPLIANCE,hard,europe,
+e47,europe_stellantis__reg,europe_stellantis__ota,MANDATORY REPORTING,hard,europe,
+e48,europe_stellantis__api,europe_stellantis__dms,INTEGRATES WITH,soft,europe,Dealer integration varies
+e49,europe_renault_group__holdco,europe_renault_group__os,CONTROLS,medium,europe,
+e50,europe_renault_group__os,europe_renault_group__ota,PROCESSES,medium,europe,
+e51,europe_renault_group__ota,europe_renault_group__tcu,EXPOSES DATA,soft,europe,
+e52,europe_renault_group__tcu,europe_renault_group__carrier,ROUTES DATA,medium,europe,
+e53,europe_renault_group__carrier,europe_renault_group__cloud,ROUTES DATA,soft,europe,
+e54,europe_renault_group__cloud,europe_renault_group__stream,INGESTS,medium,europe,
+e55,europe_renault_group__stream,europe_renault_group__lake,STORES,medium,europe,
+e56,europe_renault_group__lake,europe_renault_group__ai,FEEDS,medium,europe,
+e57,europe_renault_group__lake,europe_renault_group__api,EXPOSES DATA,medium,europe,
+e58,europe_renault_group__gov,europe_renault_group__cloud,REGULATORY COMPLIANCE,hard,europe,
+e59,europe_renault_group__reg,europe_renault_group__ota,MANDATORY REPORTING,hard,europe,
+e60,europe_renault_group__api,europe_renault_group__dms,INTEGRATES WITH,soft,europe,Dealer integration varies
+e61,europe_volvo_cars__holdco,europe_volvo_cars__os,CONTROLS,medium,europe,
+e62,europe_volvo_cars__os,europe_volvo_cars__ota,PROCESSES,medium,europe,
+e63,europe_volvo_cars__ota,europe_volvo_cars__tcu,EXPOSES DATA,soft,europe,
+e64,europe_volvo_cars__tcu,europe_volvo_cars__carrier,ROUTES DATA,medium,europe,
+e65,europe_volvo_cars__carrier,europe_volvo_cars__cloud,ROUTES DATA,soft,europe,
+e66,europe_volvo_cars__cloud,europe_volvo_cars__stream,INGESTS,medium,europe,
+e67,europe_volvo_cars__stream,europe_volvo_cars__lake,STORES,medium,europe,
+e68,europe_volvo_cars__lake,europe_volvo_cars__ai,FEEDS,medium,europe,
+e69,europe_volvo_cars__lake,europe_volvo_cars__api,EXPOSES DATA,medium,europe,
+e70,europe_volvo_cars__gov,europe_volvo_cars__cloud,REGULATORY COMPLIANCE,hard,europe,
+e71,europe_volvo_cars__reg,europe_volvo_cars__ota,MANDATORY REPORTING,hard,europe,
+e72,europe_volvo_cars__api,europe_volvo_cars__dms,INTEGRATES WITH,soft,europe,Dealer integration varies
+e73,europe_jaguar_land_rover__holdco,europe_jaguar_land_rover__os,CONTROLS,medium,europe,
+e74,europe_jaguar_land_rover__os,europe_jaguar_land_rover__ota,PROCESSES,medium,europe,
+e75,europe_jaguar_land_rover__ota,europe_jaguar_land_rover__tcu,EXPOSES DATA,soft,europe,
+e76,europe_jaguar_land_rover__tcu,europe_jaguar_land_rover__carrier,ROUTES DATA,medium,europe,
+e77,europe_jaguar_land_rover__carrier,europe_jaguar_land_rover__cloud,ROUTES DATA,soft,europe,
+e78,europe_jaguar_land_rover__cloud,europe_jaguar_land_rover__stream,INGESTS,medium,europe,
+e79,europe_jaguar_land_rover__stream,europe_jaguar_land_rover__lake,STORES,medium,europe,
+e80,europe_jaguar_land_rover__lake,europe_jaguar_land_rover__ai,FEEDS,medium,europe,
+e81,europe_jaguar_land_rover__lake,europe_jaguar_land_rover__api,EXPOSES DATA,medium,europe,
+e82,europe_jaguar_land_rover__gov,europe_jaguar_land_rover__cloud,REGULATORY COMPLIANCE,hard,europe,
+e83,europe_jaguar_land_rover__reg,europe_jaguar_land_rover__ota,MANDATORY REPORTING,hard,europe,
+e84,europe_jaguar_land_rover__api,europe_jaguar_land_rover__dms,INTEGRATES WITH,soft,europe,Dealer integration varies
+e85,china_saic_motor__holdco,china_saic_motor__os,CONTROLS,medium,china,
+e86,china_saic_motor__os,china_saic_motor__ota,PROCESSES,medium,china,
+e87,china_saic_motor__ota,china_saic_motor__tcu,EXPOSES DATA,soft,china,
+e88,china_saic_motor__tcu,china_saic_motor__carrier,ROUTES DATA,medium,china,
+e89,china_saic_motor__carrier,china_saic_motor__cloud,ROUTES DATA,soft,china,
+e90,china_saic_motor__cloud,china_saic_motor__stream,INGESTS,medium,china,
+e91,china_saic_motor__stream,china_saic_motor__lake,STORES,medium,china,
+e92,china_saic_motor__lake,china_saic_motor__ai,FEEDS,medium,china,
+e93,china_saic_motor__lake,china_saic_motor__api,EXPOSES DATA,medium,china,
+e94,china_saic_motor__gov,china_saic_motor__cloud,REGULATORY COMPLIANCE,hard,china,
+e95,china_saic_motor__reg,china_saic_motor__ota,MANDATORY REPORTING,hard,china,
+e96,china_saic_motor__api,china_saic_motor__dms,INTEGRATES WITH,soft,china,Dealer integration varies
+e97,china_saic_motor__tcu,china_saic_motor__gateway,ROUTES DATA,hard,china,Domestic compliance routing
+e98,china_saic_motor__gateway,china_saic_motor__carrier,ROUTES DATA,hard,china,Domestic carrier handoff
+e99,china_saic_motor__gov,china_saic_motor__lake,DATA LOCALIZATION REQUIRED,hard,china,Telemetry stored/processed domestically
+e100,china_geely_holding_group__holdco,china_geely_holding_group__os,CONTROLS,medium,china,
+e101,china_geely_holding_group__os,china_geely_holding_group__ota,PROCESSES,medium,china,
+e102,china_geely_holding_group__ota,china_geely_holding_group__tcu,EXPOSES DATA,soft,china,
+e103,china_geely_holding_group__tcu,china_geely_holding_group__carrier,ROUTES DATA,medium,china,
+e104,china_geely_holding_group__carrier,china_geely_holding_group__cloud,ROUTES DATA,soft,china,
+e105,china_geely_holding_group__cloud,china_geely_holding_group__stream,INGESTS,medium,china,
+e106,china_geely_holding_group__stream,china_geely_holding_group__lake,STORES,medium,china,
+e107,china_geely_holding_group__lake,china_geely_holding_group__ai,FEEDS,medium,china,
+e108,china_geely_holding_group__lake,china_geely_holding_group__api,EXPOSES DATA,medium,china,
+e109,china_geely_holding_group__gov,china_geely_holding_group__cloud,REGULATORY COMPLIANCE,hard,china,
+e110,china_geely_holding_group__reg,china_geely_holding_group__ota,MANDATORY REPORTING,hard,china,
+e111,china_geely_holding_group__api,china_geely_holding_group__dms,INTEGRATES WITH,soft,china,Dealer integration varies
+e112,china_geely_holding_group__tcu,china_geely_holding_group__gateway,ROUTES DATA,hard,china,Domestic compliance routing
+e113,china_geely_holding_group__gateway,china_geely_holding_group__carrier,ROUTES DATA,hard,china,Domestic carrier handoff
+e114,china_geely_holding_group__gov,china_geely_holding_group__lake,DATA LOCALIZATION REQUIRED,hard,china,Telemetry stored/processed domestically
+e115,china_byd__holdco,china_byd__os,CONTROLS,medium,china,
+e116,china_byd__os,china_byd__ota,PROCESSES,medium,china,
+e117,china_byd__ota,china_byd__tcu,EXPOSES DATA,soft,china,
+e118,china_byd__tcu,china_byd__carrier,ROUTES DATA,medium,china,
+e119,china_byd__carrier,china_byd__cloud,ROUTES DATA,soft,china,
+e120,china_byd__cloud,china_byd__stream,INGESTS,medium,china,
+e121,china_byd__stream,china_byd__lake,STORES,medium,china,
+e122,china_byd__lake,china_byd__ai,FEEDS,medium,china,
+e123,china_byd__lake,china_byd__api,EXPOSES DATA,medium,china,
+e124,china_byd__gov,china_byd__cloud,REGULATORY COMPLIANCE,hard,china,
+e125,china_byd__reg,china_byd__ota,MANDATORY REPORTING,hard,china,
+e126,china_byd__api,china_byd__dms,INTEGRATES WITH,soft,china,Dealer integration varies
+e127,china_byd__tcu,china_byd__gateway,ROUTES DATA,hard,china,Domestic compliance routing
+e128,china_byd__gateway,china_byd__carrier,ROUTES DATA,hard,china,Domestic carrier handoff
+e129,china_byd__gov,china_byd__lake,DATA LOCALIZATION REQUIRED,hard,china,Telemetry stored/processed domestically
+e130,china_changan_automobile__holdco,china_changan_automobile__os,CONTROLS,medium,china,
+e131,china_changan_automobile__os,china_changan_automobile__ota,PROCESSES,medium,china,
+e132,china_changan_automobile__ota,china_changan_automobile__tcu,EXPOSES DATA,soft,china,
+e133,china_changan_automobile__tcu,china_changan_automobile__carrier,ROUTES DATA,medium,china,
+e134,china_changan_automobile__carrier,china_changan_automobile__cloud,ROUTES DATA,soft,china,
+e135,china_changan_automobile__cloud,china_changan_automobile__stream,INGESTS,medium,china,
+e136,china_changan_automobile__stream,china_changan_automobile__lake,STORES,medium,china,
+e137,china_changan_automobile__lake,china_changan_automobile__ai,FEEDS,medium,china,
+e138,china_changan_automobile__lake,china_changan_automobile__api,EXPOSES DATA,medium,china,
+e139,china_changan_automobile__gov,china_changan_automobile__cloud,REGULATORY COMPLIANCE,hard,china,
+e140,china_changan_automobile__reg,china_changan_automobile__ota,MANDATORY REPORTING,hard,china,
+e141,china_changan_automobile__api,china_changan_automobile__dms,INTEGRATES WITH,soft,china,Dealer integration varies
+e142,china_changan_automobile__tcu,china_changan_automobile__gateway,ROUTES DATA,hard,china,Domestic compliance routing
+e143,china_changan_automobile__gateway,china_changan_automobile__carrier,ROUTES DATA,hard,china,Domestic carrier handoff
+e144,china_changan_automobile__gov,china_changan_automobile__lake,DATA LOCALIZATION REQUIRED,hard,china,Telemetry stored/processed domestically
+e145,china_great_wall_motor__holdco,china_great_wall_motor__os,CONTROLS,medium,china,
+e146,china_great_wall_motor__os,china_great_wall_motor__ota,PROCESSES,medium,china,
+e147,china_great_wall_motor__ota,china_great_wall_motor__tcu,EXPOSES DATA,soft,china,
+e148,china_great_wall_motor__tcu,china_great_wall_motor__carrier,ROUTES DATA,medium,china,
+e149,china_great_wall_motor__carrier,china_great_wall_motor__cloud,ROUTES DATA,soft,china,
+e150,china_great_wall_motor__cloud,china_great_wall_motor__stream,INGESTS,medium,china,
+e151,china_great_wall_motor__stream,china_great_wall_motor__lake,STORES,medium,china,
+e152,china_great_wall_motor__lake,china_great_wall_motor__ai,FEEDS,medium,china,
+e153,china_great_wall_motor__lake,china_great_wall_motor__api,EXPOSES DATA,medium,china,
+e154,china_great_wall_motor__gov,china_great_wall_motor__cloud,REGULATORY COMPLIANCE,hard,china,
+e155,china_great_wall_motor__reg,china_great_wall_motor__ota,MANDATORY REPORTING,hard,china,
+e156,china_great_wall_motor__api,china_great_wall_motor__dms,INTEGRATES WITH,soft,china,Dealer integration varies
+e157,china_great_wall_motor__tcu,china_great_wall_motor__gateway,ROUTES DATA,hard,china,Domestic compliance routing
+e158,china_great_wall_motor__gateway,china_great_wall_motor__carrier,ROUTES DATA,hard,china,Domestic carrier handoff
+e159,china_great_wall_motor__gov,china_great_wall_motor__lake,DATA LOCALIZATION REQUIRED,hard,china,Telemetry stored/processed domestically
+e160,china_nio__holdco,china_nio__os,CONTROLS,medium,china,
+e161,china_nio__os,china_nio__ota,PROCESSES,medium,china,
+e162,china_nio__ota,china_nio__tcu,EXPOSES DATA,soft,china,
+e163,china_nio__tcu,china_nio__carrier,ROUTES DATA,medium,china,
+e164,china_nio__carrier,china_nio__cloud,ROUTES DATA,soft,china,
+e165,china_nio__cloud,china_nio__stream,INGESTS,medium,china,
+e166,china_nio__stream,china_nio__lake,STORES,medium,china,
+e167,china_nio__lake,china_nio__ai,FEEDS,medium,china,
+e168,china_nio__lake,china_nio__api,EXPOSES DATA,medium,china,
+e169,china_nio__gov,china_nio__cloud,REGULATORY COMPLIANCE,hard,china,
+e170,china_nio__reg,china_nio__ota,MANDATORY REPORTING,hard,china,
+e171,china_nio__api,china_nio__dms,INTEGRATES WITH,soft,china,Dealer integration varies
+e172,china_nio__tcu,china_nio__gateway,ROUTES DATA,hard,china,Domestic compliance routing
+e173,china_nio__gateway,china_nio__carrier,ROUTES DATA,hard,china,Domestic carrier handoff
+e174,china_nio__gov,china_nio__lake,DATA LOCALIZATION REQUIRED,hard,china,Telemetry stored/processed domestically
+e175,china_xpeng__holdco,china_xpeng__os,CONTROLS,medium,china,
+e176,china_xpeng__os,china_xpeng__ota,PROCESSES,medium,china,
+e177,china_xpeng__ota,china_xpeng__tcu,EXPOSES DATA,soft,china,
+e178,china_xpeng__tcu,china_xpeng__carrier,ROUTES DATA,medium,china,
+e179,china_xpeng__carrier,china_xpeng__cloud,ROUTES DATA,soft,china,
+e180,china_xpeng__cloud,china_xpeng__stream,INGESTS,medium,china,
+e181,china_xpeng__stream,china_xpeng__lake,STORES,medium,china,
+e182,china_xpeng__lake,china_xpeng__ai,FEEDS,medium,china,
+e183,china_xpeng__lake,china_xpeng__api,EXPOSES DATA,medium,china,
+e184,china_xpeng__gov,china_xpeng__cloud,REGULATORY COMPLIANCE,hard,china,
+e185,china_xpeng__reg,china_xpeng__ota,MANDATORY REPORTING,hard,china,
+e186,china_xpeng__api,china_xpeng__dms,INTEGRATES WITH,soft,china,Dealer integration varies
+e187,china_xpeng__tcu,china_xpeng__gateway,ROUTES DATA,hard,china,Domestic compliance routing
+e188,china_xpeng__gateway,china_xpeng__carrier,ROUTES DATA,hard,china,Domestic carrier handoff
+e189,china_xpeng__gov,china_xpeng__lake,DATA LOCALIZATION REQUIRED,hard,china,Telemetry stored/processed domestically
+e190,china_li_auto__holdco,china_li_auto__os,CONTROLS,medium,china,
+e191,china_li_auto__os,china_li_auto__ota,PROCESSES,medium,china,
+e192,china_li_auto__ota,china_li_auto__tcu,EXPOSES DATA,soft,china,
+e193,china_li_auto__tcu,china_li_auto__carrier,ROUTES DATA,medium,china,
+e194,china_li_auto__carrier,china_li_auto__cloud,ROUTES DATA,soft,china,
+e195,china_li_auto__cloud,china_li_auto__stream,INGESTS,medium,china,
+e196,china_li_auto__stream,china_li_auto__lake,STORES,medium,china,
+e197,china_li_auto__lake,china_li_auto__ai,FEEDS,medium,china,
+e198,china_li_auto__lake,china_li_auto__api,EXPOSES DATA,medium,china,
+e199,china_li_auto__gov,china_li_auto__cloud,REGULATORY COMPLIANCE,hard,china,
+e200,china_li_auto__reg,china_li_auto__ota,MANDATORY REPORTING,hard,china,
+e201,china_li_auto__api,china_li_auto__dms,INTEGRATES WITH,soft,china,Dealer integration varies
+e202,china_li_auto__tcu,china_li_auto__gateway,ROUTES DATA,hard,china,Domestic compliance routing
+e203,china_li_auto__gateway,china_li_auto__carrier,ROUTES DATA,hard,china,Domestic carrier handoff
+e204,china_li_auto__gov,china_li_auto__lake,DATA LOCALIZATION REQUIRED,hard,china,Telemetry stored/processed domestically
+e205,china_chery_automobile__holdco,china_chery_automobile__os,CONTROLS,medium,china,
+e206,china_chery_automobile__os,china_chery_automobile__ota,PROCESSES,medium,china,
+e207,china_chery_automobile__ota,china_chery_automobile__tcu,EXPOSES DATA,soft,china,
+e208,china_chery_automobile__tcu,china_chery_automobile__carrier,ROUTES DATA,medium,china,
+e209,china_chery_automobile__carrier,china_chery_automobile__cloud,ROUTES DATA,soft,china,
+e210,china_chery_automobile__cloud,china_chery_automobile__stream,INGESTS,medium,china,
+e211,china_chery_automobile__stream,china_chery_automobile__lake,STORES,medium,china,
+e212,china_chery_automobile__lake,china_chery_automobile__ai,FEEDS,medium,china,
+e213,china_chery_automobile__lake,china_chery_automobile__api,EXPOSES DATA,medium,china,
+e214,china_chery_automobile__gov,china_chery_automobile__cloud,REGULATORY COMPLIANCE,hard,china,
+e215,china_chery_automobile__reg,china_chery_automobile__ota,MANDATORY REPORTING,hard,china,
+e216,china_chery_automobile__api,china_chery_automobile__dms,INTEGRATES WITH,soft,china,Dealer integration varies
+e217,china_chery_automobile__tcu,china_chery_automobile__gateway,ROUTES DATA,hard,china,Domestic compliance routing
+e218,china_chery_automobile__gateway,china_chery_automobile__carrier,ROUTES DATA,hard,china,Domestic carrier handoff
+e219,china_chery_automobile__gov,china_chery_automobile__lake,DATA LOCALIZATION REQUIRED,hard,china,Telemetry stored/processed domestically
+e220,china_faw_group__holdco,china_faw_group__os,CONTROLS,medium,china,
+e221,china_faw_group__os,china_faw_group__ota,PROCESSES,medium,china,
+e222,china_faw_group__ota,china_faw_group__tcu,EXPOSES DATA,soft,china,
+e223,china_faw_group__tcu,china_faw_group__carrier,ROUTES DATA,medium,china,
+e224,china_faw_group__carrier,china_faw_group__cloud,ROUTES DATA,soft,china,
+e225,china_faw_group__cloud,china_faw_group__stream,INGESTS,medium,china,
+e226,china_faw_group__stream,china_faw_group__lake,STORES,medium,china,
+e227,china_faw_group__lake,china_faw_group__ai,FEEDS,medium,china,
+e228,china_faw_group__lake,china_faw_group__api,EXPOSES DATA,medium,china,
+e229,china_faw_group__gov,china_faw_group__cloud,REGULATORY COMPLIANCE,hard,china,
+e230,china_faw_group__reg,china_faw_group__ota,MANDATORY REPORTING,hard,china,
+e231,china_faw_group__api,china_faw_group__dms,INTEGRATES WITH,soft,china,Dealer integration varies
+e232,china_faw_group__tcu,china_faw_group__gateway,ROUTES DATA,hard,china,Domestic compliance routing
+e233,china_faw_group__gateway,china_faw_group__carrier,ROUTES DATA,hard,china,Domestic carrier handoff
+e234,china_faw_group__gov,china_faw_group__lake,DATA LOCALIZATION REQUIRED,hard,china,Telemetry stored/processed domestically
+e235,china_dongfeng_motor__holdco,china_dongfeng_motor__os,CONTROLS,medium,china,
+e236,china_dongfeng_motor__os,china_dongfeng_motor__ota,PROCESSES,medium,china,
+e237,china_dongfeng_motor__ota,china_dongfeng_motor__tcu,EXPOSES DATA,soft,china,
+e238,china_dongfeng_motor__tcu,china_dongfeng_motor__carrier,ROUTES DATA,medium,china,
+e239,china_dongfeng_motor__carrier,china_dongfeng_motor__cloud,ROUTES DATA,soft,china,
+e240,china_dongfeng_motor__cloud,china_dongfeng_motor__stream,INGESTS,medium,china,
+e241,china_dongfeng_motor__stream,china_dongfeng_motor__lake,STORES,medium,china,
+e242,china_dongfeng_motor__lake,china_dongfeng_motor__ai,FEEDS,medium,china,
+e243,china_dongfeng_motor__lake,china_dongfeng_motor__api,EXPOSES DATA,medium,china,
+e244,china_dongfeng_motor__gov,china_dongfeng_motor__cloud,REGULATORY COMPLIANCE,hard,china,
+e245,china_dongfeng_motor__reg,china_dongfeng_motor__ota,MANDATORY REPORTING,hard,china,
+e246,china_dongfeng_motor__api,china_dongfeng_motor__dms,INTEGRATES WITH,soft,china,Dealer integration varies
+e247,china_dongfeng_motor__tcu,china_dongfeng_motor__gateway,ROUTES DATA,hard,china,Domestic compliance routing
+e248,china_dongfeng_motor__gateway,china_dongfeng_motor__carrier,ROUTES DATA,hard,china,Domestic carrier handoff
+e249,china_dongfeng_motor__gov,china_dongfeng_motor__lake,DATA LOCALIZATION REQUIRED,hard,china,Telemetry stored/processed domestically
+e250,us_general_motors__holdco,us_general_motors__os,CONTROLS,medium,us,
+e251,us_general_motors__os,us_general_motors__ota,PROCESSES,medium,us,
+e252,us_general_motors__ota,us_general_motors__tcu,EXPOSES DATA,soft,us,
+e253,us_general_motors__tcu,us_general_motors__carrier,ROUTES DATA,medium,us,
+e254,us_general_motors__carrier,us_general_motors__cloud,ROUTES DATA,soft,us,
+e255,us_general_motors__cloud,us_general_motors__stream,INGESTS,medium,us,
+e256,us_general_motors__stream,us_general_motors__lake,STORES,medium,us,
+e257,us_general_motors__lake,us_general_motors__ai,FEEDS,medium,us,
+e258,us_general_motors__lake,us_general_motors__api,EXPOSES DATA,medium,us,
+e259,us_general_motors__gov,us_general_motors__cloud,REGULATORY COMPLIANCE,hard,us,
+e260,us_general_motors__reg,us_general_motors__ota,MANDATORY REPORTING,hard,us,
+e261,us_general_motors__api,us_general_motors__dms,INTEGRATES WITH,soft,us,Dealer integration varies
+e262,us_ford_motor_company__holdco,us_ford_motor_company__os,CONTROLS,medium,us,
+e263,us_ford_motor_company__os,us_ford_motor_company__ota,PROCESSES,medium,us,
+e264,us_ford_motor_company__ota,us_ford_motor_company__tcu,EXPOSES DATA,soft,us,
+e265,us_ford_motor_company__tcu,us_ford_motor_company__carrier,ROUTES DATA,medium,us,
+e266,us_ford_motor_company__carrier,us_ford_motor_company__cloud,ROUTES DATA,soft,us,
+e267,us_ford_motor_company__cloud,us_ford_motor_company__stream,INGESTS,medium,us,
+e268,us_ford_motor_company__stream,us_ford_motor_company__lake,STORES,medium,us,
+e269,us_ford_motor_company__lake,us_ford_motor_company__ai,FEEDS,medium,us,
+e270,us_ford_motor_company__lake,us_ford_motor_company__api,EXPOSES DATA,medium,us,
+e271,us_ford_motor_company__gov,us_ford_motor_company__cloud,REGULATORY COMPLIANCE,hard,us,
+e272,us_ford_motor_company__reg,us_ford_motor_company__ota,MANDATORY REPORTING,hard,us,
+e273,us_ford_motor_company__api,us_ford_motor_company__dms,INTEGRATES WITH,soft,us,Dealer integration varies
+e274,us_tesla__holdco,us_tesla__os,CONTROLS,medium,us,
+e275,us_tesla__os,us_tesla__ota,PROCESSES,medium,us,
+e276,us_tesla__ota,us_tesla__tcu,EXPOSES DATA,soft,us,
+e277,us_tesla__tcu,us_tesla__carrier,ROUTES DATA,medium,us,
+e278,us_tesla__carrier,us_tesla__cloud,ROUTES DATA,soft,us,
+e279,us_tesla__cloud,us_tesla__stream,INGESTS,medium,us,
+e280,us_tesla__stream,us_tesla__lake,STORES,medium,us,
+e281,us_tesla__lake,us_tesla__ai,FEEDS,medium,us,
+e282,us_tesla__lake,us_tesla__api,EXPOSES DATA,medium,us,
+e283,us_tesla__gov,us_tesla__cloud,REGULATORY COMPLIANCE,hard,us,
+e284,us_tesla__reg,us_tesla__ota,MANDATORY REPORTING,hard,us,
+e285,us_tesla__api,us_tesla__dms,INTEGRATES WITH,soft,us,Dealer integration varies
+e286,us_rivian__holdco,us_rivian__os,CONTROLS,medium,us,
+e287,us_rivian__os,us_rivian__ota,PROCESSES,medium,us,
+e288,us_rivian__ota,us_rivian__tcu,EXPOSES DATA,soft,us,
+e289,us_rivian__tcu,us_rivian__carrier,ROUTES DATA,medium,us,
+e290,us_rivian__carrier,us_rivian__cloud,ROUTES DATA,soft,us,
+e291,us_rivian__cloud,us_rivian__stream,INGESTS,medium,us,
+e292,us_rivian__stream,us_rivian__lake,STORES,medium,us,
+e293,us_rivian__lake,us_rivian__ai,FEEDS,medium,us,
+e294,us_rivian__lake,us_rivian__api,EXPOSES DATA,medium,us,
+e295,us_rivian__gov,us_rivian__cloud,REGULATORY COMPLIANCE,hard,us,
+e296,us_rivian__reg,us_rivian__ota,MANDATORY REPORTING,hard,us,
+e297,us_rivian__api,us_rivian__dms,INTEGRATES WITH,soft,us,Dealer integration varies
+e298,us_lucid_motors__holdco,us_lucid_motors__os,CONTROLS,medium,us,
+e299,us_lucid_motors__os,us_lucid_motors__ota,PROCESSES,medium,us,
+e300,us_lucid_motors__ota,us_lucid_motors__tcu,EXPOSES DATA,soft,us,
+e301,us_lucid_motors__tcu,us_lucid_motors__carrier,ROUTES DATA,medium,us,
+e302,us_lucid_motors__carrier,us_lucid_motors__cloud,ROUTES DATA,soft,us,
+e303,us_lucid_motors__cloud,us_lucid_motors__stream,INGESTS,medium,us,
+e304,us_lucid_motors__stream,us_lucid_motors__lake,STORES,medium,us,
+e305,us_lucid_motors__lake,us_lucid_motors__ai,FEEDS,medium,us,
+e306,us_lucid_motors__lake,us_lucid_motors__api,EXPOSES DATA,medium,us,
+e307,us_lucid_motors__gov,us_lucid_motors__cloud,REGULATORY COMPLIANCE,hard,us,
+e308,us_lucid_motors__reg,us_lucid_motors__ota,MANDATORY REPORTING,hard,us,
+e309,us_lucid_motors__api,us_lucid_motors__dms,INTEGRATES WITH,soft,us,Dealer integration varies
+e310,korea_hyundai_motor_group__holdco,korea_hyundai_motor_group__os,CONTROLS,medium,korea,
+e311,korea_hyundai_motor_group__os,korea_hyundai_motor_group__ota,PROCESSES,medium,korea,
+e312,korea_hyundai_motor_group__ota,korea_hyundai_motor_group__tcu,EXPOSES DATA,soft,korea,
+e313,korea_hyundai_motor_group__tcu,korea_hyundai_motor_group__carrier,ROUTES DATA,medium,korea,
+e314,korea_hyundai_motor_group__carrier,korea_hyundai_motor_group__cloud,ROUTES DATA,soft,korea,
+e315,korea_hyundai_motor_group__cloud,korea_hyundai_motor_group__stream,INGESTS,medium,korea,
+e316,korea_hyundai_motor_group__stream,korea_hyundai_motor_group__lake,STORES,medium,korea,
+e317,korea_hyundai_motor_group__lake,korea_hyundai_motor_group__ai,FEEDS,medium,korea,
+e318,korea_hyundai_motor_group__lake,korea_hyundai_motor_group__api,EXPOSES DATA,medium,korea,
+e319,korea_hyundai_motor_group__gov,korea_hyundai_motor_group__cloud,REGULATORY COMPLIANCE,hard,korea,
+e320,korea_hyundai_motor_group__reg,korea_hyundai_motor_group__ota,MANDATORY REPORTING,hard,korea,
+e321,korea_hyundai_motor_group__api,korea_hyundai_motor_group__dms,INTEGRATES WITH,soft,korea,Dealer integration varies
+e322,japan_toyota_motor_corporation__holdco,japan_toyota_motor_corporation__os,CONTROLS,medium,japan,
+e323,japan_toyota_motor_corporation__os,japan_toyota_motor_corporation__ota,PROCESSES,medium,japan,
+e324,japan_toyota_motor_corporation__ota,japan_toyota_motor_corporation__tcu,EXPOSES DATA,soft,japan,
+e325,japan_toyota_motor_corporation__tcu,japan_toyota_motor_corporation__carrier,ROUTES DATA,medium,japan,
+e326,japan_toyota_motor_corporation__carrier,japan_toyota_motor_corporation__cloud,ROUTES DATA,soft,japan,
+e327,japan_toyota_motor_corporation__cloud,japan_toyota_motor_corporation__stream,INGESTS,medium,japan,
+e328,japan_toyota_motor_corporation__stream,japan_toyota_motor_corporation__lake,STORES,medium,japan,
+e329,japan_toyota_motor_corporation__lake,japan_toyota_motor_corporation__ai,FEEDS,medium,japan,
+e330,japan_toyota_motor_corporation__lake,japan_toyota_motor_corporation__api,EXPOSES DATA,medium,japan,
+e331,japan_toyota_motor_corporation__gov,japan_toyota_motor_corporation__cloud,REGULATORY COMPLIANCE,hard,japan,
+e332,japan_toyota_motor_corporation__reg,japan_toyota_motor_corporation__ota,MANDATORY REPORTING,hard,japan,
+e333,japan_toyota_motor_corporation__api,japan_toyota_motor_corporation__dms,INTEGRATES WITH,soft,japan,Dealer integration varies
+e334,japan_honda_motor_co_ltd__holdco,japan_honda_motor_co_ltd__os,CONTROLS,medium,japan,
+e335,japan_honda_motor_co_ltd__os,japan_honda_motor_co_ltd__ota,PROCESSES,medium,japan,
+e336,japan_honda_motor_co_ltd__ota,japan_honda_motor_co_ltd__tcu,EXPOSES DATA,soft,japan,
+e337,japan_honda_motor_co_ltd__tcu,japan_honda_motor_co_ltd__carrier,ROUTES DATA,medium,japan,
+e338,japan_honda_motor_co_ltd__carrier,japan_honda_motor_co_ltd__cloud,ROUTES DATA,soft,japan,
+e339,japan_honda_motor_co_ltd__cloud,japan_honda_motor_co_ltd__stream,INGESTS,medium,japan,
+e340,japan_honda_motor_co_ltd__stream,japan_honda_motor_co_ltd__lake,STORES,medium,japan,
+e341,japan_honda_motor_co_ltd__lake,japan_honda_motor_co_ltd__ai,FEEDS,medium,japan,
+e342,japan_honda_motor_co_ltd__lake,japan_honda_motor_co_ltd__api,EXPOSES DATA,medium,japan,
+e343,japan_honda_motor_co_ltd__gov,japan_honda_motor_co_ltd__cloud,REGULATORY COMPLIANCE,hard,japan,
+e344,japan_honda_motor_co_ltd__reg,japan_honda_motor_co_ltd__ota,MANDATORY REPORTING,hard,japan,
+e345,japan_honda_motor_co_ltd__api,japan_honda_motor_co_ltd__dms,INTEGRATES WITH,soft,japan,Dealer integration varies
+e346,japan_nissan_motor_co_ltd__holdco,japan_nissan_motor_co_ltd__os,CONTROLS,medium,japan,
+e347,japan_nissan_motor_co_ltd__os,japan_nissan_motor_co_ltd__ota,PROCESSES,medium,japan,
+e348,japan_nissan_motor_co_ltd__ota,japan_nissan_motor_co_ltd__tcu,EXPOSES DATA,soft,japan,
+e349,japan_nissan_motor_co_ltd__tcu,japan_nissan_motor_co_ltd__carrier,ROUTES DATA,medium,japan,
+e350,japan_nissan_motor_co_ltd__carrier,japan_nissan_motor_co_ltd__cloud,ROUTES DATA,soft,japan,
+e351,japan_nissan_motor_co_ltd__cloud,japan_nissan_motor_co_ltd__stream,INGESTS,medium,japan,
+e352,japan_nissan_motor_co_ltd__stream,japan_nissan_motor_co_ltd__lake,STORES,medium,japan,
+e353,japan_nissan_motor_co_ltd__lake,japan_nissan_motor_co_ltd__ai,FEEDS,medium,japan,
+e354,japan_nissan_motor_co_ltd__lake,japan_nissan_motor_co_ltd__api,EXPOSES DATA,medium,japan,
+e355,japan_nissan_motor_co_ltd__gov,japan_nissan_motor_co_ltd__cloud,REGULATORY COMPLIANCE,hard,japan,
+e356,japan_nissan_motor_co_ltd__reg,japan_nissan_motor_co_ltd__ota,MANDATORY REPORTING,hard,japan,
+e357,japan_nissan_motor_co_ltd__api,japan_nissan_motor_co_ltd__dms,INTEGRATES WITH,soft,japan,Dealer integration varies
+e358,japan_mazda_motor_corporation__holdco,japan_mazda_motor_corporation__os,CONTROLS,medium,japan,
+e359,japan_mazda_motor_corporation__os,japan_mazda_motor_corporation__ota,PROCESSES,medium,japan,
+e360,japan_mazda_motor_corporation__ota,japan_mazda_motor_corporation__tcu,EXPOSES DATA,soft,japan,
+e361,japan_mazda_motor_corporation__tcu,japan_mazda_motor_corporation__carrier,ROUTES DATA,medium,japan,
+e362,japan_mazda_motor_corporation__carrier,japan_mazda_motor_corporation__cloud,ROUTES DATA,soft,japan,
+e363,japan_mazda_motor_corporation__cloud,japan_mazda_motor_corporation__stream,INGESTS,medium,japan,
+e364,japan_mazda_motor_corporation__stream,japan_mazda_motor_corporation__lake,STORES,medium,japan,
+e365,japan_mazda_motor_corporation__lake,japan_mazda_motor_corporation__ai,FEEDS,medium,japan,
+e366,japan_mazda_motor_corporation__lake,japan_mazda_motor_corporation__api,EXPOSES DATA,medium,japan,
+e367,japan_mazda_motor_corporation__gov,japan_mazda_motor_corporation__cloud,REGULATORY COMPLIANCE,hard,japan,
+e368,japan_mazda_motor_corporation__reg,japan_mazda_motor_corporation__ota,MANDATORY REPORTING,hard,japan,
+e369,japan_mazda_motor_corporation__api,japan_mazda_motor_corporation__dms,INTEGRATES WITH,soft,japan,Dealer integration varies
+e370,japan_subaru_corporation__holdco,japan_subaru_corporation__os,CONTROLS,medium,japan,
+e371,japan_subaru_corporation__os,japan_subaru_corporation__ota,PROCESSES,medium,japan,
+e372,japan_subaru_corporation__ota,japan_subaru_corporation__tcu,EXPOSES DATA,soft,japan,
+e373,japan_subaru_corporation__tcu,japan_subaru_corporation__carrier,ROUTES DATA,medium,japan,
+e374,japan_subaru_corporation__carrier,japan_subaru_corporation__cloud,ROUTES DATA,soft,japan,
+e375,japan_subaru_corporation__cloud,japan_subaru_corporation__stream,INGESTS,medium,japan,
+e376,japan_subaru_corporation__stream,japan_subaru_corporation__lake,STORES,medium,japan,
+e377,japan_subaru_corporation__lake,japan_subaru_corporation__ai,FEEDS,medium,japan,
+e378,japan_subaru_corporation__lake,japan_subaru_corporation__api,EXPOSES DATA,medium,japan,
+e379,japan_subaru_corporation__gov,japan_subaru_corporation__cloud,REGULATORY COMPLIANCE,hard,japan,
+e380,japan_subaru_corporation__reg,japan_subaru_corporation__ota,MANDATORY REPORTING,hard,japan,
+e381,japan_subaru_corporation__api,japan_subaru_corporation__dms,INTEGRATES WITH,soft,japan,Dealer integration varies
+e382,japan_mitsubishi_motors__holdco,japan_mitsubishi_motors__os,CONTROLS,medium,japan,
+e383,japan_mitsubishi_motors__os,japan_mitsubishi_motors__ota,PROCESSES,medium,japan,
+e384,japan_mitsubishi_motors__ota,japan_mitsubishi_motors__tcu,EXPOSES DATA,soft,japan,
+e385,japan_mitsubishi_motors__tcu,japan_mitsubishi_motors__carrier,ROUTES DATA,medium,japan,
+e386,japan_mitsubishi_motors__carrier,japan_mitsubishi_motors__cloud,ROUTES DATA,soft,japan,
+e387,japan_mitsubishi_motors__cloud,japan_mitsubishi_motors__stream,INGESTS,medium,japan,
+e388,japan_mitsubishi_motors__stream,japan_mitsubishi_motors__lake,STORES,medium,japan,
+e389,japan_mitsubishi_motors__lake,japan_mitsubishi_motors__ai,FEEDS,medium,japan,
+e390,japan_mitsubishi_motors__lake,japan_mitsubishi_motors__api,EXPOSES DATA,medium,japan,
+e391,japan_mitsubishi_motors__gov,japan_mitsubishi_motors__cloud,REGULATORY COMPLIANCE,hard,japan,
+e392,japan_mitsubishi_motors__reg,japan_mitsubishi_motors__ota,MANDATORY REPORTING,hard,japan,
+e393,japan_mitsubishi_motors__api,japan_mitsubishi_motors__dms,INTEGRATES WITH,soft,japan,Dealer integration varies
+e394,europe_volkswagen_group__bosch__tier_1_h,europe_volkswagen_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e395,europe_volkswagen_group__continental__tier_1_h,europe_volkswagen_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e396,europe_volkswagen_group__zf__tier_1_h,europe_volkswagen_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e397,europe_volkswagen_group__valeo__tier_1_h,europe_volkswagen_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e398,europe_volkswagen_group__forvia__tier_1_h,europe_volkswagen_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e399,europe_volkswagen_group__aptiv__tier_1_h,europe_volkswagen_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e400,europe_volkswagen_group__magna_international__tier_1_h,europe_volkswagen_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e401,europe_volkswagen_group__lear_corporation__tier_1_h,europe_volkswagen_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e402,europe_volkswagen_group__catl__battery_,europe_volkswagen_group__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e403,europe_volkswagen_group__byd_battery__battery_,europe_volkswagen_group__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e404,europe_volkswagen_group__lg_energy_solution__battery_,europe_volkswagen_group__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e405,europe_volkswagen_group__sk_on__battery_,europe_volkswagen_group__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e406,europe_volkswagen_group__samsung_sdi__battery_,europe_volkswagen_group__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e407,europe_volkswagen_group__nvidia__semicond,europe_volkswagen_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e408,europe_volkswagen_group__qualcomm__semicond,europe_volkswagen_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e409,europe_volkswagen_group__nxp__semicond,europe_volkswagen_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e410,europe_volkswagen_group__renesas__semicond,europe_volkswagen_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e411,europe_volkswagen_group__infineon__semicond,europe_volkswagen_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e412,europe_volkswagen_group__stmicroelectronics__semicond,europe_volkswagen_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e413,europe_volkswagen_group__texas_instruments__semicond,europe_volkswagen_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e414,europe_volkswagen_group__intel__semicond,europe_volkswagen_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e415,europe_volkswagen_group__vodafone__connecti,europe_volkswagen_group__carrier,PARTNERS,soft,europe,Carrier association varies
+e416,europe_volkswagen_group__deutsche_telekom__connecti,europe_volkswagen_group__carrier,PARTNERS,soft,europe,Carrier association varies
+e417,europe_volkswagen_group__orange__connecti,europe_volkswagen_group__carrier,PARTNERS,soft,europe,Carrier association varies
+e418,europe_volkswagen_group__aws__cloud_in,europe_volkswagen_group__cloud,HOSTS,soft,europe,Cloud vendor association varies
+e419,europe_volkswagen_group__microsoft_azure__cloud_in,europe_volkswagen_group__cloud,HOSTS,soft,europe,Cloud vendor association varies
+e420,europe_volkswagen_group__api,europe_volkswagen_group__allianz__external,POTENTIAL TELEMATICS PARTNER,soft,europe,Insurance partnerships are market-specific
+e421,europe_volkswagen_group__api,europe_volkswagen_group__axa__external,POTENTIAL TELEMATICS PARTNER,soft,europe,Insurance partnerships are market-specific
+e422,europe_volkswagen_group__api,europe_volkswagen_group__zurich_insurance__external,POTENTIAL TELEMATICS PARTNER,soft,europe,Insurance partnerships are market-specific
+e423,europe_volkswagen_group__api,europe_volkswagen_group__ionity__energy_c,INTEGRATES WITH,soft,europe,Charging network integration varies
+e424,europe_volkswagen_group__api,europe_volkswagen_group__shell_recharge__energy_c,INTEGRATES WITH,soft,europe,Charging network integration varies
+e425,europe_volkswagen_group__api,europe_volkswagen_group__bp_pulse__energy_c,INTEGRATES WITH,soft,europe,Charging network integration varies
+e426,europe_mercedes_benz_group__bosch__tier_1_h,europe_mercedes_benz_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e427,europe_mercedes_benz_group__continental__tier_1_h,europe_mercedes_benz_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e428,europe_mercedes_benz_group__zf__tier_1_h,europe_mercedes_benz_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e429,europe_mercedes_benz_group__valeo__tier_1_h,europe_mercedes_benz_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e430,europe_mercedes_benz_group__forvia__tier_1_h,europe_mercedes_benz_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e431,europe_mercedes_benz_group__aptiv__tier_1_h,europe_mercedes_benz_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e432,europe_mercedes_benz_group__magna_international__tier_1_h,europe_mercedes_benz_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e433,europe_mercedes_benz_group__lear_corporation__tier_1_h,europe_mercedes_benz_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e434,europe_mercedes_benz_group__catl__battery_,europe_mercedes_benz_group__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e435,europe_mercedes_benz_group__byd_battery__battery_,europe_mercedes_benz_group__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e436,europe_mercedes_benz_group__lg_energy_solution__battery_,europe_mercedes_benz_group__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e437,europe_mercedes_benz_group__sk_on__battery_,europe_mercedes_benz_group__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e438,europe_mercedes_benz_group__samsung_sdi__battery_,europe_mercedes_benz_group__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e439,europe_mercedes_benz_group__nvidia__semicond,europe_mercedes_benz_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e440,europe_mercedes_benz_group__qualcomm__semicond,europe_mercedes_benz_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e441,europe_mercedes_benz_group__nxp__semicond,europe_mercedes_benz_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e442,europe_mercedes_benz_group__renesas__semicond,europe_mercedes_benz_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e443,europe_mercedes_benz_group__infineon__semicond,europe_mercedes_benz_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e444,europe_mercedes_benz_group__stmicroelectronics__semicond,europe_mercedes_benz_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e445,europe_mercedes_benz_group__texas_instruments__semicond,europe_mercedes_benz_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e446,europe_mercedes_benz_group__intel__semicond,europe_mercedes_benz_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e447,europe_mercedes_benz_group__vodafone__connecti,europe_mercedes_benz_group__carrier,PARTNERS,soft,europe,Carrier association varies
+e448,europe_mercedes_benz_group__deutsche_telekom__connecti,europe_mercedes_benz_group__carrier,PARTNERS,soft,europe,Carrier association varies
+e449,europe_mercedes_benz_group__orange__connecti,europe_mercedes_benz_group__carrier,PARTNERS,soft,europe,Carrier association varies
+e450,europe_mercedes_benz_group__aws__cloud_in,europe_mercedes_benz_group__cloud,HOSTS,soft,europe,Cloud vendor association varies
+e451,europe_mercedes_benz_group__microsoft_azure__cloud_in,europe_mercedes_benz_group__cloud,HOSTS,soft,europe,Cloud vendor association varies
+e452,europe_mercedes_benz_group__api,europe_mercedes_benz_group__allianz__external,POTENTIAL TELEMATICS PARTNER,soft,europe,Insurance partnerships are market-specific
+e453,europe_mercedes_benz_group__api,europe_mercedes_benz_group__axa__external,POTENTIAL TELEMATICS PARTNER,soft,europe,Insurance partnerships are market-specific
+e454,europe_mercedes_benz_group__api,europe_mercedes_benz_group__zurich_insurance__external,POTENTIAL TELEMATICS PARTNER,soft,europe,Insurance partnerships are market-specific
+e455,europe_mercedes_benz_group__api,europe_mercedes_benz_group__ionity__energy_c,INTEGRATES WITH,soft,europe,Charging network integration varies
+e456,europe_mercedes_benz_group__api,europe_mercedes_benz_group__shell_recharge__energy_c,INTEGRATES WITH,soft,europe,Charging network integration varies
+e457,europe_mercedes_benz_group__api,europe_mercedes_benz_group__bp_pulse__energy_c,INTEGRATES WITH,soft,europe,Charging network integration varies
+e458,europe_bmw_group__bosch__tier_1_h,europe_bmw_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e459,europe_bmw_group__continental__tier_1_h,europe_bmw_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e460,europe_bmw_group__zf__tier_1_h,europe_bmw_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e461,europe_bmw_group__valeo__tier_1_h,europe_bmw_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e462,europe_bmw_group__forvia__tier_1_h,europe_bmw_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e463,europe_bmw_group__aptiv__tier_1_h,europe_bmw_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e464,europe_bmw_group__magna_international__tier_1_h,europe_bmw_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e465,europe_bmw_group__lear_corporation__tier_1_h,europe_bmw_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e466,europe_bmw_group__catl__battery_,europe_bmw_group__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e467,europe_bmw_group__byd_battery__battery_,europe_bmw_group__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e468,europe_bmw_group__lg_energy_solution__battery_,europe_bmw_group__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e469,europe_bmw_group__sk_on__battery_,europe_bmw_group__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e470,europe_bmw_group__samsung_sdi__battery_,europe_bmw_group__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e471,europe_bmw_group__nvidia__semicond,europe_bmw_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e472,europe_bmw_group__qualcomm__semicond,europe_bmw_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e473,europe_bmw_group__nxp__semicond,europe_bmw_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e474,europe_bmw_group__renesas__semicond,europe_bmw_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e475,europe_bmw_group__infineon__semicond,europe_bmw_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e476,europe_bmw_group__stmicroelectronics__semicond,europe_bmw_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e477,europe_bmw_group__texas_instruments__semicond,europe_bmw_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e478,europe_bmw_group__intel__semicond,europe_bmw_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e479,europe_bmw_group__vodafone__connecti,europe_bmw_group__carrier,PARTNERS,soft,europe,Carrier association varies
+e480,europe_bmw_group__deutsche_telekom__connecti,europe_bmw_group__carrier,PARTNERS,soft,europe,Carrier association varies
+e481,europe_bmw_group__orange__connecti,europe_bmw_group__carrier,PARTNERS,soft,europe,Carrier association varies
+e482,europe_bmw_group__aws__cloud_in,europe_bmw_group__cloud,HOSTS,soft,europe,Cloud vendor association varies
+e483,europe_bmw_group__microsoft_azure__cloud_in,europe_bmw_group__cloud,HOSTS,soft,europe,Cloud vendor association varies
+e484,europe_bmw_group__api,europe_bmw_group__allianz__external,POTENTIAL TELEMATICS PARTNER,soft,europe,Insurance partnerships are market-specific
+e485,europe_bmw_group__api,europe_bmw_group__axa__external,POTENTIAL TELEMATICS PARTNER,soft,europe,Insurance partnerships are market-specific
+e486,europe_bmw_group__api,europe_bmw_group__zurich_insurance__external,POTENTIAL TELEMATICS PARTNER,soft,europe,Insurance partnerships are market-specific
+e487,europe_bmw_group__api,europe_bmw_group__ionity__energy_c,INTEGRATES WITH,soft,europe,Charging network integration varies
+e488,europe_bmw_group__api,europe_bmw_group__shell_recharge__energy_c,INTEGRATES WITH,soft,europe,Charging network integration varies
+e489,europe_bmw_group__api,europe_bmw_group__bp_pulse__energy_c,INTEGRATES WITH,soft,europe,Charging network integration varies
+e490,europe_stellantis__bosch__tier_1_h,europe_stellantis__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e491,europe_stellantis__continental__tier_1_h,europe_stellantis__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e492,europe_stellantis__zf__tier_1_h,europe_stellantis__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e493,europe_stellantis__valeo__tier_1_h,europe_stellantis__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e494,europe_stellantis__forvia__tier_1_h,europe_stellantis__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e495,europe_stellantis__aptiv__tier_1_h,europe_stellantis__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e496,europe_stellantis__magna_international__tier_1_h,europe_stellantis__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e497,europe_stellantis__lear_corporation__tier_1_h,europe_stellantis__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e498,europe_stellantis__catl__battery_,europe_stellantis__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e499,europe_stellantis__byd_battery__battery_,europe_stellantis__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e500,europe_stellantis__lg_energy_solution__battery_,europe_stellantis__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e501,europe_stellantis__sk_on__battery_,europe_stellantis__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e502,europe_stellantis__samsung_sdi__battery_,europe_stellantis__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e503,europe_stellantis__nvidia__semicond,europe_stellantis__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e504,europe_stellantis__qualcomm__semicond,europe_stellantis__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e505,europe_stellantis__nxp__semicond,europe_stellantis__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e506,europe_stellantis__renesas__semicond,europe_stellantis__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e507,europe_stellantis__infineon__semicond,europe_stellantis__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e508,europe_stellantis__stmicroelectronics__semicond,europe_stellantis__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e509,europe_stellantis__texas_instruments__semicond,europe_stellantis__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e510,europe_stellantis__intel__semicond,europe_stellantis__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e511,europe_stellantis__vodafone__connecti,europe_stellantis__carrier,PARTNERS,soft,europe,Carrier association varies
+e512,europe_stellantis__deutsche_telekom__connecti,europe_stellantis__carrier,PARTNERS,soft,europe,Carrier association varies
+e513,europe_stellantis__orange__connecti,europe_stellantis__carrier,PARTNERS,soft,europe,Carrier association varies
+e514,europe_stellantis__aws__cloud_in,europe_stellantis__cloud,HOSTS,soft,europe,Cloud vendor association varies
+e515,europe_stellantis__microsoft_azure__cloud_in,europe_stellantis__cloud,HOSTS,soft,europe,Cloud vendor association varies
+e516,europe_stellantis__api,europe_stellantis__allianz__external,POTENTIAL TELEMATICS PARTNER,soft,europe,Insurance partnerships are market-specific
+e517,europe_stellantis__api,europe_stellantis__axa__external,POTENTIAL TELEMATICS PARTNER,soft,europe,Insurance partnerships are market-specific
+e518,europe_stellantis__api,europe_stellantis__zurich_insurance__external,POTENTIAL TELEMATICS PARTNER,soft,europe,Insurance partnerships are market-specific
+e519,europe_stellantis__api,europe_stellantis__ionity__energy_c,INTEGRATES WITH,soft,europe,Charging network integration varies
+e520,europe_stellantis__api,europe_stellantis__shell_recharge__energy_c,INTEGRATES WITH,soft,europe,Charging network integration varies
+e521,europe_stellantis__api,europe_stellantis__bp_pulse__energy_c,INTEGRATES WITH,soft,europe,Charging network integration varies
+e522,europe_renault_group__bosch__tier_1_h,europe_renault_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e523,europe_renault_group__continental__tier_1_h,europe_renault_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e524,europe_renault_group__zf__tier_1_h,europe_renault_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e525,europe_renault_group__valeo__tier_1_h,europe_renault_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e526,europe_renault_group__forvia__tier_1_h,europe_renault_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e527,europe_renault_group__aptiv__tier_1_h,europe_renault_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e528,europe_renault_group__magna_international__tier_1_h,europe_renault_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e529,europe_renault_group__lear_corporation__tier_1_h,europe_renault_group__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e530,europe_renault_group__catl__battery_,europe_renault_group__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e531,europe_renault_group__byd_battery__battery_,europe_renault_group__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e532,europe_renault_group__lg_energy_solution__battery_,europe_renault_group__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e533,europe_renault_group__sk_on__battery_,europe_renault_group__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e534,europe_renault_group__samsung_sdi__battery_,europe_renault_group__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e535,europe_renault_group__nvidia__semicond,europe_renault_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e536,europe_renault_group__qualcomm__semicond,europe_renault_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e537,europe_renault_group__nxp__semicond,europe_renault_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e538,europe_renault_group__renesas__semicond,europe_renault_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e539,europe_renault_group__infineon__semicond,europe_renault_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e540,europe_renault_group__stmicroelectronics__semicond,europe_renault_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e541,europe_renault_group__texas_instruments__semicond,europe_renault_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e542,europe_renault_group__intel__semicond,europe_renault_group__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e543,europe_renault_group__vodafone__connecti,europe_renault_group__carrier,PARTNERS,soft,europe,Carrier association varies
+e544,europe_renault_group__deutsche_telekom__connecti,europe_renault_group__carrier,PARTNERS,soft,europe,Carrier association varies
+e545,europe_renault_group__orange__connecti,europe_renault_group__carrier,PARTNERS,soft,europe,Carrier association varies
+e546,europe_renault_group__aws__cloud_in,europe_renault_group__cloud,HOSTS,soft,europe,Cloud vendor association varies
+e547,europe_renault_group__microsoft_azure__cloud_in,europe_renault_group__cloud,HOSTS,soft,europe,Cloud vendor association varies
+e548,europe_renault_group__api,europe_renault_group__allianz__external,POTENTIAL TELEMATICS PARTNER,soft,europe,Insurance partnerships are market-specific
+e549,europe_renault_group__api,europe_renault_group__axa__external,POTENTIAL TELEMATICS PARTNER,soft,europe,Insurance partnerships are market-specific
+e550,europe_renault_group__api,europe_renault_group__zurich_insurance__external,POTENTIAL TELEMATICS PARTNER,soft,europe,Insurance partnerships are market-specific
+e551,europe_renault_group__api,europe_renault_group__ionity__energy_c,INTEGRATES WITH,soft,europe,Charging network integration varies
+e552,europe_renault_group__api,europe_renault_group__shell_recharge__energy_c,INTEGRATES WITH,soft,europe,Charging network integration varies
+e553,europe_renault_group__api,europe_renault_group__bp_pulse__energy_c,INTEGRATES WITH,soft,europe,Charging network integration varies
+e554,europe_volvo_cars__bosch__tier_1_h,europe_volvo_cars__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e555,europe_volvo_cars__continental__tier_1_h,europe_volvo_cars__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e556,europe_volvo_cars__zf__tier_1_h,europe_volvo_cars__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e557,europe_volvo_cars__valeo__tier_1_h,europe_volvo_cars__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e558,europe_volvo_cars__forvia__tier_1_h,europe_volvo_cars__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e559,europe_volvo_cars__aptiv__tier_1_h,europe_volvo_cars__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e560,europe_volvo_cars__magna_international__tier_1_h,europe_volvo_cars__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e561,europe_volvo_cars__lear_corporation__tier_1_h,europe_volvo_cars__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e562,europe_volvo_cars__catl__battery_,europe_volvo_cars__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e563,europe_volvo_cars__byd_battery__battery_,europe_volvo_cars__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e564,europe_volvo_cars__lg_energy_solution__battery_,europe_volvo_cars__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e565,europe_volvo_cars__sk_on__battery_,europe_volvo_cars__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e566,europe_volvo_cars__samsung_sdi__battery_,europe_volvo_cars__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e567,europe_volvo_cars__nvidia__semicond,europe_volvo_cars__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e568,europe_volvo_cars__qualcomm__semicond,europe_volvo_cars__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e569,europe_volvo_cars__nxp__semicond,europe_volvo_cars__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e570,europe_volvo_cars__renesas__semicond,europe_volvo_cars__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e571,europe_volvo_cars__infineon__semicond,europe_volvo_cars__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e572,europe_volvo_cars__stmicroelectronics__semicond,europe_volvo_cars__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e573,europe_volvo_cars__texas_instruments__semicond,europe_volvo_cars__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e574,europe_volvo_cars__intel__semicond,europe_volvo_cars__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e575,europe_volvo_cars__vodafone__connecti,europe_volvo_cars__carrier,PARTNERS,soft,europe,Carrier association varies
+e576,europe_volvo_cars__deutsche_telekom__connecti,europe_volvo_cars__carrier,PARTNERS,soft,europe,Carrier association varies
+e577,europe_volvo_cars__orange__connecti,europe_volvo_cars__carrier,PARTNERS,soft,europe,Carrier association varies
+e578,europe_volvo_cars__aws__cloud_in,europe_volvo_cars__cloud,HOSTS,soft,europe,Cloud vendor association varies
+e579,europe_volvo_cars__microsoft_azure__cloud_in,europe_volvo_cars__cloud,HOSTS,soft,europe,Cloud vendor association varies
+e580,europe_volvo_cars__api,europe_volvo_cars__allianz__external,POTENTIAL TELEMATICS PARTNER,soft,europe,Insurance partnerships are market-specific
+e581,europe_volvo_cars__api,europe_volvo_cars__axa__external,POTENTIAL TELEMATICS PARTNER,soft,europe,Insurance partnerships are market-specific
+e582,europe_volvo_cars__api,europe_volvo_cars__zurich_insurance__external,POTENTIAL TELEMATICS PARTNER,soft,europe,Insurance partnerships are market-specific
+e583,europe_volvo_cars__api,europe_volvo_cars__ionity__energy_c,INTEGRATES WITH,soft,europe,Charging network integration varies
+e584,europe_volvo_cars__api,europe_volvo_cars__shell_recharge__energy_c,INTEGRATES WITH,soft,europe,Charging network integration varies
+e585,europe_volvo_cars__api,europe_volvo_cars__bp_pulse__energy_c,INTEGRATES WITH,soft,europe,Charging network integration varies
+e586,europe_jaguar_land_rover__bosch__tier_1_h,europe_jaguar_land_rover__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e587,europe_jaguar_land_rover__continental__tier_1_h,europe_jaguar_land_rover__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e588,europe_jaguar_land_rover__zf__tier_1_h,europe_jaguar_land_rover__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e589,europe_jaguar_land_rover__valeo__tier_1_h,europe_jaguar_land_rover__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e590,europe_jaguar_land_rover__forvia__tier_1_h,europe_jaguar_land_rover__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e591,europe_jaguar_land_rover__aptiv__tier_1_h,europe_jaguar_land_rover__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e592,europe_jaguar_land_rover__magna_international__tier_1_h,europe_jaguar_land_rover__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e593,europe_jaguar_land_rover__lear_corporation__tier_1_h,europe_jaguar_land_rover__tcu,SUPPLIES,soft,europe,Illustrative Tier-1 ↔ telematics link
+e594,europe_jaguar_land_rover__catl__battery_,europe_jaguar_land_rover__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e595,europe_jaguar_land_rover__byd_battery__battery_,europe_jaguar_land_rover__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e596,europe_jaguar_land_rover__lg_energy_solution__battery_,europe_jaguar_land_rover__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e597,europe_jaguar_land_rover__sk_on__battery_,europe_jaguar_land_rover__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e598,europe_jaguar_land_rover__samsung_sdi__battery_,europe_jaguar_land_rover__holdco,SUPPLIES,soft,europe,Battery supply relationship varies by program
+e599,europe_jaguar_land_rover__nvidia__semicond,europe_jaguar_land_rover__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e600,europe_jaguar_land_rover__qualcomm__semicond,europe_jaguar_land_rover__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e601,europe_jaguar_land_rover__nxp__semicond,europe_jaguar_land_rover__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e602,europe_jaguar_land_rover__renesas__semicond,europe_jaguar_land_rover__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e603,europe_jaguar_land_rover__infineon__semicond,europe_jaguar_land_rover__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e604,europe_jaguar_land_rover__stmicroelectronics__semicond,europe_jaguar_land_rover__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e605,europe_jaguar_land_rover__texas_instruments__semicond,europe_jaguar_land_rover__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e606,europe_jaguar_land_rover__intel__semicond,europe_jaguar_land_rover__os,SUPPLIES,soft,europe,Compute/SoC ↔ OS platform dependence
+e607,europe_jaguar_land_rover__vodafone__connecti,europe_jaguar_land_rover__carrier,PARTNERS,soft,europe,Carrier association varies
+e608,europe_jaguar_land_rover__deutsche_telekom__connecti,europe_jaguar_land_rover__carrier,PARTNERS,soft,europe,Carrier association varies
+e609,europe_jaguar_land_rover__orange__connecti,europe_jaguar_land_rover__carrier,PARTNERS,soft,europe,Carrier association varies
+e610,europe_jaguar_land_rover__aws__cloud_in,europe_jaguar_land_rover__cloud,HOSTS,soft,europe,Cloud vendor association varies
+e611,europe_jaguar_land_rover__microsoft_azure__cloud_in,europe_jaguar_land_rover__cloud,HOSTS,soft,europe,Cloud vendor association varies
+e612,europe_jaguar_land_rover__api,europe_jaguar_land_rover__allianz__external,POTENTIAL TELEMATICS PARTNER,soft,europe,Insurance partnerships are market-specific
+e613,europe_jaguar_land_rover__api,europe_jaguar_land_rover__axa__external,POTENTIAL TELEMATICS PARTNER,soft,europe,Insurance partnerships are market-specific
+e614,europe_jaguar_land_rover__api,europe_jaguar_land_rover__zurich_insurance__external,POTENTIAL TELEMATICS PARTNER,soft,europe,Insurance partnerships are market-specific
+e615,europe_jaguar_land_rover__api,europe_jaguar_land_rover__ionity__energy_c,INTEGRATES WITH,soft,europe,Charging network integration varies
+e616,europe_jaguar_land_rover__api,europe_jaguar_land_rover__shell_recharge__energy_c,INTEGRATES WITH,soft,europe,Charging network integration varies
+e617,europe_jaguar_land_rover__api,europe_jaguar_land_rover__bp_pulse__energy_c,INTEGRATES WITH,soft,europe,Charging network integration varies
+e618,china_saic_motor__bosch__tier_1_h,china_saic_motor__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e619,china_saic_motor__continental__tier_1_h,china_saic_motor__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e620,china_saic_motor__zf__tier_1_h,china_saic_motor__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e621,china_saic_motor__valeo__tier_1_h,china_saic_motor__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e622,china_saic_motor__forvia__tier_1_h,china_saic_motor__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e623,china_saic_motor__aptiv__tier_1_h,china_saic_motor__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e624,china_saic_motor__magna_international__tier_1_h,china_saic_motor__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e625,china_saic_motor__lear_corporation__tier_1_h,china_saic_motor__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e626,china_saic_motor__catl__battery_,china_saic_motor__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e627,china_saic_motor__byd_battery__battery_,china_saic_motor__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e628,china_saic_motor__lg_energy_solution__battery_,china_saic_motor__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e629,china_saic_motor__sk_on__battery_,china_saic_motor__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e630,china_saic_motor__samsung_sdi__battery_,china_saic_motor__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e631,china_saic_motor__nvidia__semicond,china_saic_motor__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e632,china_saic_motor__qualcomm__semicond,china_saic_motor__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e633,china_saic_motor__nxp__semicond,china_saic_motor__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e634,china_saic_motor__renesas__semicond,china_saic_motor__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e635,china_saic_motor__infineon__semicond,china_saic_motor__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e636,china_saic_motor__stmicroelectronics__semicond,china_saic_motor__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e637,china_saic_motor__texas_instruments__semicond,china_saic_motor__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e638,china_saic_motor__intel__semicond,china_saic_motor__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e639,china_saic_motor__china_mobile__connecti,china_saic_motor__carrier,PARTNERS,soft,china,Carrier association varies
+e640,china_saic_motor__china_unicom__connecti,china_saic_motor__carrier,PARTNERS,soft,china,Carrier association varies
+e641,china_saic_motor__china_telecom__connecti,china_saic_motor__carrier,PARTNERS,soft,china,Carrier association varies
+e642,china_saic_motor__alibaba_cloud__cloud_in,china_saic_motor__cloud,HOSTS,soft,china,Cloud vendor association varies
+e643,china_saic_motor__tencent_cloud__cloud_in,china_saic_motor__cloud,HOSTS,soft,china,Cloud vendor association varies
+e644,china_saic_motor__api,china_saic_motor__ping_an__external,POTENTIAL TELEMATICS PARTNER,soft,china,Insurance partnerships are market-specific
+e645,china_saic_motor__api,china_saic_motor__zhongan__external,POTENTIAL TELEMATICS PARTNER,soft,china,Insurance partnerships are market-specific
+e646,china_saic_motor__api,china_saic_motor__state_grid_ev__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e647,china_saic_motor__api,china_saic_motor__teld__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e648,china_saic_motor__api,china_saic_motor__starcharge__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e649,china_geely_holding_group__bosch__tier_1_h,china_geely_holding_group__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e650,china_geely_holding_group__continental__tier_1_h,china_geely_holding_group__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e651,china_geely_holding_group__zf__tier_1_h,china_geely_holding_group__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e652,china_geely_holding_group__valeo__tier_1_h,china_geely_holding_group__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e653,china_geely_holding_group__forvia__tier_1_h,china_geely_holding_group__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e654,china_geely_holding_group__aptiv__tier_1_h,china_geely_holding_group__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e655,china_geely_holding_group__magna_international__tier_1_h,china_geely_holding_group__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e656,china_geely_holding_group__lear_corporation__tier_1_h,china_geely_holding_group__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e657,china_geely_holding_group__catl__battery_,china_geely_holding_group__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e658,china_geely_holding_group__byd_battery__battery_,china_geely_holding_group__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e659,china_geely_holding_group__lg_energy_solution__battery_,china_geely_holding_group__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e660,china_geely_holding_group__sk_on__battery_,china_geely_holding_group__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e661,china_geely_holding_group__samsung_sdi__battery_,china_geely_holding_group__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e662,china_geely_holding_group__nvidia__semicond,china_geely_holding_group__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e663,china_geely_holding_group__qualcomm__semicond,china_geely_holding_group__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e664,china_geely_holding_group__nxp__semicond,china_geely_holding_group__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e665,china_geely_holding_group__renesas__semicond,china_geely_holding_group__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e666,china_geely_holding_group__infineon__semicond,china_geely_holding_group__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e667,china_geely_holding_group__stmicroelectronics__semicond,china_geely_holding_group__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e668,china_geely_holding_group__texas_instruments__semicond,china_geely_holding_group__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e669,china_geely_holding_group__intel__semicond,china_geely_holding_group__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e670,china_geely_holding_group__china_mobile__connecti,china_geely_holding_group__carrier,PARTNERS,soft,china,Carrier association varies
+e671,china_geely_holding_group__china_unicom__connecti,china_geely_holding_group__carrier,PARTNERS,soft,china,Carrier association varies
+e672,china_geely_holding_group__china_telecom__connecti,china_geely_holding_group__carrier,PARTNERS,soft,china,Carrier association varies
+e673,china_geely_holding_group__alibaba_cloud__cloud_in,china_geely_holding_group__cloud,HOSTS,soft,china,Cloud vendor association varies
+e674,china_geely_holding_group__tencent_cloud__cloud_in,china_geely_holding_group__cloud,HOSTS,soft,china,Cloud vendor association varies
+e675,china_geely_holding_group__api,china_geely_holding_group__ping_an__external,POTENTIAL TELEMATICS PARTNER,soft,china,Insurance partnerships are market-specific
+e676,china_geely_holding_group__api,china_geely_holding_group__zhongan__external,POTENTIAL TELEMATICS PARTNER,soft,china,Insurance partnerships are market-specific
+e677,china_geely_holding_group__api,china_geely_holding_group__state_grid_ev__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e678,china_geely_holding_group__api,china_geely_holding_group__teld__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e679,china_geely_holding_group__api,china_geely_holding_group__starcharge__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e680,china_byd__bosch__tier_1_h,china_byd__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e681,china_byd__continental__tier_1_h,china_byd__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e682,china_byd__zf__tier_1_h,china_byd__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e683,china_byd__valeo__tier_1_h,china_byd__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e684,china_byd__forvia__tier_1_h,china_byd__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e685,china_byd__aptiv__tier_1_h,china_byd__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e686,china_byd__magna_international__tier_1_h,china_byd__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e687,china_byd__lear_corporation__tier_1_h,china_byd__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e688,china_byd__catl__battery_,china_byd__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e689,china_byd__byd_battery__battery_,china_byd__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e690,china_byd__lg_energy_solution__battery_,china_byd__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e691,china_byd__sk_on__battery_,china_byd__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e692,china_byd__samsung_sdi__battery_,china_byd__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e693,china_byd__nvidia__semicond,china_byd__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e694,china_byd__qualcomm__semicond,china_byd__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e695,china_byd__nxp__semicond,china_byd__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e696,china_byd__renesas__semicond,china_byd__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e697,china_byd__infineon__semicond,china_byd__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e698,china_byd__stmicroelectronics__semicond,china_byd__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e699,china_byd__texas_instruments__semicond,china_byd__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e700,china_byd__intel__semicond,china_byd__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e701,china_byd__china_mobile__connecti,china_byd__carrier,PARTNERS,soft,china,Carrier association varies
+e702,china_byd__china_unicom__connecti,china_byd__carrier,PARTNERS,soft,china,Carrier association varies
+e703,china_byd__china_telecom__connecti,china_byd__carrier,PARTNERS,soft,china,Carrier association varies
+e704,china_byd__alibaba_cloud__cloud_in,china_byd__cloud,HOSTS,soft,china,Cloud vendor association varies
+e705,china_byd__tencent_cloud__cloud_in,china_byd__cloud,HOSTS,soft,china,Cloud vendor association varies
+e706,china_byd__api,china_byd__ping_an__external,POTENTIAL TELEMATICS PARTNER,soft,china,Insurance partnerships are market-specific
+e707,china_byd__api,china_byd__zhongan__external,POTENTIAL TELEMATICS PARTNER,soft,china,Insurance partnerships are market-specific
+e708,china_byd__api,china_byd__state_grid_ev__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e709,china_byd__api,china_byd__teld__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e710,china_byd__api,china_byd__starcharge__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e711,china_changan_automobile__bosch__tier_1_h,china_changan_automobile__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e712,china_changan_automobile__continental__tier_1_h,china_changan_automobile__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e713,china_changan_automobile__zf__tier_1_h,china_changan_automobile__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e714,china_changan_automobile__valeo__tier_1_h,china_changan_automobile__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e715,china_changan_automobile__forvia__tier_1_h,china_changan_automobile__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e716,china_changan_automobile__aptiv__tier_1_h,china_changan_automobile__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e717,china_changan_automobile__magna_international__tier_1_h,china_changan_automobile__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e718,china_changan_automobile__lear_corporation__tier_1_h,china_changan_automobile__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e719,china_changan_automobile__catl__battery_,china_changan_automobile__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e720,china_changan_automobile__byd_battery__battery_,china_changan_automobile__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e721,china_changan_automobile__lg_energy_solution__battery_,china_changan_automobile__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e722,china_changan_automobile__sk_on__battery_,china_changan_automobile__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e723,china_changan_automobile__samsung_sdi__battery_,china_changan_automobile__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e724,china_changan_automobile__nvidia__semicond,china_changan_automobile__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e725,china_changan_automobile__qualcomm__semicond,china_changan_automobile__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e726,china_changan_automobile__nxp__semicond,china_changan_automobile__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e727,china_changan_automobile__renesas__semicond,china_changan_automobile__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e728,china_changan_automobile__infineon__semicond,china_changan_automobile__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e729,china_changan_automobile__stmicroelectronics__semicond,china_changan_automobile__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e730,china_changan_automobile__texas_instruments__semicond,china_changan_automobile__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e731,china_changan_automobile__intel__semicond,china_changan_automobile__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e732,china_changan_automobile__china_mobile__connecti,china_changan_automobile__carrier,PARTNERS,soft,china,Carrier association varies
+e733,china_changan_automobile__china_unicom__connecti,china_changan_automobile__carrier,PARTNERS,soft,china,Carrier association varies
+e734,china_changan_automobile__china_telecom__connecti,china_changan_automobile__carrier,PARTNERS,soft,china,Carrier association varies
+e735,china_changan_automobile__alibaba_cloud__cloud_in,china_changan_automobile__cloud,HOSTS,soft,china,Cloud vendor association varies
+e736,china_changan_automobile__tencent_cloud__cloud_in,china_changan_automobile__cloud,HOSTS,soft,china,Cloud vendor association varies
+e737,china_changan_automobile__api,china_changan_automobile__ping_an__external,POTENTIAL TELEMATICS PARTNER,soft,china,Insurance partnerships are market-specific
+e738,china_changan_automobile__api,china_changan_automobile__zhongan__external,POTENTIAL TELEMATICS PARTNER,soft,china,Insurance partnerships are market-specific
+e739,china_changan_automobile__api,china_changan_automobile__state_grid_ev__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e740,china_changan_automobile__api,china_changan_automobile__teld__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e741,china_changan_automobile__api,china_changan_automobile__starcharge__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e742,china_great_wall_motor__bosch__tier_1_h,china_great_wall_motor__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e743,china_great_wall_motor__continental__tier_1_h,china_great_wall_motor__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e744,china_great_wall_motor__zf__tier_1_h,china_great_wall_motor__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e745,china_great_wall_motor__valeo__tier_1_h,china_great_wall_motor__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e746,china_great_wall_motor__forvia__tier_1_h,china_great_wall_motor__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e747,china_great_wall_motor__aptiv__tier_1_h,china_great_wall_motor__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e748,china_great_wall_motor__magna_international__tier_1_h,china_great_wall_motor__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e749,china_great_wall_motor__lear_corporation__tier_1_h,china_great_wall_motor__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e750,china_great_wall_motor__catl__battery_,china_great_wall_motor__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e751,china_great_wall_motor__byd_battery__battery_,china_great_wall_motor__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e752,china_great_wall_motor__lg_energy_solution__battery_,china_great_wall_motor__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e753,china_great_wall_motor__sk_on__battery_,china_great_wall_motor__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e754,china_great_wall_motor__samsung_sdi__battery_,china_great_wall_motor__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e755,china_great_wall_motor__nvidia__semicond,china_great_wall_motor__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e756,china_great_wall_motor__qualcomm__semicond,china_great_wall_motor__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e757,china_great_wall_motor__nxp__semicond,china_great_wall_motor__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e758,china_great_wall_motor__renesas__semicond,china_great_wall_motor__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e759,china_great_wall_motor__infineon__semicond,china_great_wall_motor__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e760,china_great_wall_motor__stmicroelectronics__semicond,china_great_wall_motor__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e761,china_great_wall_motor__texas_instruments__semicond,china_great_wall_motor__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e762,china_great_wall_motor__intel__semicond,china_great_wall_motor__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e763,china_great_wall_motor__china_mobile__connecti,china_great_wall_motor__carrier,PARTNERS,soft,china,Carrier association varies
+e764,china_great_wall_motor__china_unicom__connecti,china_great_wall_motor__carrier,PARTNERS,soft,china,Carrier association varies
+e765,china_great_wall_motor__china_telecom__connecti,china_great_wall_motor__carrier,PARTNERS,soft,china,Carrier association varies
+e766,china_great_wall_motor__alibaba_cloud__cloud_in,china_great_wall_motor__cloud,HOSTS,soft,china,Cloud vendor association varies
+e767,china_great_wall_motor__tencent_cloud__cloud_in,china_great_wall_motor__cloud,HOSTS,soft,china,Cloud vendor association varies
+e768,china_great_wall_motor__api,china_great_wall_motor__ping_an__external,POTENTIAL TELEMATICS PARTNER,soft,china,Insurance partnerships are market-specific
+e769,china_great_wall_motor__api,china_great_wall_motor__zhongan__external,POTENTIAL TELEMATICS PARTNER,soft,china,Insurance partnerships are market-specific
+e770,china_great_wall_motor__api,china_great_wall_motor__state_grid_ev__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e771,china_great_wall_motor__api,china_great_wall_motor__teld__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e772,china_great_wall_motor__api,china_great_wall_motor__starcharge__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e773,china_nio__bosch__tier_1_h,china_nio__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e774,china_nio__continental__tier_1_h,china_nio__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e775,china_nio__zf__tier_1_h,china_nio__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e776,china_nio__valeo__tier_1_h,china_nio__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e777,china_nio__forvia__tier_1_h,china_nio__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e778,china_nio__aptiv__tier_1_h,china_nio__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e779,china_nio__magna_international__tier_1_h,china_nio__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e780,china_nio__lear_corporation__tier_1_h,china_nio__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e781,china_nio__catl__battery_,china_nio__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e782,china_nio__byd_battery__battery_,china_nio__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e783,china_nio__lg_energy_solution__battery_,china_nio__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e784,china_nio__sk_on__battery_,china_nio__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e785,china_nio__samsung_sdi__battery_,china_nio__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e786,china_nio__nvidia__semicond,china_nio__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e787,china_nio__qualcomm__semicond,china_nio__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e788,china_nio__nxp__semicond,china_nio__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e789,china_nio__renesas__semicond,china_nio__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e790,china_nio__infineon__semicond,china_nio__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e791,china_nio__stmicroelectronics__semicond,china_nio__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e792,china_nio__texas_instruments__semicond,china_nio__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e793,china_nio__intel__semicond,china_nio__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e794,china_nio__china_mobile__connecti,china_nio__carrier,PARTNERS,soft,china,Carrier association varies
+e795,china_nio__china_unicom__connecti,china_nio__carrier,PARTNERS,soft,china,Carrier association varies
+e796,china_nio__china_telecom__connecti,china_nio__carrier,PARTNERS,soft,china,Carrier association varies
+e797,china_nio__alibaba_cloud__cloud_in,china_nio__cloud,HOSTS,soft,china,Cloud vendor association varies
+e798,china_nio__tencent_cloud__cloud_in,china_nio__cloud,HOSTS,soft,china,Cloud vendor association varies
+e799,china_nio__api,china_nio__ping_an__external,POTENTIAL TELEMATICS PARTNER,soft,china,Insurance partnerships are market-specific
+e800,china_nio__api,china_nio__zhongan__external,POTENTIAL TELEMATICS PARTNER,soft,china,Insurance partnerships are market-specific
+e801,china_nio__api,china_nio__state_grid_ev__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e802,china_nio__api,china_nio__teld__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e803,china_nio__api,china_nio__starcharge__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e804,china_xpeng__bosch__tier_1_h,china_xpeng__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e805,china_xpeng__continental__tier_1_h,china_xpeng__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e806,china_xpeng__zf__tier_1_h,china_xpeng__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e807,china_xpeng__valeo__tier_1_h,china_xpeng__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e808,china_xpeng__forvia__tier_1_h,china_xpeng__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e809,china_xpeng__aptiv__tier_1_h,china_xpeng__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e810,china_xpeng__magna_international__tier_1_h,china_xpeng__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e811,china_xpeng__lear_corporation__tier_1_h,china_xpeng__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e812,china_xpeng__catl__battery_,china_xpeng__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e813,china_xpeng__byd_battery__battery_,china_xpeng__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e814,china_xpeng__lg_energy_solution__battery_,china_xpeng__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e815,china_xpeng__sk_on__battery_,china_xpeng__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e816,china_xpeng__samsung_sdi__battery_,china_xpeng__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e817,china_xpeng__nvidia__semicond,china_xpeng__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e818,china_xpeng__qualcomm__semicond,china_xpeng__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e819,china_xpeng__nxp__semicond,china_xpeng__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e820,china_xpeng__renesas__semicond,china_xpeng__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e821,china_xpeng__infineon__semicond,china_xpeng__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e822,china_xpeng__stmicroelectronics__semicond,china_xpeng__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e823,china_xpeng__texas_instruments__semicond,china_xpeng__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e824,china_xpeng__intel__semicond,china_xpeng__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e825,china_xpeng__china_mobile__connecti,china_xpeng__carrier,PARTNERS,soft,china,Carrier association varies
+e826,china_xpeng__china_unicom__connecti,china_xpeng__carrier,PARTNERS,soft,china,Carrier association varies
+e827,china_xpeng__china_telecom__connecti,china_xpeng__carrier,PARTNERS,soft,china,Carrier association varies
+e828,china_xpeng__alibaba_cloud__cloud_in,china_xpeng__cloud,HOSTS,soft,china,Cloud vendor association varies
+e829,china_xpeng__tencent_cloud__cloud_in,china_xpeng__cloud,HOSTS,soft,china,Cloud vendor association varies
+e830,china_xpeng__api,china_xpeng__ping_an__external,POTENTIAL TELEMATICS PARTNER,soft,china,Insurance partnerships are market-specific
+e831,china_xpeng__api,china_xpeng__zhongan__external,POTENTIAL TELEMATICS PARTNER,soft,china,Insurance partnerships are market-specific
+e832,china_xpeng__api,china_xpeng__state_grid_ev__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e833,china_xpeng__api,china_xpeng__teld__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e834,china_xpeng__api,china_xpeng__starcharge__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e835,china_li_auto__bosch__tier_1_h,china_li_auto__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e836,china_li_auto__continental__tier_1_h,china_li_auto__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e837,china_li_auto__zf__tier_1_h,china_li_auto__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e838,china_li_auto__valeo__tier_1_h,china_li_auto__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e839,china_li_auto__forvia__tier_1_h,china_li_auto__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e840,china_li_auto__aptiv__tier_1_h,china_li_auto__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e841,china_li_auto__magna_international__tier_1_h,china_li_auto__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e842,china_li_auto__lear_corporation__tier_1_h,china_li_auto__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e843,china_li_auto__catl__battery_,china_li_auto__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e844,china_li_auto__byd_battery__battery_,china_li_auto__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e845,china_li_auto__lg_energy_solution__battery_,china_li_auto__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e846,china_li_auto__sk_on__battery_,china_li_auto__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e847,china_li_auto__samsung_sdi__battery_,china_li_auto__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e848,china_li_auto__nvidia__semicond,china_li_auto__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e849,china_li_auto__qualcomm__semicond,china_li_auto__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e850,china_li_auto__nxp__semicond,china_li_auto__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e851,china_li_auto__renesas__semicond,china_li_auto__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e852,china_li_auto__infineon__semicond,china_li_auto__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e853,china_li_auto__stmicroelectronics__semicond,china_li_auto__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e854,china_li_auto__texas_instruments__semicond,china_li_auto__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e855,china_li_auto__intel__semicond,china_li_auto__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e856,china_li_auto__china_mobile__connecti,china_li_auto__carrier,PARTNERS,soft,china,Carrier association varies
+e857,china_li_auto__china_unicom__connecti,china_li_auto__carrier,PARTNERS,soft,china,Carrier association varies
+e858,china_li_auto__china_telecom__connecti,china_li_auto__carrier,PARTNERS,soft,china,Carrier association varies
+e859,china_li_auto__alibaba_cloud__cloud_in,china_li_auto__cloud,HOSTS,soft,china,Cloud vendor association varies
+e860,china_li_auto__tencent_cloud__cloud_in,china_li_auto__cloud,HOSTS,soft,china,Cloud vendor association varies
+e861,china_li_auto__api,china_li_auto__ping_an__external,POTENTIAL TELEMATICS PARTNER,soft,china,Insurance partnerships are market-specific
+e862,china_li_auto__api,china_li_auto__zhongan__external,POTENTIAL TELEMATICS PARTNER,soft,china,Insurance partnerships are market-specific
+e863,china_li_auto__api,china_li_auto__state_grid_ev__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e864,china_li_auto__api,china_li_auto__teld__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e865,china_li_auto__api,china_li_auto__starcharge__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e866,china_chery_automobile__bosch__tier_1_h,china_chery_automobile__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e867,china_chery_automobile__continental__tier_1_h,china_chery_automobile__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e868,china_chery_automobile__zf__tier_1_h,china_chery_automobile__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e869,china_chery_automobile__valeo__tier_1_h,china_chery_automobile__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e870,china_chery_automobile__forvia__tier_1_h,china_chery_automobile__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e871,china_chery_automobile__aptiv__tier_1_h,china_chery_automobile__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e872,china_chery_automobile__magna_international__tier_1_h,china_chery_automobile__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e873,china_chery_automobile__lear_corporation__tier_1_h,china_chery_automobile__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e874,china_chery_automobile__catl__battery_,china_chery_automobile__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e875,china_chery_automobile__byd_battery__battery_,china_chery_automobile__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e876,china_chery_automobile__lg_energy_solution__battery_,china_chery_automobile__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e877,china_chery_automobile__sk_on__battery_,china_chery_automobile__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e878,china_chery_automobile__samsung_sdi__battery_,china_chery_automobile__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e879,china_chery_automobile__nvidia__semicond,china_chery_automobile__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e880,china_chery_automobile__qualcomm__semicond,china_chery_automobile__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e881,china_chery_automobile__nxp__semicond,china_chery_automobile__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e882,china_chery_automobile__renesas__semicond,china_chery_automobile__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e883,china_chery_automobile__infineon__semicond,china_chery_automobile__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e884,china_chery_automobile__stmicroelectronics__semicond,china_chery_automobile__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e885,china_chery_automobile__texas_instruments__semicond,china_chery_automobile__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e886,china_chery_automobile__intel__semicond,china_chery_automobile__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e887,china_chery_automobile__china_mobile__connecti,china_chery_automobile__carrier,PARTNERS,soft,china,Carrier association varies
+e888,china_chery_automobile__china_unicom__connecti,china_chery_automobile__carrier,PARTNERS,soft,china,Carrier association varies
+e889,china_chery_automobile__china_telecom__connecti,china_chery_automobile__carrier,PARTNERS,soft,china,Carrier association varies
+e890,china_chery_automobile__alibaba_cloud__cloud_in,china_chery_automobile__cloud,HOSTS,soft,china,Cloud vendor association varies
+e891,china_chery_automobile__tencent_cloud__cloud_in,china_chery_automobile__cloud,HOSTS,soft,china,Cloud vendor association varies
+e892,china_chery_automobile__api,china_chery_automobile__ping_an__external,POTENTIAL TELEMATICS PARTNER,soft,china,Insurance partnerships are market-specific
+e893,china_chery_automobile__api,china_chery_automobile__zhongan__external,POTENTIAL TELEMATICS PARTNER,soft,china,Insurance partnerships are market-specific
+e894,china_chery_automobile__api,china_chery_automobile__state_grid_ev__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e895,china_chery_automobile__api,china_chery_automobile__teld__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e896,china_chery_automobile__api,china_chery_automobile__starcharge__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e897,china_faw_group__bosch__tier_1_h,china_faw_group__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e898,china_faw_group__continental__tier_1_h,china_faw_group__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e899,china_faw_group__zf__tier_1_h,china_faw_group__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e900,china_faw_group__valeo__tier_1_h,china_faw_group__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e901,china_faw_group__forvia__tier_1_h,china_faw_group__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e902,china_faw_group__aptiv__tier_1_h,china_faw_group__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e903,china_faw_group__magna_international__tier_1_h,china_faw_group__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e904,china_faw_group__lear_corporation__tier_1_h,china_faw_group__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e905,china_faw_group__catl__battery_,china_faw_group__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e906,china_faw_group__byd_battery__battery_,china_faw_group__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e907,china_faw_group__lg_energy_solution__battery_,china_faw_group__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e908,china_faw_group__sk_on__battery_,china_faw_group__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e909,china_faw_group__samsung_sdi__battery_,china_faw_group__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e910,china_faw_group__nvidia__semicond,china_faw_group__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e911,china_faw_group__qualcomm__semicond,china_faw_group__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e912,china_faw_group__nxp__semicond,china_faw_group__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e913,china_faw_group__renesas__semicond,china_faw_group__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e914,china_faw_group__infineon__semicond,china_faw_group__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e915,china_faw_group__stmicroelectronics__semicond,china_faw_group__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e916,china_faw_group__texas_instruments__semicond,china_faw_group__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e917,china_faw_group__intel__semicond,china_faw_group__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e918,china_faw_group__china_mobile__connecti,china_faw_group__carrier,PARTNERS,soft,china,Carrier association varies
+e919,china_faw_group__china_unicom__connecti,china_faw_group__carrier,PARTNERS,soft,china,Carrier association varies
+e920,china_faw_group__china_telecom__connecti,china_faw_group__carrier,PARTNERS,soft,china,Carrier association varies
+e921,china_faw_group__alibaba_cloud__cloud_in,china_faw_group__cloud,HOSTS,soft,china,Cloud vendor association varies
+e922,china_faw_group__tencent_cloud__cloud_in,china_faw_group__cloud,HOSTS,soft,china,Cloud vendor association varies
+e923,china_faw_group__api,china_faw_group__ping_an__external,POTENTIAL TELEMATICS PARTNER,soft,china,Insurance partnerships are market-specific
+e924,china_faw_group__api,china_faw_group__zhongan__external,POTENTIAL TELEMATICS PARTNER,soft,china,Insurance partnerships are market-specific
+e925,china_faw_group__api,china_faw_group__state_grid_ev__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e926,china_faw_group__api,china_faw_group__teld__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e927,china_faw_group__api,china_faw_group__starcharge__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e928,china_dongfeng_motor__bosch__tier_1_h,china_dongfeng_motor__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e929,china_dongfeng_motor__continental__tier_1_h,china_dongfeng_motor__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e930,china_dongfeng_motor__zf__tier_1_h,china_dongfeng_motor__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e931,china_dongfeng_motor__valeo__tier_1_h,china_dongfeng_motor__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e932,china_dongfeng_motor__forvia__tier_1_h,china_dongfeng_motor__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e933,china_dongfeng_motor__aptiv__tier_1_h,china_dongfeng_motor__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e934,china_dongfeng_motor__magna_international__tier_1_h,china_dongfeng_motor__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e935,china_dongfeng_motor__lear_corporation__tier_1_h,china_dongfeng_motor__tcu,SUPPLIES,soft,china,Illustrative Tier-1 ↔ telematics link
+e936,china_dongfeng_motor__catl__battery_,china_dongfeng_motor__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e937,china_dongfeng_motor__byd_battery__battery_,china_dongfeng_motor__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e938,china_dongfeng_motor__lg_energy_solution__battery_,china_dongfeng_motor__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e939,china_dongfeng_motor__sk_on__battery_,china_dongfeng_motor__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e940,china_dongfeng_motor__samsung_sdi__battery_,china_dongfeng_motor__holdco,SUPPLIES,soft,china,Battery supply relationship varies by program
+e941,china_dongfeng_motor__nvidia__semicond,china_dongfeng_motor__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e942,china_dongfeng_motor__qualcomm__semicond,china_dongfeng_motor__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e943,china_dongfeng_motor__nxp__semicond,china_dongfeng_motor__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e944,china_dongfeng_motor__renesas__semicond,china_dongfeng_motor__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e945,china_dongfeng_motor__infineon__semicond,china_dongfeng_motor__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e946,china_dongfeng_motor__stmicroelectronics__semicond,china_dongfeng_motor__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e947,china_dongfeng_motor__texas_instruments__semicond,china_dongfeng_motor__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e948,china_dongfeng_motor__intel__semicond,china_dongfeng_motor__os,SUPPLIES,soft,china,Compute/SoC ↔ OS platform dependence
+e949,china_dongfeng_motor__china_mobile__connecti,china_dongfeng_motor__carrier,PARTNERS,soft,china,Carrier association varies
+e950,china_dongfeng_motor__china_unicom__connecti,china_dongfeng_motor__carrier,PARTNERS,soft,china,Carrier association varies
+e951,china_dongfeng_motor__china_telecom__connecti,china_dongfeng_motor__carrier,PARTNERS,soft,china,Carrier association varies
+e952,china_dongfeng_motor__alibaba_cloud__cloud_in,china_dongfeng_motor__cloud,HOSTS,soft,china,Cloud vendor association varies
+e953,china_dongfeng_motor__tencent_cloud__cloud_in,china_dongfeng_motor__cloud,HOSTS,soft,china,Cloud vendor association varies
+e954,china_dongfeng_motor__api,china_dongfeng_motor__ping_an__external,POTENTIAL TELEMATICS PARTNER,soft,china,Insurance partnerships are market-specific
+e955,china_dongfeng_motor__api,china_dongfeng_motor__zhongan__external,POTENTIAL TELEMATICS PARTNER,soft,china,Insurance partnerships are market-specific
+e956,china_dongfeng_motor__api,china_dongfeng_motor__state_grid_ev__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e957,china_dongfeng_motor__api,china_dongfeng_motor__teld__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e958,china_dongfeng_motor__api,china_dongfeng_motor__starcharge__energy_c,INTEGRATES WITH,soft,china,Charging network integration varies
+e959,us_general_motors__bosch__tier_1_h,us_general_motors__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e960,us_general_motors__continental__tier_1_h,us_general_motors__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e961,us_general_motors__zf__tier_1_h,us_general_motors__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e962,us_general_motors__valeo__tier_1_h,us_general_motors__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e963,us_general_motors__forvia__tier_1_h,us_general_motors__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e964,us_general_motors__aptiv__tier_1_h,us_general_motors__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e965,us_general_motors__magna_international__tier_1_h,us_general_motors__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e966,us_general_motors__lear_corporation__tier_1_h,us_general_motors__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e967,us_general_motors__catl__battery_,us_general_motors__holdco,SUPPLIES,soft,us,Battery supply relationship varies by program
+e968,us_general_motors__byd_battery__battery_,us_general_motors__holdco,SUPPLIES,soft,us,Battery supply relationship varies by program
+e969,us_general_motors__lg_energy_solution__battery_,us_general_motors__holdco,SUPPLIES,soft,us,Battery supply relationship varies by program
+e970,us_general_motors__sk_on__battery_,us_general_motors__holdco,SUPPLIES,soft,us,Battery supply relationship varies by program
+e971,us_general_motors__samsung_sdi__battery_,us_general_motors__holdco,SUPPLIES,soft,us,Battery supply relationship varies by program
+e972,us_general_motors__nvidia__semicond,us_general_motors__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e973,us_general_motors__qualcomm__semicond,us_general_motors__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e974,us_general_motors__nxp__semicond,us_general_motors__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e975,us_general_motors__renesas__semicond,us_general_motors__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e976,us_general_motors__infineon__semicond,us_general_motors__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e977,us_general_motors__stmicroelectronics__semicond,us_general_motors__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e978,us_general_motors__texas_instruments__semicond,us_general_motors__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e979,us_general_motors__intel__semicond,us_general_motors__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e980,us_general_motors__verizon__connecti,us_general_motors__carrier,PARTNERS,soft,us,Carrier association varies
+e981,us_general_motors__at_t__connecti,us_general_motors__carrier,PARTNERS,soft,us,Carrier association varies
+e982,us_general_motors__t_mobile__connecti,us_general_motors__carrier,PARTNERS,soft,us,Carrier association varies
+e983,us_general_motors__aws__cloud_in,us_general_motors__cloud,HOSTS,soft,us,Cloud vendor association varies
+e984,us_general_motors__microsoft_azure__cloud_in,us_general_motors__cloud,HOSTS,soft,us,Cloud vendor association varies
+e985,us_general_motors__api,us_general_motors__geico__external,POTENTIAL TELEMATICS PARTNER,soft,us,Insurance partnerships are market-specific
+e986,us_general_motors__api,us_general_motors__progressive__external,POTENTIAL TELEMATICS PARTNER,soft,us,Insurance partnerships are market-specific
+e987,us_general_motors__api,us_general_motors__state_farm__external,POTENTIAL TELEMATICS PARTNER,soft,us,Insurance partnerships are market-specific
+e988,us_general_motors__api,us_general_motors__electrify_america__energy_c,INTEGRATES WITH,soft,us,Charging network integration varies
+e989,us_general_motors__api,us_general_motors__chargepoint__energy_c,INTEGRATES WITH,soft,us,Charging network integration varies
+e990,us_general_motors__api,us_general_motors__evgo__energy_c,INTEGRATES WITH,soft,us,Charging network integration varies
+e991,us_ford_motor_company__bosch__tier_1_h,us_ford_motor_company__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e992,us_ford_motor_company__continental__tier_1_h,us_ford_motor_company__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e993,us_ford_motor_company__zf__tier_1_h,us_ford_motor_company__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e994,us_ford_motor_company__valeo__tier_1_h,us_ford_motor_company__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e995,us_ford_motor_company__forvia__tier_1_h,us_ford_motor_company__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e996,us_ford_motor_company__aptiv__tier_1_h,us_ford_motor_company__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e997,us_ford_motor_company__magna_international__tier_1_h,us_ford_motor_company__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e998,us_ford_motor_company__lear_corporation__tier_1_h,us_ford_motor_company__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e999,us_ford_motor_company__catl__battery_,us_ford_motor_company__holdco,SUPPLIES,soft,us,Battery supply relationship varies by program
+e1000,us_ford_motor_company__byd_battery__battery_,us_ford_motor_company__holdco,SUPPLIES,soft,us,Battery supply relationship varies by program
+e1001,us_ford_motor_company__lg_energy_solution__battery_,us_ford_motor_company__holdco,SUPPLIES,soft,us,Battery supply relationship varies by program
+e1002,us_ford_motor_company__sk_on__battery_,us_ford_motor_company__holdco,SUPPLIES,soft,us,Battery supply relationship varies by program
+e1003,us_ford_motor_company__samsung_sdi__battery_,us_ford_motor_company__holdco,SUPPLIES,soft,us,Battery supply relationship varies by program
+e1004,us_ford_motor_company__nvidia__semicond,us_ford_motor_company__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1005,us_ford_motor_company__qualcomm__semicond,us_ford_motor_company__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1006,us_ford_motor_company__nxp__semicond,us_ford_motor_company__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1007,us_ford_motor_company__renesas__semicond,us_ford_motor_company__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1008,us_ford_motor_company__infineon__semicond,us_ford_motor_company__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1009,us_ford_motor_company__stmicroelectronics__semicond,us_ford_motor_company__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1010,us_ford_motor_company__texas_instruments__semicond,us_ford_motor_company__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1011,us_ford_motor_company__intel__semicond,us_ford_motor_company__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1012,us_ford_motor_company__verizon__connecti,us_ford_motor_company__carrier,PARTNERS,soft,us,Carrier association varies
+e1013,us_ford_motor_company__at_t__connecti,us_ford_motor_company__carrier,PARTNERS,soft,us,Carrier association varies
+e1014,us_ford_motor_company__t_mobile__connecti,us_ford_motor_company__carrier,PARTNERS,soft,us,Carrier association varies
+e1015,us_ford_motor_company__aws__cloud_in,us_ford_motor_company__cloud,HOSTS,soft,us,Cloud vendor association varies
+e1016,us_ford_motor_company__microsoft_azure__cloud_in,us_ford_motor_company__cloud,HOSTS,soft,us,Cloud vendor association varies
+e1017,us_ford_motor_company__api,us_ford_motor_company__geico__external,POTENTIAL TELEMATICS PARTNER,soft,us,Insurance partnerships are market-specific
+e1018,us_ford_motor_company__api,us_ford_motor_company__progressive__external,POTENTIAL TELEMATICS PARTNER,soft,us,Insurance partnerships are market-specific
+e1019,us_ford_motor_company__api,us_ford_motor_company__state_farm__external,POTENTIAL TELEMATICS PARTNER,soft,us,Insurance partnerships are market-specific
+e1020,us_ford_motor_company__api,us_ford_motor_company__electrify_america__energy_c,INTEGRATES WITH,soft,us,Charging network integration varies
+e1021,us_ford_motor_company__api,us_ford_motor_company__chargepoint__energy_c,INTEGRATES WITH,soft,us,Charging network integration varies
+e1022,us_ford_motor_company__api,us_ford_motor_company__evgo__energy_c,INTEGRATES WITH,soft,us,Charging network integration varies
+e1023,us_tesla__bosch__tier_1_h,us_tesla__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e1024,us_tesla__continental__tier_1_h,us_tesla__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e1025,us_tesla__zf__tier_1_h,us_tesla__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e1026,us_tesla__valeo__tier_1_h,us_tesla__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e1027,us_tesla__forvia__tier_1_h,us_tesla__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e1028,us_tesla__aptiv__tier_1_h,us_tesla__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e1029,us_tesla__magna_international__tier_1_h,us_tesla__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e1030,us_tesla__lear_corporation__tier_1_h,us_tesla__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e1031,us_tesla__catl__battery_,us_tesla__holdco,SUPPLIES,soft,us,Battery supply relationship varies by program
+e1032,us_tesla__byd_battery__battery_,us_tesla__holdco,SUPPLIES,soft,us,Battery supply relationship varies by program
+e1033,us_tesla__lg_energy_solution__battery_,us_tesla__holdco,SUPPLIES,soft,us,Battery supply relationship varies by program
+e1034,us_tesla__sk_on__battery_,us_tesla__holdco,SUPPLIES,soft,us,Battery supply relationship varies by program
+e1035,us_tesla__samsung_sdi__battery_,us_tesla__holdco,SUPPLIES,soft,us,Battery supply relationship varies by program
+e1036,us_tesla__nvidia__semicond,us_tesla__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1037,us_tesla__qualcomm__semicond,us_tesla__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1038,us_tesla__nxp__semicond,us_tesla__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1039,us_tesla__renesas__semicond,us_tesla__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1040,us_tesla__infineon__semicond,us_tesla__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1041,us_tesla__stmicroelectronics__semicond,us_tesla__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1042,us_tesla__texas_instruments__semicond,us_tesla__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1043,us_tesla__intel__semicond,us_tesla__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1044,us_tesla__verizon__connecti,us_tesla__carrier,PARTNERS,soft,us,Carrier association varies
+e1045,us_tesla__at_t__connecti,us_tesla__carrier,PARTNERS,soft,us,Carrier association varies
+e1046,us_tesla__t_mobile__connecti,us_tesla__carrier,PARTNERS,soft,us,Carrier association varies
+e1047,us_tesla__aws__cloud_in,us_tesla__cloud,HOSTS,soft,us,Cloud vendor association varies
+e1048,us_tesla__microsoft_azure__cloud_in,us_tesla__cloud,HOSTS,soft,us,Cloud vendor association varies
+e1049,us_tesla__api,us_tesla__geico__external,POTENTIAL TELEMATICS PARTNER,soft,us,Insurance partnerships are market-specific
+e1050,us_tesla__api,us_tesla__progressive__external,POTENTIAL TELEMATICS PARTNER,soft,us,Insurance partnerships are market-specific
+e1051,us_tesla__api,us_tesla__state_farm__external,POTENTIAL TELEMATICS PARTNER,soft,us,Insurance partnerships are market-specific
+e1052,us_tesla__api,us_tesla__electrify_america__energy_c,INTEGRATES WITH,soft,us,Charging network integration varies
+e1053,us_tesla__api,us_tesla__chargepoint__energy_c,INTEGRATES WITH,soft,us,Charging network integration varies
+e1054,us_tesla__api,us_tesla__evgo__energy_c,INTEGRATES WITH,soft,us,Charging network integration varies
+e1055,us_rivian__bosch__tier_1_h,us_rivian__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e1056,us_rivian__continental__tier_1_h,us_rivian__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e1057,us_rivian__zf__tier_1_h,us_rivian__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e1058,us_rivian__valeo__tier_1_h,us_rivian__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e1059,us_rivian__forvia__tier_1_h,us_rivian__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e1060,us_rivian__aptiv__tier_1_h,us_rivian__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e1061,us_rivian__magna_international__tier_1_h,us_rivian__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e1062,us_rivian__lear_corporation__tier_1_h,us_rivian__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e1063,us_rivian__catl__battery_,us_rivian__holdco,SUPPLIES,soft,us,Battery supply relationship varies by program
+e1064,us_rivian__byd_battery__battery_,us_rivian__holdco,SUPPLIES,soft,us,Battery supply relationship varies by program
+e1065,us_rivian__lg_energy_solution__battery_,us_rivian__holdco,SUPPLIES,soft,us,Battery supply relationship varies by program
+e1066,us_rivian__sk_on__battery_,us_rivian__holdco,SUPPLIES,soft,us,Battery supply relationship varies by program
+e1067,us_rivian__samsung_sdi__battery_,us_rivian__holdco,SUPPLIES,soft,us,Battery supply relationship varies by program
+e1068,us_rivian__nvidia__semicond,us_rivian__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1069,us_rivian__qualcomm__semicond,us_rivian__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1070,us_rivian__nxp__semicond,us_rivian__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1071,us_rivian__renesas__semicond,us_rivian__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1072,us_rivian__infineon__semicond,us_rivian__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1073,us_rivian__stmicroelectronics__semicond,us_rivian__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1074,us_rivian__texas_instruments__semicond,us_rivian__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1075,us_rivian__intel__semicond,us_rivian__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1076,us_rivian__verizon__connecti,us_rivian__carrier,PARTNERS,soft,us,Carrier association varies
+e1077,us_rivian__at_t__connecti,us_rivian__carrier,PARTNERS,soft,us,Carrier association varies
+e1078,us_rivian__t_mobile__connecti,us_rivian__carrier,PARTNERS,soft,us,Carrier association varies
+e1079,us_rivian__aws__cloud_in,us_rivian__cloud,HOSTS,soft,us,Cloud vendor association varies
+e1080,us_rivian__microsoft_azure__cloud_in,us_rivian__cloud,HOSTS,soft,us,Cloud vendor association varies
+e1081,us_rivian__api,us_rivian__geico__external,POTENTIAL TELEMATICS PARTNER,soft,us,Insurance partnerships are market-specific
+e1082,us_rivian__api,us_rivian__progressive__external,POTENTIAL TELEMATICS PARTNER,soft,us,Insurance partnerships are market-specific
+e1083,us_rivian__api,us_rivian__state_farm__external,POTENTIAL TELEMATICS PARTNER,soft,us,Insurance partnerships are market-specific
+e1084,us_rivian__api,us_rivian__electrify_america__energy_c,INTEGRATES WITH,soft,us,Charging network integration varies
+e1085,us_rivian__api,us_rivian__chargepoint__energy_c,INTEGRATES WITH,soft,us,Charging network integration varies
+e1086,us_rivian__api,us_rivian__evgo__energy_c,INTEGRATES WITH,soft,us,Charging network integration varies
+e1087,us_lucid_motors__bosch__tier_1_h,us_lucid_motors__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e1088,us_lucid_motors__continental__tier_1_h,us_lucid_motors__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e1089,us_lucid_motors__zf__tier_1_h,us_lucid_motors__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e1090,us_lucid_motors__valeo__tier_1_h,us_lucid_motors__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e1091,us_lucid_motors__forvia__tier_1_h,us_lucid_motors__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e1092,us_lucid_motors__aptiv__tier_1_h,us_lucid_motors__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e1093,us_lucid_motors__magna_international__tier_1_h,us_lucid_motors__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e1094,us_lucid_motors__lear_corporation__tier_1_h,us_lucid_motors__tcu,SUPPLIES,soft,us,Illustrative Tier-1 ↔ telematics link
+e1095,us_lucid_motors__catl__battery_,us_lucid_motors__holdco,SUPPLIES,soft,us,Battery supply relationship varies by program
+e1096,us_lucid_motors__byd_battery__battery_,us_lucid_motors__holdco,SUPPLIES,soft,us,Battery supply relationship varies by program
+e1097,us_lucid_motors__lg_energy_solution__battery_,us_lucid_motors__holdco,SUPPLIES,soft,us,Battery supply relationship varies by program
+e1098,us_lucid_motors__sk_on__battery_,us_lucid_motors__holdco,SUPPLIES,soft,us,Battery supply relationship varies by program
+e1099,us_lucid_motors__samsung_sdi__battery_,us_lucid_motors__holdco,SUPPLIES,soft,us,Battery supply relationship varies by program
+e1100,us_lucid_motors__nvidia__semicond,us_lucid_motors__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1101,us_lucid_motors__qualcomm__semicond,us_lucid_motors__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1102,us_lucid_motors__nxp__semicond,us_lucid_motors__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1103,us_lucid_motors__renesas__semicond,us_lucid_motors__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1104,us_lucid_motors__infineon__semicond,us_lucid_motors__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1105,us_lucid_motors__stmicroelectronics__semicond,us_lucid_motors__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1106,us_lucid_motors__texas_instruments__semicond,us_lucid_motors__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1107,us_lucid_motors__intel__semicond,us_lucid_motors__os,SUPPLIES,soft,us,Compute/SoC ↔ OS platform dependence
+e1108,us_lucid_motors__verizon__connecti,us_lucid_motors__carrier,PARTNERS,soft,us,Carrier association varies
+e1109,us_lucid_motors__at_t__connecti,us_lucid_motors__carrier,PARTNERS,soft,us,Carrier association varies
+e1110,us_lucid_motors__t_mobile__connecti,us_lucid_motors__carrier,PARTNERS,soft,us,Carrier association varies
+e1111,us_lucid_motors__aws__cloud_in,us_lucid_motors__cloud,HOSTS,soft,us,Cloud vendor association varies
+e1112,us_lucid_motors__microsoft_azure__cloud_in,us_lucid_motors__cloud,HOSTS,soft,us,Cloud vendor association varies
+e1113,us_lucid_motors__api,us_lucid_motors__geico__external,POTENTIAL TELEMATICS PARTNER,soft,us,Insurance partnerships are market-specific
+e1114,us_lucid_motors__api,us_lucid_motors__progressive__external,POTENTIAL TELEMATICS PARTNER,soft,us,Insurance partnerships are market-specific
+e1115,us_lucid_motors__api,us_lucid_motors__state_farm__external,POTENTIAL TELEMATICS PARTNER,soft,us,Insurance partnerships are market-specific
+e1116,us_lucid_motors__api,us_lucid_motors__electrify_america__energy_c,INTEGRATES WITH,soft,us,Charging network integration varies
+e1117,us_lucid_motors__api,us_lucid_motors__chargepoint__energy_c,INTEGRATES WITH,soft,us,Charging network integration varies
+e1118,us_lucid_motors__api,us_lucid_motors__evgo__energy_c,INTEGRATES WITH,soft,us,Charging network integration varies
+e1119,korea_hyundai_motor_group__bosch__tier_1_h,korea_hyundai_motor_group__tcu,SUPPLIES,soft,korea,Illustrative Tier-1 ↔ telematics link
+e1120,korea_hyundai_motor_group__continental__tier_1_h,korea_hyundai_motor_group__tcu,SUPPLIES,soft,korea,Illustrative Tier-1 ↔ telematics link
+e1121,korea_hyundai_motor_group__zf__tier_1_h,korea_hyundai_motor_group__tcu,SUPPLIES,soft,korea,Illustrative Tier-1 ↔ telematics link
+e1122,korea_hyundai_motor_group__valeo__tier_1_h,korea_hyundai_motor_group__tcu,SUPPLIES,soft,korea,Illustrative Tier-1 ↔ telematics link
+e1123,korea_hyundai_motor_group__forvia__tier_1_h,korea_hyundai_motor_group__tcu,SUPPLIES,soft,korea,Illustrative Tier-1 ↔ telematics link
+e1124,korea_hyundai_motor_group__aptiv__tier_1_h,korea_hyundai_motor_group__tcu,SUPPLIES,soft,korea,Illustrative Tier-1 ↔ telematics link
+e1125,korea_hyundai_motor_group__magna_international__tier_1_h,korea_hyundai_motor_group__tcu,SUPPLIES,soft,korea,Illustrative Tier-1 ↔ telematics link
+e1126,korea_hyundai_motor_group__lear_corporation__tier_1_h,korea_hyundai_motor_group__tcu,SUPPLIES,soft,korea,Illustrative Tier-1 ↔ telematics link
+e1127,korea_hyundai_motor_group__catl__battery_,korea_hyundai_motor_group__holdco,SUPPLIES,soft,korea,Battery supply relationship varies by program
+e1128,korea_hyundai_motor_group__byd_battery__battery_,korea_hyundai_motor_group__holdco,SUPPLIES,soft,korea,Battery supply relationship varies by program
+e1129,korea_hyundai_motor_group__lg_energy_solution__battery_,korea_hyundai_motor_group__holdco,SUPPLIES,soft,korea,Battery supply relationship varies by program
+e1130,korea_hyundai_motor_group__sk_on__battery_,korea_hyundai_motor_group__holdco,SUPPLIES,soft,korea,Battery supply relationship varies by program
+e1131,korea_hyundai_motor_group__samsung_sdi__battery_,korea_hyundai_motor_group__holdco,SUPPLIES,soft,korea,Battery supply relationship varies by program
+e1132,korea_hyundai_motor_group__nvidia__semicond,korea_hyundai_motor_group__os,SUPPLIES,soft,korea,Compute/SoC ↔ OS platform dependence
+e1133,korea_hyundai_motor_group__qualcomm__semicond,korea_hyundai_motor_group__os,SUPPLIES,soft,korea,Compute/SoC ↔ OS platform dependence
+e1134,korea_hyundai_motor_group__nxp__semicond,korea_hyundai_motor_group__os,SUPPLIES,soft,korea,Compute/SoC ↔ OS platform dependence
+e1135,korea_hyundai_motor_group__renesas__semicond,korea_hyundai_motor_group__os,SUPPLIES,soft,korea,Compute/SoC ↔ OS platform dependence
+e1136,korea_hyundai_motor_group__infineon__semicond,korea_hyundai_motor_group__os,SUPPLIES,soft,korea,Compute/SoC ↔ OS platform dependence
+e1137,korea_hyundai_motor_group__stmicroelectronics__semicond,korea_hyundai_motor_group__os,SUPPLIES,soft,korea,Compute/SoC ↔ OS platform dependence
+e1138,korea_hyundai_motor_group__texas_instruments__semicond,korea_hyundai_motor_group__os,SUPPLIES,soft,korea,Compute/SoC ↔ OS platform dependence
+e1139,korea_hyundai_motor_group__intel__semicond,korea_hyundai_motor_group__os,SUPPLIES,soft,korea,Compute/SoC ↔ OS platform dependence
+e1140,korea_hyundai_motor_group__sk_telecom__connecti,korea_hyundai_motor_group__carrier,PARTNERS,soft,korea,Carrier association varies
+e1141,korea_hyundai_motor_group__kt__connecti,korea_hyundai_motor_group__carrier,PARTNERS,soft,korea,Carrier association varies
+e1142,korea_hyundai_motor_group__lg_u__connecti,korea_hyundai_motor_group__carrier,PARTNERS,soft,korea,Carrier association varies
+e1143,korea_hyundai_motor_group__aws__cloud_in,korea_hyundai_motor_group__cloud,HOSTS,soft,korea,Cloud vendor association varies
+e1144,korea_hyundai_motor_group__microsoft_azure__cloud_in,korea_hyundai_motor_group__cloud,HOSTS,soft,korea,Cloud vendor association varies
+e1145,korea_hyundai_motor_group__api,korea_hyundai_motor_group__samsung_fire_marine__external,POTENTIAL TELEMATICS PARTNER,soft,korea,Insurance partnerships are market-specific
+e1146,korea_hyundai_motor_group__api,korea_hyundai_motor_group__hyundai_marine_fire_insurance__external,POTENTIAL TELEMATICS PARTNER,soft,korea,Insurance partnerships are market-specific
+e1147,korea_hyundai_motor_group__api,korea_hyundai_motor_group__hyundai_e_pit__energy_c,INTEGRATES WITH,soft,korea,Charging network integration varies
+e1148,korea_hyundai_motor_group__api,korea_hyundai_motor_group__korea_ev_charging_kevcs__energy_c,INTEGRATES WITH,soft,korea,Charging network integration varies
+e1149,japan_toyota_motor_corporation__bosch__tier_1_h,japan_toyota_motor_corporation__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1150,japan_toyota_motor_corporation__continental__tier_1_h,japan_toyota_motor_corporation__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1151,japan_toyota_motor_corporation__zf__tier_1_h,japan_toyota_motor_corporation__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1152,japan_toyota_motor_corporation__valeo__tier_1_h,japan_toyota_motor_corporation__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1153,japan_toyota_motor_corporation__forvia__tier_1_h,japan_toyota_motor_corporation__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1154,japan_toyota_motor_corporation__aptiv__tier_1_h,japan_toyota_motor_corporation__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1155,japan_toyota_motor_corporation__magna_international__tier_1_h,japan_toyota_motor_corporation__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1156,japan_toyota_motor_corporation__lear_corporation__tier_1_h,japan_toyota_motor_corporation__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1157,japan_toyota_motor_corporation__catl__battery_,japan_toyota_motor_corporation__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1158,japan_toyota_motor_corporation__byd_battery__battery_,japan_toyota_motor_corporation__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1159,japan_toyota_motor_corporation__lg_energy_solution__battery_,japan_toyota_motor_corporation__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1160,japan_toyota_motor_corporation__sk_on__battery_,japan_toyota_motor_corporation__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1161,japan_toyota_motor_corporation__samsung_sdi__battery_,japan_toyota_motor_corporation__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1162,japan_toyota_motor_corporation__nvidia__semicond,japan_toyota_motor_corporation__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1163,japan_toyota_motor_corporation__qualcomm__semicond,japan_toyota_motor_corporation__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1164,japan_toyota_motor_corporation__nxp__semicond,japan_toyota_motor_corporation__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1165,japan_toyota_motor_corporation__renesas__semicond,japan_toyota_motor_corporation__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1166,japan_toyota_motor_corporation__infineon__semicond,japan_toyota_motor_corporation__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1167,japan_toyota_motor_corporation__stmicroelectronics__semicond,japan_toyota_motor_corporation__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1168,japan_toyota_motor_corporation__texas_instruments__semicond,japan_toyota_motor_corporation__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1169,japan_toyota_motor_corporation__intel__semicond,japan_toyota_motor_corporation__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1170,japan_toyota_motor_corporation__ntt_docomo__connecti,japan_toyota_motor_corporation__carrier,PARTNERS,soft,japan,Carrier association varies
+e1171,japan_toyota_motor_corporation__kddi__connecti,japan_toyota_motor_corporation__carrier,PARTNERS,soft,japan,Carrier association varies
+e1172,japan_toyota_motor_corporation__softbank__connecti,japan_toyota_motor_corporation__carrier,PARTNERS,soft,japan,Carrier association varies
+e1173,japan_toyota_motor_corporation__aws__cloud_in,japan_toyota_motor_corporation__cloud,HOSTS,soft,japan,Cloud vendor association varies
+e1174,japan_toyota_motor_corporation__microsoft_azure__cloud_in,japan_toyota_motor_corporation__cloud,HOSTS,soft,japan,Cloud vendor association varies
+e1175,japan_toyota_motor_corporation__api,japan_toyota_motor_corporation__tokio_marine__external,POTENTIAL TELEMATICS PARTNER,soft,japan,Insurance partnerships are market-specific
+e1176,japan_toyota_motor_corporation__api,japan_toyota_motor_corporation__sompo__external,POTENTIAL TELEMATICS PARTNER,soft,japan,Insurance partnerships are market-specific
+e1177,japan_toyota_motor_corporation__api,japan_toyota_motor_corporation__ms_ad__external,POTENTIAL TELEMATICS PARTNER,soft,japan,Insurance partnerships are market-specific
+e1178,japan_toyota_motor_corporation__api,japan_toyota_motor_corporation__e_mobility_power__energy_c,INTEGRATES WITH,soft,japan,Charging network integration varies
+e1179,japan_toyota_motor_corporation__api,japan_toyota_motor_corporation__tepco_energy__energy_c,INTEGRATES WITH,soft,japan,Charging network integration varies
+e1180,japan_honda_motor_co_ltd__bosch__tier_1_h,japan_honda_motor_co_ltd__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1181,japan_honda_motor_co_ltd__continental__tier_1_h,japan_honda_motor_co_ltd__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1182,japan_honda_motor_co_ltd__zf__tier_1_h,japan_honda_motor_co_ltd__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1183,japan_honda_motor_co_ltd__valeo__tier_1_h,japan_honda_motor_co_ltd__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1184,japan_honda_motor_co_ltd__forvia__tier_1_h,japan_honda_motor_co_ltd__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1185,japan_honda_motor_co_ltd__aptiv__tier_1_h,japan_honda_motor_co_ltd__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1186,japan_honda_motor_co_ltd__magna_international__tier_1_h,japan_honda_motor_co_ltd__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1187,japan_honda_motor_co_ltd__lear_corporation__tier_1_h,japan_honda_motor_co_ltd__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1188,japan_honda_motor_co_ltd__catl__battery_,japan_honda_motor_co_ltd__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1189,japan_honda_motor_co_ltd__byd_battery__battery_,japan_honda_motor_co_ltd__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1190,japan_honda_motor_co_ltd__lg_energy_solution__battery_,japan_honda_motor_co_ltd__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1191,japan_honda_motor_co_ltd__sk_on__battery_,japan_honda_motor_co_ltd__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1192,japan_honda_motor_co_ltd__samsung_sdi__battery_,japan_honda_motor_co_ltd__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1193,japan_honda_motor_co_ltd__nvidia__semicond,japan_honda_motor_co_ltd__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1194,japan_honda_motor_co_ltd__qualcomm__semicond,japan_honda_motor_co_ltd__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1195,japan_honda_motor_co_ltd__nxp__semicond,japan_honda_motor_co_ltd__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1196,japan_honda_motor_co_ltd__renesas__semicond,japan_honda_motor_co_ltd__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1197,japan_honda_motor_co_ltd__infineon__semicond,japan_honda_motor_co_ltd__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1198,japan_honda_motor_co_ltd__stmicroelectronics__semicond,japan_honda_motor_co_ltd__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1199,japan_honda_motor_co_ltd__texas_instruments__semicond,japan_honda_motor_co_ltd__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1200,japan_honda_motor_co_ltd__intel__semicond,japan_honda_motor_co_ltd__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1201,japan_honda_motor_co_ltd__ntt_docomo__connecti,japan_honda_motor_co_ltd__carrier,PARTNERS,soft,japan,Carrier association varies
+e1202,japan_honda_motor_co_ltd__kddi__connecti,japan_honda_motor_co_ltd__carrier,PARTNERS,soft,japan,Carrier association varies
+e1203,japan_honda_motor_co_ltd__softbank__connecti,japan_honda_motor_co_ltd__carrier,PARTNERS,soft,japan,Carrier association varies
+e1204,japan_honda_motor_co_ltd__aws__cloud_in,japan_honda_motor_co_ltd__cloud,HOSTS,soft,japan,Cloud vendor association varies
+e1205,japan_honda_motor_co_ltd__microsoft_azure__cloud_in,japan_honda_motor_co_ltd__cloud,HOSTS,soft,japan,Cloud vendor association varies
+e1206,japan_honda_motor_co_ltd__api,japan_honda_motor_co_ltd__tokio_marine__external,POTENTIAL TELEMATICS PARTNER,soft,japan,Insurance partnerships are market-specific
+e1207,japan_honda_motor_co_ltd__api,japan_honda_motor_co_ltd__sompo__external,POTENTIAL TELEMATICS PARTNER,soft,japan,Insurance partnerships are market-specific
+e1208,japan_honda_motor_co_ltd__api,japan_honda_motor_co_ltd__ms_ad__external,POTENTIAL TELEMATICS PARTNER,soft,japan,Insurance partnerships are market-specific
+e1209,japan_honda_motor_co_ltd__api,japan_honda_motor_co_ltd__e_mobility_power__energy_c,INTEGRATES WITH,soft,japan,Charging network integration varies
+e1210,japan_honda_motor_co_ltd__api,japan_honda_motor_co_ltd__tepco_energy__energy_c,INTEGRATES WITH,soft,japan,Charging network integration varies
+e1211,japan_nissan_motor_co_ltd__bosch__tier_1_h,japan_nissan_motor_co_ltd__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1212,japan_nissan_motor_co_ltd__continental__tier_1_h,japan_nissan_motor_co_ltd__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1213,japan_nissan_motor_co_ltd__zf__tier_1_h,japan_nissan_motor_co_ltd__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1214,japan_nissan_motor_co_ltd__valeo__tier_1_h,japan_nissan_motor_co_ltd__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1215,japan_nissan_motor_co_ltd__forvia__tier_1_h,japan_nissan_motor_co_ltd__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1216,japan_nissan_motor_co_ltd__aptiv__tier_1_h,japan_nissan_motor_co_ltd__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1217,japan_nissan_motor_co_ltd__magna_international__tier_1_h,japan_nissan_motor_co_ltd__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1218,japan_nissan_motor_co_ltd__lear_corporation__tier_1_h,japan_nissan_motor_co_ltd__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1219,japan_nissan_motor_co_ltd__catl__battery_,japan_nissan_motor_co_ltd__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1220,japan_nissan_motor_co_ltd__byd_battery__battery_,japan_nissan_motor_co_ltd__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1221,japan_nissan_motor_co_ltd__lg_energy_solution__battery_,japan_nissan_motor_co_ltd__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1222,japan_nissan_motor_co_ltd__sk_on__battery_,japan_nissan_motor_co_ltd__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1223,japan_nissan_motor_co_ltd__samsung_sdi__battery_,japan_nissan_motor_co_ltd__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1224,japan_nissan_motor_co_ltd__nvidia__semicond,japan_nissan_motor_co_ltd__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1225,japan_nissan_motor_co_ltd__qualcomm__semicond,japan_nissan_motor_co_ltd__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1226,japan_nissan_motor_co_ltd__nxp__semicond,japan_nissan_motor_co_ltd__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1227,japan_nissan_motor_co_ltd__renesas__semicond,japan_nissan_motor_co_ltd__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1228,japan_nissan_motor_co_ltd__infineon__semicond,japan_nissan_motor_co_ltd__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1229,japan_nissan_motor_co_ltd__stmicroelectronics__semicond,japan_nissan_motor_co_ltd__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1230,japan_nissan_motor_co_ltd__texas_instruments__semicond,japan_nissan_motor_co_ltd__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1231,japan_nissan_motor_co_ltd__intel__semicond,japan_nissan_motor_co_ltd__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1232,japan_nissan_motor_co_ltd__ntt_docomo__connecti,japan_nissan_motor_co_ltd__carrier,PARTNERS,soft,japan,Carrier association varies
+e1233,japan_nissan_motor_co_ltd__kddi__connecti,japan_nissan_motor_co_ltd__carrier,PARTNERS,soft,japan,Carrier association varies
+e1234,japan_nissan_motor_co_ltd__softbank__connecti,japan_nissan_motor_co_ltd__carrier,PARTNERS,soft,japan,Carrier association varies
+e1235,japan_nissan_motor_co_ltd__aws__cloud_in,japan_nissan_motor_co_ltd__cloud,HOSTS,soft,japan,Cloud vendor association varies
+e1236,japan_nissan_motor_co_ltd__microsoft_azure__cloud_in,japan_nissan_motor_co_ltd__cloud,HOSTS,soft,japan,Cloud vendor association varies
+e1237,japan_nissan_motor_co_ltd__api,japan_nissan_motor_co_ltd__tokio_marine__external,POTENTIAL TELEMATICS PARTNER,soft,japan,Insurance partnerships are market-specific
+e1238,japan_nissan_motor_co_ltd__api,japan_nissan_motor_co_ltd__sompo__external,POTENTIAL TELEMATICS PARTNER,soft,japan,Insurance partnerships are market-specific
+e1239,japan_nissan_motor_co_ltd__api,japan_nissan_motor_co_ltd__ms_ad__external,POTENTIAL TELEMATICS PARTNER,soft,japan,Insurance partnerships are market-specific
+e1240,japan_nissan_motor_co_ltd__api,japan_nissan_motor_co_ltd__e_mobility_power__energy_c,INTEGRATES WITH,soft,japan,Charging network integration varies
+e1241,japan_nissan_motor_co_ltd__api,japan_nissan_motor_co_ltd__tepco_energy__energy_c,INTEGRATES WITH,soft,japan,Charging network integration varies
+e1242,japan_mazda_motor_corporation__bosch__tier_1_h,japan_mazda_motor_corporation__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1243,japan_mazda_motor_corporation__continental__tier_1_h,japan_mazda_motor_corporation__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1244,japan_mazda_motor_corporation__zf__tier_1_h,japan_mazda_motor_corporation__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1245,japan_mazda_motor_corporation__valeo__tier_1_h,japan_mazda_motor_corporation__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1246,japan_mazda_motor_corporation__forvia__tier_1_h,japan_mazda_motor_corporation__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1247,japan_mazda_motor_corporation__aptiv__tier_1_h,japan_mazda_motor_corporation__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1248,japan_mazda_motor_corporation__magna_international__tier_1_h,japan_mazda_motor_corporation__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1249,japan_mazda_motor_corporation__lear_corporation__tier_1_h,japan_mazda_motor_corporation__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1250,japan_mazda_motor_corporation__catl__battery_,japan_mazda_motor_corporation__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1251,japan_mazda_motor_corporation__byd_battery__battery_,japan_mazda_motor_corporation__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1252,japan_mazda_motor_corporation__lg_energy_solution__battery_,japan_mazda_motor_corporation__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1253,japan_mazda_motor_corporation__sk_on__battery_,japan_mazda_motor_corporation__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1254,japan_mazda_motor_corporation__samsung_sdi__battery_,japan_mazda_motor_corporation__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1255,japan_mazda_motor_corporation__nvidia__semicond,japan_mazda_motor_corporation__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1256,japan_mazda_motor_corporation__qualcomm__semicond,japan_mazda_motor_corporation__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1257,japan_mazda_motor_corporation__nxp__semicond,japan_mazda_motor_corporation__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1258,japan_mazda_motor_corporation__renesas__semicond,japan_mazda_motor_corporation__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1259,japan_mazda_motor_corporation__infineon__semicond,japan_mazda_motor_corporation__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1260,japan_mazda_motor_corporation__stmicroelectronics__semicond,japan_mazda_motor_corporation__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1261,japan_mazda_motor_corporation__texas_instruments__semicond,japan_mazda_motor_corporation__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1262,japan_mazda_motor_corporation__intel__semicond,japan_mazda_motor_corporation__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1263,japan_mazda_motor_corporation__ntt_docomo__connecti,japan_mazda_motor_corporation__carrier,PARTNERS,soft,japan,Carrier association varies
+e1264,japan_mazda_motor_corporation__kddi__connecti,japan_mazda_motor_corporation__carrier,PARTNERS,soft,japan,Carrier association varies
+e1265,japan_mazda_motor_corporation__softbank__connecti,japan_mazda_motor_corporation__carrier,PARTNERS,soft,japan,Carrier association varies
+e1266,japan_mazda_motor_corporation__aws__cloud_in,japan_mazda_motor_corporation__cloud,HOSTS,soft,japan,Cloud vendor association varies
+e1267,japan_mazda_motor_corporation__microsoft_azure__cloud_in,japan_mazda_motor_corporation__cloud,HOSTS,soft,japan,Cloud vendor association varies
+e1268,japan_mazda_motor_corporation__api,japan_mazda_motor_corporation__tokio_marine__external,POTENTIAL TELEMATICS PARTNER,soft,japan,Insurance partnerships are market-specific
+e1269,japan_mazda_motor_corporation__api,japan_mazda_motor_corporation__sompo__external,POTENTIAL TELEMATICS PARTNER,soft,japan,Insurance partnerships are market-specific
+e1270,japan_mazda_motor_corporation__api,japan_mazda_motor_corporation__ms_ad__external,POTENTIAL TELEMATICS PARTNER,soft,japan,Insurance partnerships are market-specific
+e1271,japan_mazda_motor_corporation__api,japan_mazda_motor_corporation__e_mobility_power__energy_c,INTEGRATES WITH,soft,japan,Charging network integration varies
+e1272,japan_mazda_motor_corporation__api,japan_mazda_motor_corporation__tepco_energy__energy_c,INTEGRATES WITH,soft,japan,Charging network integration varies
+e1273,japan_subaru_corporation__bosch__tier_1_h,japan_subaru_corporation__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1274,japan_subaru_corporation__continental__tier_1_h,japan_subaru_corporation__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1275,japan_subaru_corporation__zf__tier_1_h,japan_subaru_corporation__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1276,japan_subaru_corporation__valeo__tier_1_h,japan_subaru_corporation__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1277,japan_subaru_corporation__forvia__tier_1_h,japan_subaru_corporation__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1278,japan_subaru_corporation__aptiv__tier_1_h,japan_subaru_corporation__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1279,japan_subaru_corporation__magna_international__tier_1_h,japan_subaru_corporation__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1280,japan_subaru_corporation__lear_corporation__tier_1_h,japan_subaru_corporation__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1281,japan_subaru_corporation__catl__battery_,japan_subaru_corporation__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1282,japan_subaru_corporation__byd_battery__battery_,japan_subaru_corporation__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1283,japan_subaru_corporation__lg_energy_solution__battery_,japan_subaru_corporation__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1284,japan_subaru_corporation__sk_on__battery_,japan_subaru_corporation__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1285,japan_subaru_corporation__samsung_sdi__battery_,japan_subaru_corporation__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1286,japan_subaru_corporation__nvidia__semicond,japan_subaru_corporation__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1287,japan_subaru_corporation__qualcomm__semicond,japan_subaru_corporation__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1288,japan_subaru_corporation__nxp__semicond,japan_subaru_corporation__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1289,japan_subaru_corporation__renesas__semicond,japan_subaru_corporation__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1290,japan_subaru_corporation__infineon__semicond,japan_subaru_corporation__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1291,japan_subaru_corporation__stmicroelectronics__semicond,japan_subaru_corporation__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1292,japan_subaru_corporation__texas_instruments__semicond,japan_subaru_corporation__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1293,japan_subaru_corporation__intel__semicond,japan_subaru_corporation__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1294,japan_subaru_corporation__ntt_docomo__connecti,japan_subaru_corporation__carrier,PARTNERS,soft,japan,Carrier association varies
+e1295,japan_subaru_corporation__kddi__connecti,japan_subaru_corporation__carrier,PARTNERS,soft,japan,Carrier association varies
+e1296,japan_subaru_corporation__softbank__connecti,japan_subaru_corporation__carrier,PARTNERS,soft,japan,Carrier association varies
+e1297,japan_subaru_corporation__aws__cloud_in,japan_subaru_corporation__cloud,HOSTS,soft,japan,Cloud vendor association varies
+e1298,japan_subaru_corporation__microsoft_azure__cloud_in,japan_subaru_corporation__cloud,HOSTS,soft,japan,Cloud vendor association varies
+e1299,japan_subaru_corporation__api,japan_subaru_corporation__tokio_marine__external,POTENTIAL TELEMATICS PARTNER,soft,japan,Insurance partnerships are market-specific
+e1300,japan_subaru_corporation__api,japan_subaru_corporation__sompo__external,POTENTIAL TELEMATICS PARTNER,soft,japan,Insurance partnerships are market-specific
+e1301,japan_subaru_corporation__api,japan_subaru_corporation__ms_ad__external,POTENTIAL TELEMATICS PARTNER,soft,japan,Insurance partnerships are market-specific
+e1302,japan_subaru_corporation__api,japan_subaru_corporation__e_mobility_power__energy_c,INTEGRATES WITH,soft,japan,Charging network integration varies
+e1303,japan_subaru_corporation__api,japan_subaru_corporation__tepco_energy__energy_c,INTEGRATES WITH,soft,japan,Charging network integration varies
+e1304,japan_mitsubishi_motors__bosch__tier_1_h,japan_mitsubishi_motors__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1305,japan_mitsubishi_motors__continental__tier_1_h,japan_mitsubishi_motors__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1306,japan_mitsubishi_motors__zf__tier_1_h,japan_mitsubishi_motors__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1307,japan_mitsubishi_motors__valeo__tier_1_h,japan_mitsubishi_motors__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1308,japan_mitsubishi_motors__forvia__tier_1_h,japan_mitsubishi_motors__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1309,japan_mitsubishi_motors__aptiv__tier_1_h,japan_mitsubishi_motors__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1310,japan_mitsubishi_motors__magna_international__tier_1_h,japan_mitsubishi_motors__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1311,japan_mitsubishi_motors__lear_corporation__tier_1_h,japan_mitsubishi_motors__tcu,SUPPLIES,soft,japan,Illustrative Tier-1 ↔ telematics link
+e1312,japan_mitsubishi_motors__catl__battery_,japan_mitsubishi_motors__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1313,japan_mitsubishi_motors__byd_battery__battery_,japan_mitsubishi_motors__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1314,japan_mitsubishi_motors__lg_energy_solution__battery_,japan_mitsubishi_motors__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1315,japan_mitsubishi_motors__sk_on__battery_,japan_mitsubishi_motors__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1316,japan_mitsubishi_motors__samsung_sdi__battery_,japan_mitsubishi_motors__holdco,SUPPLIES,soft,japan,Battery supply relationship varies by program
+e1317,japan_mitsubishi_motors__nvidia__semicond,japan_mitsubishi_motors__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1318,japan_mitsubishi_motors__qualcomm__semicond,japan_mitsubishi_motors__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1319,japan_mitsubishi_motors__nxp__semicond,japan_mitsubishi_motors__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1320,japan_mitsubishi_motors__renesas__semicond,japan_mitsubishi_motors__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1321,japan_mitsubishi_motors__infineon__semicond,japan_mitsubishi_motors__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1322,japan_mitsubishi_motors__stmicroelectronics__semicond,japan_mitsubishi_motors__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1323,japan_mitsubishi_motors__texas_instruments__semicond,japan_mitsubishi_motors__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1324,japan_mitsubishi_motors__intel__semicond,japan_mitsubishi_motors__os,SUPPLIES,soft,japan,Compute/SoC ↔ OS platform dependence
+e1325,japan_mitsubishi_motors__ntt_docomo__connecti,japan_mitsubishi_motors__carrier,PARTNERS,soft,japan,Carrier association varies
+e1326,japan_mitsubishi_motors__kddi__connecti,japan_mitsubishi_motors__carrier,PARTNERS,soft,japan,Carrier association varies
+e1327,japan_mitsubishi_motors__softbank__connecti,japan_mitsubishi_motors__carrier,PARTNERS,soft,japan,Carrier association varies
+e1328,japan_mitsubishi_motors__aws__cloud_in,japan_mitsubishi_motors__cloud,HOSTS,soft,japan,Cloud vendor association varies
+e1329,japan_mitsubishi_motors__microsoft_azure__cloud_in,japan_mitsubishi_motors__cloud,HOSTS,soft,japan,Cloud vendor association varies
+e1330,japan_mitsubishi_motors__api,japan_mitsubishi_motors__tokio_marine__external,POTENTIAL TELEMATICS PARTNER,soft,japan,Insurance partnerships are market-specific
+e1331,japan_mitsubishi_motors__api,japan_mitsubishi_motors__sompo__external,POTENTIAL TELEMATICS PARTNER,soft,japan,Insurance partnerships are market-specific
+e1332,japan_mitsubishi_motors__api,japan_mitsubishi_motors__ms_ad__external,POTENTIAL TELEMATICS PARTNER,soft,japan,Insurance partnerships are market-specific
+e1333,japan_mitsubishi_motors__api,japan_mitsubishi_motors__e_mobility_power__energy_c,INTEGRATES WITH,soft,japan,Charging network integration varies
+e1334,japan_mitsubishi_motors__api,japan_mitsubishi_motors__tepco_energy__energy_c,INTEGRATES WITH,soft,japan,Charging network integration varies
