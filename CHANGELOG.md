@@ -10,10 +10,10 @@
 - README + footer branding
 - Provenance/citation fields
 
-## v4.0 (Phase 7)
+## v4.0 (Phase 7-8)
 - Provenance IDs + citation discipline
 
-## v3.0 (Phase 5)
+## v3.0 (Phase 5-6)
 - Evidence fields (ASSUMED/REFERENCED/VERIFIED)
 
 ## v2.0 (Phase 3–4)
