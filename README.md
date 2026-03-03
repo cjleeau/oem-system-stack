@@ -1,6 +1,6 @@
 # Global OEM System Stack – D3 Intelligence Model
 
-- Version: v5.0 (Phase 9)
+- Version: v5.0 (Phase 10)
 - Created: 2026-03-03
 
 ## Overview
@@ -26,6 +26,16 @@ This project models the global automotive OEM digital ecosystem using a layered 
 - REFERENCED
 - VERIFIED
 
+## Evidence logic
+Edge is treated as verified if:
+- `evidence_status == VERIFIED` OR
+- `verified_edge == true` OR
+- `source_url` is present
+
+In Evidence Only mode:
+- Only verified edges remain
+- Only nodes connected to verified edges remain
+
 ## Verification Priority
 - P1 – Regulatory backbone
 - P2 – Tier 1 integrations
@@ -41,3 +51,4 @@ This project models the global automotive OEM digital ecosystem using a layered 
 - v3.0 – Evidence fields
 - v4.0 – Cross-border modelling
 - v5.0 – Provenance + documentation + branding
+- v6.0 - UX hardening and governance ergonomics
