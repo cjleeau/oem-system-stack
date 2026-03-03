@@ -19,5 +19,5 @@
 ## v2.0 (Phase 3–4)
 - Multi-tier and multi-region expansion
 
-## v1.0 (Phase 1)
+## v1.0 (Phase 1-2)
 - EU spine initial visualisation
