@@ -1,5 +1,6 @@
 // Global OEM System Stack — D3 (Grid + Network) — CSV-driven
-// Phase 10 — UX hardening: reset fix, dependent dropdown disabling, greyed-out empty fields
+// Phase 12 — Governance Dashboard View (tables + mini charts)
+// Includes: Grid (default), Network, Governance tabs; Reset fix; dependent dropdown disabling; greyed-out empty fields
 
 const LAYERS = [
   "Ownership & Brand Stack",
@@ -33,7 +34,7 @@ const vizEl = d3.select("#viz");
 const tooltip = d3.select("#tooltip");
 
 const state = {
-  view: "grid",
+  view: "grid", // grid | network | governance
   region: "all",
   oem: "all",
   layer: "all",
@@ -114,7 +115,7 @@ function restrictNodesToEdges(nodes, edges) {
   return nodes.filter(n => keep.has(n.id));
 }
 
-// ---------- Controls: dependent disabling ----------
+// ---------- Dependent dropdown disabling ----------
 
 function setOptionsWithDisable(selectEl, values, isEnabledFn) {
   const current = selectEl.value || "all";
@@ -187,13 +188,18 @@ function fieldRow(label, value) {
 function evidenceBlock(d){
   const rows = [
     fieldRow("Evidence status", d.evidence_status),
+    fieldRow("Evidence class", d.evidence_class),
+    fieldRow("Verification level", d.verification_level),
+    fieldRow("Verification status", d.verification_status),
     fieldRow("Source", d.source_name),
     fieldRow("Date", d.source_date),
     fieldRow("Evidence note", d.evidence_note),
     fieldRow("URL", d.source_url),
     fieldRow("Provenance ID", d.provenance_id),
     fieldRow("Citation required", d.citation_required),
-    fieldRow("Last validated", d.last_validated_date)
+    fieldRow("Last validated", d.last_validated_date),
+    fieldRow("Last reviewed", d.last_reviewed),
+    fieldRow("Owner", d.verification_owner)
   ];
   return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.12)">${rows.join("")}</div>`;
 }
@@ -246,15 +252,21 @@ Promise.all([
     control_boundary: safe(d.control_boundary),
     confidence: safe(d.confidence),
     notes: d.notes ?? "",
+
     source_name: d.source_name ?? "",
     source_url: d.source_url ?? "",
     source_date: d.source_date ?? "",
     evidence_note: d.evidence_note ?? "",
     evidence_status: safe(d.evidence_status).toUpperCase(),
     provenance_id: d.provenance_id ?? "",
-    provenance_parent: d.provenance_parent ?? "",
     citation_required: d.citation_required ?? "",
-    last_validated_date: d.last_validated_date ?? ""
+    last_validated_date: d.last_validated_date ?? "",
+
+    evidence_class: d.evidence_class ?? "",
+    verification_level: d.verification_level ?? "",
+    verification_status: d.verification_status ?? "",
+    verification_owner: d.verification_owner ?? "",
+    last_reviewed: d.last_reviewed ?? ""
   }))
   .map(d => ({...d, layerIndex: LAYERS.indexOf(d.layer)}))
   .filter(d => d.layerIndex >= 0);
@@ -268,6 +280,7 @@ Promise.all([
     confidence: safe(e.confidence),
     region: safe(e.region),
     notes: e.notes ?? "",
+
     source_name: e.source_name ?? "",
     source_url: e.source_url ?? "",
     source_date: e.source_date ?? "",
@@ -276,16 +289,42 @@ Promise.all([
     telemetry_edge: e.telemetry_edge,
     verified_edge: e.verified_edge,
     provenance_id: e.provenance_id ?? "",
-    provenance_parent: e.provenance_parent ?? "",
     citation_required: e.citation_required ?? "",
-    last_validated_date: e.last_validated_date ?? ""
+    last_validated_date: e.last_validated_date ?? "",
+
+    evidence_class: e.evidence_class ?? "",
+    verification_level: e.verification_level ?? "",
+    verification_status: e.verification_status ?? "",
+    verification_owner: e.verification_owner ?? "",
+    last_reviewed: e.last_reviewed ?? ""
   }));
 
+  // Tabs
+  const tabGrid = document.querySelector("#tab-grid");
+  const tabNet = document.querySelector("#tab-network");
+  const tabGov = document.querySelector("#tab-governance");
+
+  function setView(v){
+    state.view = v;
+    if (tabGrid) tabGrid.classList.toggle("active", v==="grid");
+    if (tabNet) tabNet.classList.toggle("active", v==="network");
+    if (tabGov) tabGov.classList.toggle("active", v==="governance");
+    render();
+  }
+  if (tabGrid) tabGrid.addEventListener("click", ()=>setView("grid"));
+  if (tabNet) tabNet.addEventListener("click", ()=>setView("network"));
+  if (tabGov) tabGov.addEventListener("click", ()=>setView("governance"));
+
+  // Controls
   const regionSel = document.querySelector("#region");
   const oemSel = document.querySelector("#oem");
   const layerSel = document.querySelector("#layer");
   const typeSel = document.querySelector("#type");
   const confSel = document.querySelector("#confidence");
+  const searchEl = document.querySelector("#search");
+  const telem = document.querySelector("#telemetryOnly");
+  const evidence = document.querySelector("#evidenceOnly");
+  const resetBtn = document.querySelector("#reset");
 
   if (regionSel) regionSel.addEventListener("change", (e)=>{ state.region=e.target.value; render(); });
   if (oemSel) oemSel.addEventListener("change", (e)=>{ state.oem=e.target.value; render(); });
@@ -293,57 +332,39 @@ Promise.all([
   if (typeSel) typeSel.addEventListener("change", (e)=>{ state.type=e.target.value; render(); });
   if (confSel) confSel.addEventListener("change", (e)=>{ state.confidence=e.target.value; render(); });
 
-  const searchEl = document.querySelector("#search");
   if (searchEl) searchEl.addEventListener("input", (e)=>{ state.search=e.target.value; render(); });
-
-  const telem = document.querySelector("#telemetryOnly");
   if (telem) telem.addEventListener("change", (e)=>{ state.telemetryOnly=e.target.checked; render(); });
-
-  const evidence = document.querySelector("#evidenceOnly");
   if (evidence) evidence.addEventListener("change", (e)=>{ state.evidenceOnly=e.target.checked; render(); });
 
-  const tabGrid = document.querySelector("#tab-grid");
-  const tabNet = document.querySelector("#tab-network");
-  function setView(v){
-    state.view = v;
-    if (tabGrid) tabGrid.classList.toggle("active", v==="grid");
-    if (tabNet) tabNet.classList.toggle("active", v==="network");
-    render();
-  }
-  if (tabGrid) tabGrid.addEventListener("click", ()=>setView("grid"));
-  if (tabNet) tabNet.addEventListener("click", ()=>setView("network"));
-
-  // ✅ Reset fix
-  const resetBtn = document.querySelector("#reset");
-  if (resetBtn) {
-    resetBtn.addEventListener("click", ()=>{
-      Object.assign(state, {
-        view: "grid",
-        region: "all",
-        oem: "all",
-        layer: "all",
-        type: "all",
-        confidence: "all",
-        search: "",
-        telemetryOnly: false,
-        evidenceOnly: false
-      });
-
-      if (regionSel) regionSel.value = "all";
-      if (oemSel) oemSel.value = "all";
-      if (layerSel) layerSel.value = "all";
-      if (typeSel) typeSel.value = "all";
-      if (confSel) confSel.value = "all";
-      if (searchEl) searchEl.value = "";
-      if (telem) telem.checked = false;
-      if (evidence) evidence.checked = false;
-
-      if (tabGrid) tabGrid.classList.add("active");
-      if (tabNet) tabNet.classList.remove("active");
-
-      render();
+  // Reset fix
+  if (resetBtn) resetBtn.addEventListener("click", ()=>{
+    Object.assign(state, {
+      view: "grid",
+      region: "all",
+      oem: "all",
+      layer: "all",
+      type: "all",
+      confidence: "all",
+      search: "",
+      telemetryOnly: false,
+      evidenceOnly: false
     });
-  }
+
+    if (regionSel) regionSel.value = "all";
+    if (oemSel) oemSel.value = "all";
+    if (layerSel) layerSel.value = "all";
+    if (typeSel) typeSel.value = "all";
+    if (confSel) confSel.value = "all";
+    if (searchEl) searchEl.value = "";
+    if (telem) telem.checked = false;
+    if (evidence) evidence.checked = false;
+
+    if (tabGrid) tabGrid.classList.add("active");
+    if (tabNet) tabNet.classList.remove("active");
+    if (tabGov) tabGov.classList.remove("active");
+
+    render();
+  });
 
   render();
 });
@@ -351,19 +372,233 @@ Promise.all([
 function render() {
   if (!_nodesAll || !_edgesAll) return;
 
-  // ✅ Grey out unavailable dropdown options based on current state
-  rebuildDependentDropdowns(_nodesAll);
+  if (state.view !== "governance") rebuildDependentDropdowns(_nodesAll);
 
   vizEl.selectAll("*").remove();
 
+  if (state.view === "governance") {
+    renderGovernance(_nodesAll, _edgesAll);
+    return;
+  }
+
   let nodes = _nodesAll.filter(n => matchesNodeFilters(n));
   const nodeById = new Map(nodes.map(d => [d.id, d]));
-
   let edges = filterEdges(_edgesAll, nodeById);
   nodes = restrictNodesToEdges(nodes, edges);
 
   if (state.view === "network") renderNetwork(nodes, edges);
   else renderGrid(nodes, edges, uniq(nodes.map(d => d.oem_group)));
+}
+
+// ----- Governance View -----
+
+function parseLevel(v){
+  const n = Number(safe(v));
+  if (Number.isFinite(n) && n >= 0) return n;
+  return 1; // conservative fallback
+}
+
+function pct(n, d){
+  if (!d) return "0%";
+  return `${Math.round((n/d)*1000)/10}%`;
+}
+
+function renderTable(svg, cfg){
+  const { title, x, y, columns, rows } = cfg;
+  const rowH = 22;
+  const headerH = 24;
+  const tableW = columns.reduce((s,c)=>s+c.w, 0);
+
+  const g = svg.append("g").attr("transform", `translate(${x},${y})`);
+
+  g.append("text").attr("x",0).attr("y",-10).text(title);
+  applyReadableText(g.select("text"), { size: 13, fill:"#D1D5DB", stroke:"rgba(0,0,0,0.9)" });
+
+  g.append("rect")
+    .attr("x",0).attr("y",0)
+    .attr("width", tableW)
+    .attr("height", headerH + rows.length*rowH + 10)
+    .attr("fill","rgba(255,255,255,0.03)")
+    .attr("stroke","rgba(255,255,255,0.08)")
+    .attr("rx", 10);
+
+  let cx = 10;
+  columns.forEach(col => {
+    const t = g.append("text").attr("x", cx).attr("y", 18).text(col.label);
+    applyReadableText(t, { size: 11, fill:"#D1D5DB", stroke:"rgba(0,0,0,0.9)" });
+    cx += col.w;
+  });
+
+  rows.forEach((r, i) => {
+    const y0 = headerH + 6 + i*rowH;
+
+    if (i % 2 === 1){
+      g.append("rect")
+        .attr("x",6).attr("y", y0-16)
+        .attr("width", tableW-12).attr("height", rowH)
+        .attr("fill","rgba(255,255,255,0.02)")
+        .attr("rx", 6);
+    }
+
+    let x0 = 10;
+    columns.forEach(col => {
+      const val = r[col.key];
+      const out = col.fmt ? col.fmt(val) : String(val ?? "");
+      const t = g.append("text").attr("x", x0).attr("y", y0).text(out);
+      applyReadableText(t, { size: 11 });
+      x0 += col.w;
+    });
+  });
+}
+
+function renderGovernance(nodesAll, edgesAll){
+  const nodes = nodesAll.filter(n => matchesNodeFilters(n));
+  const nodeById = new Map(nodes.map(d=>[d.id,d]));
+  const edges = edgesAll.filter(e => nodeById.has(e.source) && nodeById.has(e.target));
+
+  const totalNodes = nodes.length;
+  const totalEdges = edges.length;
+
+  const levels = [4,3,2,1,0];
+  const levelCounts = new Map(levels.map(l => [l,0]));
+  edges.forEach(e => {
+    const l = parseLevel(e.verification_level);
+    levelCounts.set(l, (levelCounts.get(l) || 0) + 1);
+  });
+
+  const unreviewed = edges.filter(e => safe(e.verification_status).toUpperCase() === "UNREVIEWED").length;
+
+  const w = 1400;
+  const h = 900;
+  const svg = vizEl.append("svg").attr("viewBox", `0 0 ${w} ${h}`);
+  svg.append("rect").attr("width", w).attr("height", h).attr("fill","transparent");
+
+  const header = svg.append("text").attr("x", 24).attr("y", 38)
+    .text("Governance Dashboard — Verification Coverage");
+  applyReadableText(header, { size: 18 });
+
+  const kpi = [
+    ["Nodes", totalNodes],
+    ["Edges", totalEdges],
+    ["L4 (Hard)", levelCounts.get(4) || 0],
+    ["L3 (Public)", levelCounts.get(3) || 0],
+    ["L1 (Modelled)", levelCounts.get(1) || 0],
+    ["Unreviewed", unreviewed]
+  ];
+
+  const kpiG = svg.append("g").attr("transform", "translate(24,60)");
+  kpiG.selectAll("g.k").data(kpi).join("g")
+    .attr("class","k")
+    .attr("transform",(d,i)=>`translate(${i*220},0)`)
+    .each(function(d){
+      const g = d3.select(this);
+      g.append("text").attr("x",0).attr("y",18).text(d[0]);
+      applyReadableText(g.select("text"), { size: 12, fill:"#D1D5DB", stroke:"rgba(0,0,0,0.9)" });
+      g.append("text").attr("x",0).attr("y",44).text(String(d[1]));
+      applyReadableText(g.selectAll("text").filter((_,i)=>i===1), { size: 20 });
+    });
+
+  // Mini chart
+  const chartX = 24, chartY = 130, chartW = 620, chartH = 220;
+  const chart = svg.append("g").attr("transform", `translate(${chartX},${chartY})`);
+
+  chart.append("text").attr("x",0).attr("y",-10).text("Edge Distribution by Verification Level");
+  applyReadableText(chart.select("text"), { size: 13, fill:"#D1D5DB", stroke:"rgba(0,0,0,0.9)" });
+
+  const data = levels.map(l => ({ level: l, count: levelCounts.get(l) || 0 }));
+  const x = d3.scaleBand().domain(levels.map(String)).range([0, chartW]).padding(0.2);
+  const y = d3.scaleLinear().domain([0, d3.max(data, d=>d.count) || 1]).nice().range([chartH, 0]);
+
+  chart.append("g").attr("transform", `translate(0,${chartH})`)
+    .call(d3.axisBottom(x)).selectAll("text").attr("fill","#D1D5DB");
+  chart.append("g").call(d3.axisLeft(y).ticks(5)).selectAll("text").attr("fill","#D1D5DB");
+
+  chart.selectAll("rect.bar").data(data).join("rect")
+    .attr("class","bar")
+    .attr("x", d=>x(String(d.level)))
+    .attr("y", d=>y(d.count))
+    .attr("width", x.bandwidth())
+    .attr("height", d=>chartH - y(d.count))
+    .attr("fill", "rgba(37,99,235,0.9)")
+    .attr("stroke","rgba(255,255,255,0.2)");
+
+  chart.selectAll("text.barlabel").data(data).join("text")
+    .attr("class","barlabel")
+    .attr("x", d=>x(String(d.level)) + x.bandwidth()/2)
+    .attr("y", d=>y(d.count) - 6)
+    .attr("text-anchor","middle")
+    .text(d=>d.count);
+  applyReadableText(chart.selectAll("text.barlabel"), { size: 11 });
+
+  // OEM aggregation
+  const oemAgg = new Map();
+  edges.forEach(e => {
+    const src = nodeById.get(e.source);
+    const tgt = nodeById.get(e.target);
+    const oem = (src && safe(src.oem_group)) || (tgt && safe(tgt.oem_group)) || "UNKNOWN";
+    if (!oemAgg.has(oem)) oemAgg.set(oem, { oem, edges:0, l4:0, l3:0, l1:0 });
+    const a = oemAgg.get(oem);
+    a.edges += 1;
+    const l = parseLevel(e.verification_level);
+    if (l===4) a.l4 += 1;
+    else if (l===3) a.l3 += 1;
+    else if (l===1) a.l1 += 1;
+  });
+
+  const oems = Array.from(oemAgg.values()).map(r => ({
+    ...r,
+    verified_pct: (r.l4 + r.l3) / (r.edges || 1)
+  })).sort((a,b)=>b.verified_pct - a.verified_pct).slice(0, 18);
+
+  renderTable(svg, {
+    title: "Top OEMs by % Verified (L3+L4)",
+    x: 680, y: 130,
+    columns: [
+      { key:"oem", label:"OEM", w: 220 },
+      { key:"edges", label:"Edges", w: 90, fmt: d=>String(d) },
+      { key:"l4", label:"L4", w: 60, fmt: d=>String(d) },
+      { key:"l3", label:"L3", w: 60, fmt: d=>String(d) },
+      { key:"l1", label:"L1", w: 60, fmt: d=>String(d) },
+      { key:"verified_pct", label:"% Verified", w: 110, fmt: d=>pct(d,1) }
+    ],
+    rows: oems
+  });
+
+  // Layer aggregation
+  const layerAgg = new Map();
+  edges.forEach(e => {
+    const src = nodeById.get(e.source);
+    const tgt = nodeById.get(e.target);
+    const layers = new Set([src ? safe(src.layer) : "", tgt ? safe(tgt.layer) : ""]);
+    layers.forEach(layer => {
+      if (!layer) return;
+      if (!layerAgg.has(layer)) layerAgg.set(layer, { layer, edges:0, l4:0, l3:0, l1:0 });
+      const a = layerAgg.get(layer);
+      a.edges += 1;
+      const l = parseLevel(e.verification_level);
+      if (l===4) a.l4 += 1;
+      else if (l===3) a.l3 += 1;
+      else if (l===1) a.l1 += 1;
+    });
+  });
+
+  const layersTbl = Array.from(layerAgg.values()).map(r => ({
+    ...r,
+    verified_pct: (r.l4 + r.l3) / (r.edges || 1),
+    modelled_pct: r.l1 / (r.edges || 1)
+  })).sort((a,b)=>a.verified_pct - b.verified_pct).slice(0, 18);
+
+  renderTable(svg, {
+    title: "Weakest Layers (lowest % Verified)",
+    x: 24, y: 390,
+    columns: [
+      { key:"layer", label:"Layer", w: 380 },
+      { key:"edges", label:"Edges", w: 90, fmt: d=>String(d) },
+      { key:"verified_pct", label:"% Verified", w: 110, fmt: d=>pct(d,1) },
+      { key:"modelled_pct", label:"% Modelled (L1)", w: 140, fmt: d=>pct(d,1) }
+    ],
+    rows: layersTbl
+  });
 }
 
 // ----- GRID VIEW -----
@@ -471,18 +706,6 @@ function renderGrid(nodes, edges, cols){
 
   nodeSel.on("mousemove", showTip).on("mouseleave", hideTip);
 
-  for (const [layer, byCol] of grouped){
-    const r = LAYERS.indexOf(layer);
-    for (const [col, list] of byCol){
-      if (list.length<=3) continue;
-      const c = cols.indexOf(col);
-      const x = margin.left + c*cellW + 14;
-      const y = margin.top + r*cellH + 10 + 3*(24+6) + 10;
-      const moreText = gRoot.append("text").attr("x", x).attr("y", y).text(`+${list.length-3} more`);
-      applyReadableText(moreText, { size: 11, fill: "#D1D5DB", stroke: "rgba(0,0,0,0.9)" });
-    }
-  }
-
   const zoom = d3.zoom().scaleExtent([0.6, 3.5]).on("zoom", (event) => gRoot.attr("transform", event.transform));
   svg.call(zoom);
 }
@@ -537,12 +760,6 @@ function renderNetwork(nodes, edges){
   applyReadableText(labelSel, { size: 12 });
 
   nodeSel.on("mousemove", showTip).on("mouseleave", hideTip);
-
-  const regionText = gRoot.append("g").selectAll("text")
-    .data(regions).join("text")
-    .attr("x", d=>xScale(d)).attr("y", 24).attr("text-anchor","middle")
-    .text(d=>d.toUpperCase());
-  applyReadableText(regionText, { size: 12, fill: "#D1D5DB", stroke: "rgba(0,0,0,0.9)" });
 
   const sim = d3.forceSimulation(nodesLocal)
     .force("link", d3.forceLink(links).distance(90).strength(0.25))
