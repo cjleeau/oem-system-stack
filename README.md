@@ -6,6 +6,10 @@
 ## Overview
 This project models the global automotive OEM digital ecosystem using a layered systems architecture and D3 visualisation.
 
+This model blends regulatory evidence, public disclosures, and structured architectural inference.
+
+Relationships are tagged by verification level to distinguish confirmed partnerships from modelled system dependencies.
+
 ## Core Capabilities
 - Grid (default) and Network view
 - CSV-driven architecture
@@ -52,3 +56,5 @@ In Evidence Only mode:
 - v4.0 – Cross-border modelling
 - v5.0 – Provenance + documentation + branding
 - v6.0 - UX hardening and governance ergonomics
+
+
