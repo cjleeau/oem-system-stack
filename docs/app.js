@@ -494,8 +494,8 @@ function renderGovernance(nodesAll, edgesAll){
 
   const unreviewed = edges.filter(e => safe(e.verification_status).toUpperCase() === "UNREVIEWED").length;
 
-  const w = 1400;
-  const h = 900;
+  const w = 1560;
+  const h = 1020;
   const svg = vizEl.append("svg").attr("viewBox", `0 0 ${w} ${h}`);
   svg.append("rect").attr("width", w).attr("height", h).attr("fill","transparent");
 
@@ -535,7 +535,7 @@ function renderGovernance(nodesAll, edgesAll){
     });
 
   // Mini chart
-  const chartX = 24, chartY = 150, chartW = 620, chartH = 220;
+  const chartX = 24, chartY = 180, chartW = 680, chartH = 240;
   const chart = svg.append("g").attr("transform", `translate(${chartX},${chartY})`);
 
   chart.append("text").attr("x",0).attr("y",-10).text("Edge Distribution by Verification Level");
@@ -588,9 +588,9 @@ function renderGovernance(nodesAll, edgesAll){
 
   renderTable(svg, {
     title: "Top OEMs by % Verified (L3+L4)",
-    x: 680, y: 130,
+    x: 760, y: 180,
     columns: [
-      { key:"oem", label:"OEM", w: 220 },
+      { key:"oem", label:"OEM", w: 260 },
       { key:"edges", label:"Edges", w: 90, fmt: d=>String(d) },
       { key:"l4", label:"L4", w: 60, fmt: d=>String(d) },
       { key:"l3", label:"L3", w: 60, fmt: d=>String(d) },
@@ -626,7 +626,7 @@ function renderGovernance(nodesAll, edgesAll){
 
   renderTable(svg, {
     title: "Weakest Layers (lowest % Verified)",
-    x: 24, y: 390,
+    x: 24, y: 460,
     columns: [
       { key:"layer", label:"Layer", w: 380 },
       { key:"edges", label:"Edges", w: 90, fmt: d=>String(d) },
@@ -642,7 +642,7 @@ function renderGovernance(nodesAll, edgesAll){
 
   renderTable(svg, {
     title: "Evidence Status (edges)",
-    x: 680, y: 390,
+    x: 760, y: 520,
     columns: [
       { key:"status", label:"Status", w: 160 },
       { key:"count", label:"Count", w: 90, fmt: d=>String(d) },
@@ -659,7 +659,7 @@ function renderGovernance(nodesAll, edgesAll){
 
   renderTable(svg, {
     title: "Top Missing Fields (edges)",
-    x: 680, y: 560,
+    x: 760, y: 670,
     columns: [
       { key:"field", label:"Field", w: 220 },
       { key:"missing", label:"Missing", w: 90, fmt: d=>String(d) },
