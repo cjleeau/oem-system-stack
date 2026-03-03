@@ -1,6 +1,5 @@
 // Global OEM System Stack — D3 (Grid + Network) — CSV-driven
-// Phase 5+ Evidence Mode (VERIFIED) + Telemetry toggle
-// Grid default + Network toggle + zoom/pan + readable labels
+// Phase 10 — UX hardening: reset fix, dependent dropdown disabling, greyed-out empty fields
 
 const LAYERS = [
   "Ownership & Brand Stack",
@@ -49,27 +48,13 @@ function safe(v){ return (v ?? "").toString().trim(); }
 function norm(s){ return safe(s).toLowerCase(); }
 function uniq(arr) { return Array.from(new Set(arr)).sort((a,b)=>a.localeCompare(b)); }
 
-function initSelect(selector, values, onChange) {
-  const sel = d3.select(selector);
-  sel.selectAll("option").remove();
-  sel.append("option").attr("value","all").text("All");
-  values.forEach(v => sel.append("option").attr("value", v).text(v));
-  sel.on("change", function(){ onChange(this.value); });
-}
-
 function applyReadableText(textSel, opts = {}) {
   const size = opts.size ?? 12;
   const fill = opts.fill ?? "#F9FAFB";
   const stroke = opts.stroke ?? "rgba(0,0,0,0.85)";
   const strokeWidth = opts.strokeWidth ?? 3;
-
-  textSel
-    .attr("font-size", size)
-    .attr("opacity", 1)
-    .attr("fill", fill)
-    .attr("stroke", stroke)
-    .attr("stroke-width", strokeWidth)
-    .attr("paint-order", "stroke");
+  textSel.attr("font-size", size).attr("opacity", 1).attr("fill", fill)
+    .attr("stroke", stroke).attr("stroke-width", strokeWidth).attr("paint-order", "stroke");
 }
 
 function nodeFill(d){
@@ -77,71 +62,8 @@ function nodeFill(d){
   if (d.control_boundary === "external") return "#6C8CFF";
   return "#3B82F6";
 }
-function edgeDash(e){
-  // Verified edges = solid; assumed/referenced = dashed
-  return (e.evidence_status === "VERIFIED" || e.verified_edge === true) ? "0" : "5 4";
-}
-
-function evidenceBlock(d){
-  const src = safe(d.source_name);
-  const date = safe(d.source_date);
-  const note = safe(d.evidence_note);
-  const url = safe(d.source_url);
-  const status = safe(d.evidence_status);
-
-  const rows = [];
-  if (status) rows.push(`<div><strong>Evidence status:</strong> ${status}</div>`);
-  if (src) rows.push(`<div><strong>Source:</strong> ${src}</div>`);
-  if (date) rows.push(`<div><strong>Date:</strong> ${date}</div>`);
-  if (note) rows.push(`<div style="opacity:.9"><strong>Evidence note:</strong> ${note}</div>`);
-  if (url) rows.push(`<div style="opacity:.75"><strong>URL:</strong> ${url}</div>`);
-
-  if (!rows.length) return "";
-  return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.12)">${rows.join("")}</div>`;
-}
-
-function showTip(evt, d) {
-  tooltip.style("display","block")
-    .style("left", (evt.pageX + 12) + "px")
-    .style("top", (evt.pageY + 12) + "px")
-    .html(`
-      <div><strong>${safe(d.label)}</strong></div>
-      <div style="opacity:.85">${safe(d.region)} • ${safe(d.layer)}</div>
-      <div style="opacity:.85">${safe(d.node_type)} • ${safe(d.control_boundary)} • ${safe(d.confidence)}</div>
-      ${safe(d.notes) ? `<div style="margin-top:6px;opacity:.8">${safe(d.notes)}</div>` : ""}
-      ${evidenceBlock(d)}
-    `);
-}
-function showEdgeTip(evt, e) {
-  tooltip.style("display","block")
-    .style("left", (evt.pageX + 12) + "px")
-    .style("top", (evt.pageY + 12) + "px")
-    .html(`
-      <div><strong>${safe(e.relation)}</strong></div>
-      <div style="opacity:.85">${safe(e.region)} • ${safe(e.confidence)}</div>
-      ${safe(e.notes) ? `<div style="margin-top:6px;opacity:.8">${safe(e.notes)}</div>` : ""}
-      ${evidenceBlock(e)}
-    `);
-}
-function hideTip(){ tooltip.style("display","none"); }
-
-function matchesNodeFilters(n) {
-  if (state.region !== "all" && n.region !== state.region) return false;
-  if (state.oem !== "all" && n.oem_group !== state.oem) return false;
-  if (state.layer !== "all" && n.layer !== state.layer) return false;
-  if (state.type !== "all" && n.node_type !== state.type) return false;
-  if (state.confidence !== "all" && n.confidence !== state.confidence) return false;
-
-  if (state.search) {
-    const q = norm(state.search);
-    const hay = norm(`${n.label} ${n.id} ${n.notes ?? ""}`);
-    if (!hay.includes(q)) return false;
-  }
-  return true;
-}
 
 function isVerifiedEdge(e){
-  // Robust against casing + whitespace + boolean fields
   const status = safe(e.evidence_status).toUpperCase();
   const verifiedBool = (e.verified_edge === true) || (safe(e.verified_edge).toLowerCase() === "true");
   const hasUrl = !!safe(e.source_url);
@@ -154,6 +76,30 @@ function isTelemetryEdge(e){
   return telemetryBool || TELEMETRY_RELATIONS.has(rel);
 }
 
+function edgeDash(e){ return isVerifiedEdge(e) ? "0" : "5 4"; }
+
+function matchesNodeFilters(n, override = {}) {
+  const region = override.region ?? state.region;
+  const oem = override.oem ?? state.oem;
+  const layer = override.layer ?? state.layer;
+  const type = override.type ?? state.type;
+  const confidence = override.confidence ?? state.confidence;
+  const search = override.search ?? state.search;
+
+  if (region !== "all" && n.region !== region) return false;
+  if (oem !== "all" && n.oem_group !== oem) return false;
+  if (layer !== "all" && n.layer !== layer) return false;
+  if (type !== "all" && n.node_type !== type) return false;
+  if (confidence !== "all" && n.confidence !== confidence) return false;
+
+  if (search) {
+    const q = norm(search);
+    const hay = norm(`${n.label} ${n.id} ${n.notes ?? ""}`);
+    if (!hay.includes(q)) return false;
+  }
+  return true;
+}
+
 function filterEdges(edges, nodeById) {
   return edges
     .filter(e => nodeById.has(e.source) && nodeById.has(e.target))
@@ -162,20 +108,134 @@ function filterEdges(edges, nodeById) {
 }
 
 function restrictNodesToEdges(nodes, edges) {
-  if (!state.evidenceOnly) return nodes; // only do this in evidence mode
+  if (!state.evidenceOnly) return nodes;
   const keep = new Set();
   edges.forEach(e => { keep.add(e.source); keep.add(e.target); });
   return nodes.filter(n => keep.has(n.id));
 }
 
-// ----- LOAD -----
+// ---------- Controls: dependent disabling ----------
+
+function setOptionsWithDisable(selectEl, values, isEnabledFn) {
+  const current = selectEl.value || "all";
+  selectEl.innerHTML = "";
+
+  const optAll = document.createElement("option");
+  optAll.value = "all";
+  optAll.textContent = "All";
+  optAll.disabled = false;
+  selectEl.appendChild(optAll);
+
+  values.forEach(v => {
+    const opt = document.createElement("option");
+    opt.value = v;
+    opt.textContent = v;
+    opt.disabled = !isEnabledFn(v);
+    selectEl.appendChild(opt);
+  });
+
+  const stillThere = Array.from(selectEl.options).some(o => o.value === current && !o.disabled);
+  selectEl.value = stillThere ? current : "all";
+}
+
+function rebuildDependentDropdowns(nodesAll) {
+  const regionSel = document.querySelector("#region");
+  const oemSel = document.querySelector("#oem");
+  const layerSel = document.querySelector("#layer");
+  const typeSel = document.querySelector("#type");
+  const confSel = document.querySelector("#confidence");
+  if (!regionSel || !oemSel || !layerSel || !typeSel || !confSel) return;
+
+  const regions = uniq(nodesAll.map(d => d.region));
+  const oems = uniq(nodesAll.map(d => d.oem_group));
+  const types = uniq(nodesAll.map(d => d.node_type));
+  const confs = uniq(nodesAll.map(d => d.confidence));
+
+  function existsWith(override) { return nodesAll.some(n => matchesNodeFilters(n, override)); }
+
+  setOptionsWithDisable(regionSel, regions, (v) =>
+    existsWith({ region: v, oem: state.oem, layer: state.layer, type: state.type, confidence: state.confidence, search: state.search })
+  );
+  setOptionsWithDisable(oemSel, oems, (v) =>
+    existsWith({ region: state.region, oem: v, layer: state.layer, type: state.type, confidence: state.confidence, search: state.search })
+  );
+  setOptionsWithDisable(layerSel, LAYERS, (v) =>
+    existsWith({ region: state.region, oem: state.oem, layer: v, type: state.type, confidence: state.confidence, search: state.search })
+  );
+  setOptionsWithDisable(typeSel, types, (v) =>
+    existsWith({ region: state.region, oem: state.oem, layer: state.layer, type: v, confidence: state.confidence, search: state.search })
+  );
+  setOptionsWithDisable(confSel, confs, (v) =>
+    existsWith({ region: state.region, oem: state.oem, layer: state.layer, type: state.type, confidence: v, search: state.search })
+  );
+
+  state.region = regionSel.value;
+  state.oem = oemSel.value;
+  state.layer = layerSel.value;
+  state.type = typeSel.value;
+  state.confidence = confSel.value;
+}
+
+// ---------- Tooltip with greyed-out empty fields ----------
+
+function fieldRow(label, value) {
+  const v = safe(value);
+  if (!v) return `<div style="opacity:.45"><strong>${label}:</strong> —</div>`;
+  return `<div><strong>${label}:</strong> ${v}</div>`;
+}
+
+function evidenceBlock(d){
+  const rows = [
+    fieldRow("Evidence status", d.evidence_status),
+    fieldRow("Source", d.source_name),
+    fieldRow("Date", d.source_date),
+    fieldRow("Evidence note", d.evidence_note),
+    fieldRow("URL", d.source_url),
+    fieldRow("Provenance ID", d.provenance_id),
+    fieldRow("Citation required", d.citation_required),
+    fieldRow("Last validated", d.last_validated_date)
+  ];
+  return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.12)">${rows.join("")}</div>`;
+}
+
+function showTip(evt, d) {
+  tooltip.style("display","block")
+    .style("left", (evt.pageX + 12) + "px")
+    .style("top", (evt.pageY + 12) + "px")
+    .html(`
+      <div><strong>${safe(d.label)}</strong></div>
+      <div style="opacity:.85">${safe(d.region)} • ${safe(d.layer)}</div>
+      <div style="opacity:.85">${safe(d.node_type)} • ${safe(d.control_boundary)} • ${safe(d.confidence)}</div>
+      ${fieldRow("Notes", d.notes)}
+      ${evidenceBlock(d)}
+    `);
+}
+
+function showEdgeTip(evt, e) {
+  tooltip.style("display","block")
+    .style("left", (evt.pageX + 12) + "px")
+    .style("top", (evt.pageY + 12) + "px")
+    .html(`
+      <div><strong>${safe(e.relation)}</strong></div>
+      <div style="opacity:.85">${safe(e.region)} • ${safe(e.confidence)}</div>
+      ${fieldRow("Notes", e.notes)}
+      ${evidenceBlock(e)}
+    `);
+}
+
+function hideTip(){ tooltip.style("display","none"); }
+
+// ---------- Load + render ----------
+
+let _nodesAll = null;
+let _edgesAll = null;
 
 Promise.all([
   d3.csv("data/nodes.csv", d3.autoType),
   d3.csv("data/edges.csv", d3.autoType)
 ]).then(([nodesRaw, edgesRaw]) => {
 
-  const nodesAll = nodesRaw.map(d => ({
+  _nodesAll = nodesRaw.map(d => ({
     ...d,
     id: safe(d.id),
     label: safe(d.label),
@@ -190,12 +250,16 @@ Promise.all([
     source_url: d.source_url ?? "",
     source_date: d.source_date ?? "",
     evidence_note: d.evidence_note ?? "",
-    evidence_status: safe(d.evidence_status).toUpperCase()
+    evidence_status: safe(d.evidence_status).toUpperCase(),
+    provenance_id: d.provenance_id ?? "",
+    provenance_parent: d.provenance_parent ?? "",
+    citation_required: d.citation_required ?? "",
+    last_validated_date: d.last_validated_date ?? ""
   }))
   .map(d => ({...d, layerIndex: LAYERS.indexOf(d.layer)}))
   .filter(d => d.layerIndex >= 0);
 
-  const edgesAll = edgesRaw.map(e => ({
+  _edgesAll = edgesRaw.map(e => ({
     ...e,
     id: safe(e.id),
     source: safe(e.source),
@@ -210,51 +274,92 @@ Promise.all([
     evidence_note: e.evidence_note ?? "",
     evidence_status: safe(e.evidence_status).toUpperCase(),
     telemetry_edge: e.telemetry_edge,
-    verified_edge: e.verified_edge
+    verified_edge: e.verified_edge,
+    provenance_id: e.provenance_id ?? "",
+    provenance_parent: e.provenance_parent ?? "",
+    citation_required: e.citation_required ?? "",
+    last_validated_date: e.last_validated_date ?? ""
   }));
 
-  // Controls (only if your HTML has these selects; if not, remove safely)
-  if (document.querySelector("#region")) initSelect("#region", uniq(nodesAll.map(d => d.region)), v => { state.region=v; render(nodesAll, edgesAll); });
-  if (document.querySelector("#oem")) initSelect("#oem", uniq(nodesAll.map(d => d.oem_group)), v => { state.oem=v; render(nodesAll, edgesAll); });
-  if (document.querySelector("#layer")) initSelect("#layer", LAYERS, v => { state.layer=v; render(nodesAll, edgesAll); });
-  if (document.querySelector("#type")) initSelect("#type", uniq(nodesAll.map(d => d.node_type)), v => { state.type=v; render(nodesAll, edgesAll); });
-  if (document.querySelector("#confidence")) initSelect("#confidence", uniq(nodesAll.map(d => d.confidence)), v => { state.confidence=v; render(nodesAll, edgesAll); });
+  const regionSel = document.querySelector("#region");
+  const oemSel = document.querySelector("#oem");
+  const layerSel = document.querySelector("#layer");
+  const typeSel = document.querySelector("#type");
+  const confSel = document.querySelector("#confidence");
 
-  if (document.querySelector("#search")) {
-    d3.select("#search").on("input", function(){ state.search=this.value; render(nodesAll, edgesAll); });
-  }
+  if (regionSel) regionSel.addEventListener("change", (e)=>{ state.region=e.target.value; render(); });
+  if (oemSel) oemSel.addEventListener("change", (e)=>{ state.oem=e.target.value; render(); });
+  if (layerSel) layerSel.addEventListener("change", (e)=>{ state.layer=e.target.value; render(); });
+  if (typeSel) typeSel.addEventListener("change", (e)=>{ state.type=e.target.value; render(); });
+  if (confSel) confSel.addEventListener("change", (e)=>{ state.confidence=e.target.value; render(); });
 
-  if (document.querySelector("#telemetryOnly")) {
-    d3.select("#telemetryOnly").on("change", function(){ state.telemetryOnly=this.checked; render(nodesAll, edgesAll); });
-  }
+  const searchEl = document.querySelector("#search");
+  if (searchEl) searchEl.addEventListener("input", (e)=>{ state.search=e.target.value; render(); });
 
-  // ✅ Evidence toggle wiring
-  if (document.querySelector("#evidenceOnly")) {
-    d3.select("#evidenceOnly").on("change", function(){ state.evidenceOnly=this.checked; render(nodesAll, edgesAll); });
-  }
+  const telem = document.querySelector("#telemetryOnly");
+  if (telem) telem.addEventListener("change", (e)=>{ state.telemetryOnly=e.target.checked; render(); });
 
-  // Tabs
+  const evidence = document.querySelector("#evidenceOnly");
+  if (evidence) evidence.addEventListener("change", (e)=>{ state.evidenceOnly=e.target.checked; render(); });
+
+  const tabGrid = document.querySelector("#tab-grid");
+  const tabNet = document.querySelector("#tab-network");
   function setView(v){
     state.view = v;
-    if (document.querySelector("#tab-grid")) d3.select("#tab-grid").classed("active", v==="grid");
-    if (document.querySelector("#tab-network")) d3.select("#tab-network").classed("active", v==="network");
-    render(nodesAll, edgesAll);
+    if (tabGrid) tabGrid.classList.toggle("active", v==="grid");
+    if (tabNet) tabNet.classList.toggle("active", v==="network");
+    render();
   }
-  if (document.querySelector("#tab-grid")) d3.select("#tab-grid").on("click", ()=>setView("grid"));
-  if (document.querySelector("#tab-network")) d3.select("#tab-network").on("click", ()=>setView("network"));
+  if (tabGrid) tabGrid.addEventListener("click", ()=>setView("grid"));
+  if (tabNet) tabNet.addEventListener("click", ()=>setView("network"));
 
-  render(nodesAll, edgesAll);
+  // ✅ Reset fix
+  const resetBtn = document.querySelector("#reset");
+  if (resetBtn) {
+    resetBtn.addEventListener("click", ()=>{
+      Object.assign(state, {
+        view: "grid",
+        region: "all",
+        oem: "all",
+        layer: "all",
+        type: "all",
+        confidence: "all",
+        search: "",
+        telemetryOnly: false,
+        evidenceOnly: false
+      });
+
+      if (regionSel) regionSel.value = "all";
+      if (oemSel) oemSel.value = "all";
+      if (layerSel) layerSel.value = "all";
+      if (typeSel) typeSel.value = "all";
+      if (confSel) confSel.value = "all";
+      if (searchEl) searchEl.value = "";
+      if (telem) telem.checked = false;
+      if (evidence) evidence.checked = false;
+
+      if (tabGrid) tabGrid.classList.add("active");
+      if (tabNet) tabNet.classList.remove("active");
+
+      render();
+    });
+  }
+
+  render();
 });
 
-function render(nodesAll, edgesAll) {
+function render() {
+  if (!_nodesAll || !_edgesAll) return;
+
+  // ✅ Grey out unavailable dropdown options based on current state
+  rebuildDependentDropdowns(_nodesAll);
+
   vizEl.selectAll("*").remove();
 
-  let nodes = nodesAll.filter(matchesNodeFilters);
+  let nodes = _nodesAll.filter(n => matchesNodeFilters(n));
   const nodeById = new Map(nodes.map(d => [d.id, d]));
 
-  let edges = filterEdges(edgesAll, nodeById);
-
-  // In evidence-only mode, hide nodes that aren't connected to verified edges
+  let edges = filterEdges(_edgesAll, nodeById);
   nodes = restrictNodesToEdges(nodes, edges);
 
   if (state.view === "network") renderNetwork(nodes, edges);
@@ -277,7 +382,6 @@ function renderGrid(nodes, edges, cols){
 
   const gRoot = svg.append("g");
 
-  // Headers
   const headerSel = gRoot.append("g").selectAll("text")
     .data(cols).join("text")
     .attr("x", (d,i)=> margin.left + i*cellW + 8)
@@ -285,7 +389,6 @@ function renderGrid(nodes, edges, cols){
     .text(d=>d);
   applyReadableText(headerSel, { size: 13 });
 
-  // Row labels
   const rowSel = gRoot.append("g").selectAll("text")
     .data(LAYERS).join("text")
     .attr("x", 12)
@@ -293,7 +396,6 @@ function renderGrid(nodes, edges, cols){
     .text(d=>d);
   applyReadableText(rowSel, { size: 12, fill: "#D1D5DB", stroke: "rgba(0,0,0,0.9)" });
 
-  // Grid lines
   const grid = gRoot.append("g").attr("opacity", 0.28);
   for (let r=0; r<LAYERS.length; r++){
     for (let c=0; c<cols.length; c++){
@@ -307,9 +409,9 @@ function renderGrid(nodes, edges, cols){
     }
   }
 
-  // Positions (max 3 per cell +N more)
   const grouped = d3.group(nodes, d=>d.layer, d=>d.oem_group);
   const pos = new Map();
+
   for (const [layer, byCol] of grouped){
     const r = LAYERS.indexOf(layer);
     for (const [col, list] of byCol){
@@ -323,10 +425,8 @@ function renderGrid(nodes, edges, cols){
     }
   }
 
-  // Edges
-  const edgeSel = gRoot.append("g").selectAll("path")
+  gRoot.append("g").selectAll("path")
     .data(edges).join("path")
-    .attr("class","edge")
     .attr("fill","none")
     .attr("stroke","#9CA3AF")
     .attr("stroke-width", 1.5)
@@ -343,14 +443,13 @@ function renderGrid(nodes, edges, cols){
     .on("mousemove", showEdgeTip)
     .on("mouseleave", hideTip);
 
-  // Nodes
   const visibleNodes = nodes.filter(n=>pos.has(n.id));
   const nodeSel = gRoot.append("g").selectAll("g.node")
     .data(visibleNodes, d=>d.id)
     .join(enter=>{
       const g = enter.append("g").attr("class","node");
-      g.append("rect").attr("class","node-rect");
-      g.append("text").attr("class","node-label");
+      g.append("rect");
+      g.append("text");
       return g;
     })
     .attr("transform", d=>{
@@ -372,7 +471,6 @@ function renderGrid(nodes, edges, cols){
 
   nodeSel.on("mousemove", showTip).on("mouseleave", hideTip);
 
-  // +N markers
   for (const [layer, byCol] of grouped){
     const r = LAYERS.indexOf(layer);
     for (const [col, list] of byCol){
