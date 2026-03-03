@@ -27,9 +27,9 @@ This project models the global automotive OEM digital ecosystem using a layered 
 - VERIFIED
 
 ## Verification Priority
-P1 – Regulatory backbone
-P2 – Tier 1 integrations
-P3 – Ecosystem / assumed flows
+- P1 – Regulatory backbone
+- P2 – Tier 1 integrations
+- P3 – Ecosystem / assumed flows
 
 ## Developer
 - Chris Lee – https://www.linkedin.com/in/christopherjustinlee/
