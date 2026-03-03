@@ -454,6 +454,7 @@ function renderTable(svg, cfg){
 }
 
 function renderGovernance(nodesAll, edgesAll){
+  // HTML-first dashboard to avoid SVG/table overlap
   const nodes = nodesAll.filter(n => matchesNodeFilters(n));
   const nodeById = new Map(nodes.map(d=>[d.id,d]));
   const edges = edgesAll.filter(e => nodeById.has(e.source) && nodeById.has(e.target));
@@ -461,30 +462,13 @@ function renderGovernance(nodesAll, edgesAll){
   const totalNodes = nodes.length;
   const totalEdges = edges.length;
 
-
-  // Data completeness checks
+  // Data completeness checks (edges)
   const fields = ["evidence_status","verification_level","verification_status","source_url","source_name","source_date","provenance_id"];
   const missing = {};
   fields.forEach(k => missing[k] = 0);
   edges.forEach(e => { fields.forEach(k => { if (!safe(e[k])) missing[k] += 1; }); });
 
-  const blankVerification = missing["verification_level"];
-  const blankEvidenceStatus = missing["evidence_status"];
-
-  const bannerMsg =
-    (blankVerification / (totalEdges || 1) > 0.5)
-      ? `Most edges have no verification_level set (${blankVerification}/${totalEdges}). Dashboard is showing defaults. Populate verification_level (0–4) to get meaningful coverage.`
-      : null;
-
-  // evidence_status distribution (VERIFIED / UNVERIFIED / UNREVIEWED / blank)
-  const statusCounts = new Map([["VERIFIED",0],["UNVERIFIED",0],["UNREVIEWED",0],["BLANK",0]]);
-  edges.forEach(e => {
-    const s = safe(e.evidence_status).toUpperCase();
-    if (!s) statusCounts.set("BLANK", statusCounts.get("BLANK")+1);
-    else if (statusCounts.has(s)) statusCounts.set(s, statusCounts.get(s)+1);
-    else statusCounts.set(s, (statusCounts.get(s)||0)+1);
-  });
-
+  // Verification level counts (treat blank as L1 by parseLevel)
   const levels = [4,3,2,1,0];
   const levelCounts = new Map(levels.map(l => [l,0]));
   edges.forEach(e => {
@@ -494,77 +478,22 @@ function renderGovernance(nodesAll, edgesAll){
 
   const unreviewed = edges.filter(e => safe(e.verification_status).toUpperCase() === "UNREVIEWED").length;
 
-  const w = 1560;
-  const h = 1020;
-  const svg = vizEl.append("svg").attr("viewBox", `0 0 ${w} ${h}`);
-  svg.append("rect").attr("width", w).attr("height", h).attr("fill","transparent");
+  const bannerMsg =
+    (missing["verification_level"] / (totalEdges || 1) > 0.5)
+      ? `Most edges have no verification_level set (${missing["verification_level"]}/${totalEdges}). Dashboard is showing defaults. Populate verification_level (0–4) to get meaningful coverage.`
+      : null;
 
-  const header = svg.append("text").attr("x", 24).attr("y", 38)
-    .text("Governance Dashboard — Verification Coverage");
-  applyReadableText(header, { size: 18 });
-
-  if (bannerMsg){
-    const bg = svg.append("rect").attr("x",24).attr("y",46).attr("width", w-48).attr("height", 34)
-      .attr("rx",10).attr("fill","rgba(244,162,97,0.18)").attr("stroke","rgba(244,162,97,0.35)");
-    const t = svg.append("text").attr("x", 36).attr("y", 68).text(bannerMsg);
-    applyReadableText(t, { size: 12, fill:"#FDE68A", stroke:"rgba(0,0,0,0.9)" });
-  }
-
-
-  const kpi = [
-    ["Nodes", totalNodes],
-    ["Edges", totalEdges],
-    ["L4 (Hard)", levelCounts.get(4) || 0],
-    ["L3 (Public)", levelCounts.get(3) || 0],
-    ["L1 (Modelled)", levelCounts.get(1) || 0],
-    ["Unreviewed", unreviewed],
-    ["Missing verification_level", missing["verification_level"]],
-    ["Missing source_url", missing["source_url"]]
-  ];
-
-  const kpiG = svg.append("g").attr("transform", "translate(24,60)");
-  kpiG.selectAll("g.k").data(kpi).join("g")
-    .attr("class","k")
-    .attr("transform",(d,i)=>`translate(${(i%4)*340},${Math.floor(i/4)*64})`)
-    .each(function(d){
-      const g = d3.select(this);
-      g.append("text").attr("x",0).attr("y",18).text(d[0]);
-      applyReadableText(g.select("text"), { size: 12, fill:"#D1D5DB", stroke:"rgba(0,0,0,0.9)" });
-      g.append("text").attr("x",0).attr("y",44).text(String(d[1]));
-      applyReadableText(g.selectAll("text").filter((_,i)=>i===1), { size: 20 });
-    });
-
-  // Mini chart
-  const chartX = 24, chartY = 180, chartW = 680, chartH = 240;
-  const chart = svg.append("g").attr("transform", `translate(${chartX},${chartY})`);
-
-  chart.append("text").attr("x",0).attr("y",-10).text("Edge Distribution by Verification Level");
-  applyReadableText(chart.select("text"), { size: 13, fill:"#D1D5DB", stroke:"rgba(0,0,0,0.9)" });
-
-  const data = levels.map(l => ({ level: l, count: levelCounts.get(l) || 0 }));
-  const x = d3.scaleBand().domain(levels.map(String)).range([0, chartW]).padding(0.2);
-  const y = d3.scaleLinear().domain([0, d3.max(data, d=>d.count) || 1]).nice().range([chartH, 0]);
-
-  chart.append("g").attr("transform", `translate(0,${chartH})`)
-    .call(d3.axisBottom(x)).selectAll("text").attr("fill","#D1D5DB");
-  chart.append("g").call(d3.axisLeft(y).ticks(5)).selectAll("text").attr("fill","#D1D5DB");
-
-  chart.selectAll("rect.bar").data(data).join("rect")
-    .attr("class","bar")
-    .attr("x", d=>x(String(d.level)))
-    .attr("y", d=>y(d.count))
-    .attr("width", x.bandwidth())
-    .attr("height", d=>chartH - y(d.count))
-    .attr("fill", "rgba(37,99,235,0.9)")
-    .attr("stroke","rgba(255,255,255,0.2)");
-
-  chart.selectAll("text.barlabel").data(data).join("text")
-    .attr("class","barlabel")
-    .attr("x", d=>x(String(d.level)) + x.bandwidth()/2)
-    .attr("y", d=>y(d.count) - 6)
-    .attr("text-anchor","middle")
-    .text(d=>d.count);
-  applyReadableText(chart.selectAll("text.barlabel"), { size: 11 });
+  // evidence_status distribution
+  const statusCounts = new Map([["VERIFIED",0],["UNVERIFIED",0],["UNREVIEWED",0],["BLANK",0]]);
+  edges.forEach(e => {
+    const s = safe(e.evidence_status).toUpperCase();
+    if (!s) statusCounts.set("BLANK", statusCounts.get("BLANK")+1);
+    else if (statusCounts.has(s)) statusCounts.set(s, statusCounts.get(s)+1);
+    else statusCounts.set(s, (statusCounts.get(s)||0)+1);
+  });
+  const statusRows = Array.from(statusCounts.entries())
+    .map(([status,count]) => ({ status, count, pct: count/(totalEdges||1) }))
+    .sort((a,b)=>b.count-a.count);
 
   // OEM aggregation
   const oemAgg = new Map();
@@ -584,23 +513,9 @@ function renderGovernance(nodesAll, edgesAll){
   const oems = Array.from(oemAgg.values()).map(r => ({
     ...r,
     verified_pct: (r.l4 + r.l3) / (r.edges || 1)
-  })).sort((a,b)=>b.verified_pct - a.verified_pct).slice(0, 18);
+  })).sort((a,b)=>b.verified_pct - a.verified_pct);
 
-  renderTable(svg, {
-    title: "Top OEMs by % Verified (L3+L4)",
-    x: 760, y: 180,
-    columns: [
-      { key:"oem", label:"OEM", w: 260 },
-      { key:"edges", label:"Edges", w: 90, fmt: d=>String(d) },
-      { key:"l4", label:"L4", w: 60, fmt: d=>String(d) },
-      { key:"l3", label:"L3", w: 60, fmt: d=>String(d) },
-      { key:"l1", label:"L1", w: 60, fmt: d=>String(d) },
-      { key:"verified_pct", label:"% Verified", w: 110, fmt: d=>pct(d,1) }
-    ],
-    rows: oems
-  });
-
-  // Layer aggregation
+  // Layer aggregation (weakest first)
   const layerAgg = new Map();
   edges.forEach(e => {
     const src = nodeById.get(e.source);
@@ -622,54 +537,233 @@ function renderGovernance(nodesAll, edgesAll){
     ...r,
     verified_pct: (r.l4 + r.l3) / (r.edges || 1),
     modelled_pct: r.l1 / (r.edges || 1)
-  })).sort((a,b)=>a.verified_pct - b.verified_pct).slice(0, 18);
+  })).sort((a,b)=>a.verified_pct - b.verified_pct);
 
-  renderTable(svg, {
-    title: "Weakest Layers (lowest % Verified)",
-    x: 24, y: 460,
-    columns: [
-      { key:"layer", label:"Layer", w: 380 },
-      { key:"edges", label:"Edges", w: 90, fmt: d=>String(d) },
-      { key:"verified_pct", label:"% Verified", w: 110, fmt: d=>pct(d,1) },
-      { key:"modelled_pct", label:"% Modelled (L1)", w: 140, fmt: d=>pct(d,1) }
-    ],
-    rows: layersTbl
+  const missingRows = Object.entries(missing)
+    .map(([field,missingCount]) => ({ field, missing: missingCount, pct: missingCount/(totalEdges||1) }))
+    .sort((a,b)=>b.missing-a.missing);
+
+  // -------- HTML dashboard --------
+  const root = vizEl.append("div")
+    .attr("class","gov-root")
+    .style("width","100%")
+    .style("height","100%")
+    .style("padding","18px 18px 28px 18px")
+    .style("box-sizing","border-box");
+
+  root.append("div")
+    .style("font-size","18px")
+    .style("font-weight","700")
+    .style("color","#F9FAFB")
+    .style("margin","6px 0 10px 0")
+    .text("Governance Dashboard — Verification Coverage");
+
+  if (bannerMsg){
+    root.append("div")
+      .style("background","rgba(244,162,97,0.18)")
+      .style("border","1px solid rgba(244,162,97,0.35)")
+      .style("color","#FDE68A")
+      .style("padding","10px 12px")
+      .style("border-radius","10px")
+      .style("margin","0 0 12px 0")
+      .style("font-size","12px")
+      .text(bannerMsg);
+  }
+
+  function card(parent, title){
+    const c = parent.append("div")
+      .style("background","rgba(255,255,255,0.03)")
+      .style("border","1px solid rgba(255,255,255,0.08)")
+      .style("border-radius","12px")
+      .style("padding","12px 12px 10px 12px")
+      .style("box-sizing","border-box")
+      .style("min-height","0");
+    c.append("div")
+      .style("font-size","12px")
+      .style("color","#D1D5DB")
+      .style("margin-bottom","8px")
+      .text(title);
+    return c;
+  }
+
+  function htmlTable(parent, cols, rows, maxRows=18, maxHeight=360){
+    const wrap = parent.append("div")
+      .style("overflow","auto")
+      .style("max-height", `${maxHeight}px`)
+      .style("border-radius","10px");
+
+    const table = wrap.append("table")
+      .style("width","100%")
+      .style("border-collapse","collapse")
+      .style("font-size","12px")
+      .style("color","#E5E7EB");
+
+    const thead = table.append("thead");
+    const trh = thead.append("tr");
+
+    cols.forEach(c => trh.append("th")
+      .style("position","sticky")
+      .style("top","0")
+      .style("background","rgba(0,0,0,0.35)")
+      .style("backdrop-filter","blur(4px)")
+      .style("text-align", c.align || "left")
+      .style("padding","8px 8px")
+      .style("border-bottom","1px solid rgba(255,255,255,0.10)")
+      .text(c.label));
+
+    const tbody = table.append("tbody");
+    rows.slice(0,maxRows).forEach((r,i) => {
+      const tr = tbody.append("tr")
+        .style("background", i%2 ? "rgba(255,255,255,0.02)" : "transparent");
+      cols.forEach(c => tr.append("td")
+        .style("padding","7px 8px")
+        .style("border-bottom","1px solid rgba(255,255,255,0.06)")
+        .style("text-align", c.align || "left")
+        .text(c.fmt ? c.fmt(r[c.key], r) : (r[c.key] ?? "")));
+    });
+    return wrap;
+  }
+
+  // KPI row
+  const kpiRow = root.append("div")
+    .style("display","grid")
+    .style("grid-template-columns","repeat(8, minmax(120px, 1fr))")
+    .style("gap","10px")
+    .style("margin","0 0 12px 0");
+
+  const kpis = [
+    ["Nodes", totalNodes],
+    ["Edges", totalEdges],
+    ["L4 (Hard)", levelCounts.get(4) || 0],
+    ["L3 (Public)", levelCounts.get(3) || 0],
+    ["L2 (Trade)", levelCounts.get(2) || 0],
+    ["L1 (Modelled)", levelCounts.get(1) || 0],
+    ["Unreviewed", unreviewed],
+    ["Missing verification_level", missing["verification_level"]]
+  ];
+
+  kpis.forEach(([k,v]) => {
+    const c = card(kpiRow, k);
+    c.append("div")
+      .style("font-size","20px")
+      .style("font-weight","700")
+      .style("color","#F9FAFB")
+      .text(String(v));
   });
+
+  // Two-column layout
+  const grid = root.append("div")
+    .style("display","grid")
+    .style("grid-template-columns","minmax(520px, 1fr) minmax(520px, 1fr)")
+    .style("gap","12px");
+
+  const left = grid.append("div")
+    .style("display","flex")
+    .style("flex-direction","column")
+    .style("gap","12px")
+    .style("min-height","0");
+
+  const right = grid.append("div")
+    .style("display","flex")
+    .style("flex-direction","column")
+    .style("gap","12px")
+    .style("min-height","0");
+
+  // Chart card (SVG inside card)
+  const chartCard = card(left, "Edge Distribution by Verification Level");
+  const svgW = 520, svgH = 240, pad = {l:34,r:10,t:8,b:28};
+  const svg = chartCard.append("svg").attr("viewBox", `0 0 ${svgW} ${svgH}`);
+
+  const data = levels.map(l => ({ level: String(l), count: levelCounts.get(l) || 0 }));
+  const x = d3.scaleBand().domain(data.map(d=>d.level)).range([pad.l, svgW-pad.r]).padding(0.22);
+  const y = d3.scaleLinear().domain([0, d3.max(data, d=>d.count) || 1]).nice().range([svgH-pad.b, pad.t]);
+
+  svg.append("g")
+    .attr("transform", `translate(0,${svgH-pad.b})`)
+    .call(d3.axisBottom(x))
+    .selectAll("text").attr("fill","#D1D5DB");
+
+  svg.append("g")
+    .attr("transform", `translate(${pad.l},0)`)
+    .call(d3.axisLeft(y).ticks(5))
+    .selectAll("text").attr("fill","#D1D5DB");
+
+  svg.selectAll("rect.bar").data(data).join("rect")
+    .attr("x", d=>x(d.level))
+    .attr("y", d=>y(d.count))
+    .attr("width", x.bandwidth())
+    .attr("height", d=>(svgH-pad.b) - y(d.count))
+    .attr("fill","rgba(37,99,235,0.9)")
+    .attr("stroke","rgba(255,255,255,0.20)");
+
+  svg.selectAll("text.lbl").data(data).join("text")
+    .attr("x", d=>x(d.level) + x.bandwidth()/2)
+    .attr("y", d=>y(d.count) - 6)
+    .attr("text-anchor","middle")
+    .attr("fill","#F9FAFB")
+    .attr("stroke","rgba(0,0,0,0.85)")
+    .attr("stroke-width", 3)
+    .attr("paint-order","stroke")
+    .style("font-size","11px")
+    .text(d=>d.count);
+
+  // Weakest layers table
+  const weakCard = card(left, "Weakest Layers (lowest % Verified)");
+  htmlTable(weakCard,
+    [
+      {key:"layer", label:"Layer"},
+      {key:"edges", label:"Edges", align:"right"},
+      {key:"verified_pct", label:"% Verified", align:"right", fmt:(v)=>pct(v,1)},
+      {key:"modelled_pct", label:"% Modelled (L1)", align:"right", fmt:(v)=>pct(v,1)}
+    ],
+    layersTbl,
+    40,
+    520
+  );
+
+  // OEM table
+  const oemCard = card(right, "Top OEMs by % Verified (L3+L4)");
+  htmlTable(oemCard,
+    [
+      {key:"oem", label:"OEM"},
+      {key:"edges", label:"Edges", align:"right"},
+      {key:"l4", label:"L4", align:"right"},
+      {key:"l3", label:"L3", align:"right"},
+      {key:"l1", label:"L1", align:"right"},
+      {key:"verified_pct", label:"% Verified", align:"right", fmt:(v)=>pct(v,1)}
+    ],
+    oems,
+    40,
+    520
+  );
+
   // Evidence status table
-  const statusRows = Array.from(statusCounts.entries())
-    .map(([k,v]) => ({ status:k, count:v, pct: v/(totalEdges||1) }))
-    .sort((a,b)=>b.count-a.count);
-
-  renderTable(svg, {
-    title: "Evidence Status (edges)",
-    x: 760, y: 520,
-    columns: [
-      { key:"status", label:"Status", w: 160 },
-      { key:"count", label:"Count", w: 90, fmt: d=>String(d) },
-      { key:"pct", label:"%", w: 80, fmt: d=>pct(d,1) }
+  const statusCard = card(right, "Evidence Status (edges)");
+  htmlTable(statusCard,
+    [
+      {key:"status", label:"Status"},
+      {key:"count", label:"Count", align:"right"},
+      {key:"pct", label:"%", align:"right", fmt:(v)=>pct(v,1)}
     ],
-    rows: statusRows
-  });
+    statusRows,
+    10,
+    220
+  );
 
   // Missing fields table
-  const missingRows = Object.entries(missing)
-    .map(([k,v]) => ({ field:k, missing:v, pct: v/(totalEdges||1) }))
-    .sort((a,b)=>b.missing-a.missing)
-    .slice(0, 7);
-
-  renderTable(svg, {
-    title: "Top Missing Fields (edges)",
-    x: 760, y: 670,
-    columns: [
-      { key:"field", label:"Field", w: 220 },
-      { key:"missing", label:"Missing", w: 90, fmt: d=>String(d) },
-      { key:"pct", label:"%", w: 80, fmt: d=>pct(d,1) }
+  const missCard = card(right, "Top Missing Fields (edges)");
+  htmlTable(missCard,
+    [
+      {key:"field", label:"Field"},
+      {key:"missing", label:"Missing", align:"right"},
+      {key:"pct", label:"%", align:"right", fmt:(v)=>pct(v,1)}
     ],
-    rows: missingRows
-  });
-
-
+    missingRows,
+    12,
+    260
+  );
 }
+
 
 // ----- GRID VIEW -----
 
