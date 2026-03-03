@@ -393,9 +393,11 @@ function render() {
 // ----- Governance View -----
 
 function parseLevel(v){
-  const n = Number(safe(v));
+  const s = safe(v);
+  if (!s) return 1; // blank => modelled default
+  const n = Number(s);
   if (Number.isFinite(n) && n >= 0) return n;
-  return 1; // conservative fallback
+  return 1;
 }
 
 function pct(n, d){
@@ -459,6 +461,30 @@ function renderGovernance(nodesAll, edgesAll){
   const totalNodes = nodes.length;
   const totalEdges = edges.length;
 
+
+  // Data completeness checks
+  const fields = ["evidence_status","verification_level","verification_status","source_url","source_name","source_date","provenance_id"];
+  const missing = {};
+  fields.forEach(k => missing[k] = 0);
+  edges.forEach(e => { fields.forEach(k => { if (!safe(e[k])) missing[k] += 1; }); });
+
+  const blankVerification = missing["verification_level"];
+  const blankEvidenceStatus = missing["evidence_status"];
+
+  const bannerMsg =
+    (blankVerification / (totalEdges || 1) > 0.5)
+      ? `Most edges have no verification_level set (${blankVerification}/${totalEdges}). Dashboard is showing defaults. Populate verification_level (0–4) to get meaningful coverage.`
+      : null;
+
+  // evidence_status distribution (VERIFIED / UNVERIFIED / UNREVIEWED / blank)
+  const statusCounts = new Map([["VERIFIED",0],["UNVERIFIED",0],["UNREVIEWED",0],["BLANK",0]]);
+  edges.forEach(e => {
+    const s = safe(e.evidence_status).toUpperCase();
+    if (!s) statusCounts.set("BLANK", statusCounts.get("BLANK")+1);
+    else if (statusCounts.has(s)) statusCounts.set(s, statusCounts.get(s)+1);
+    else statusCounts.set(s, (statusCounts.get(s)||0)+1);
+  });
+
   const levels = [4,3,2,1,0];
   const levelCounts = new Map(levels.map(l => [l,0]));
   edges.forEach(e => {
@@ -477,19 +503,29 @@ function renderGovernance(nodesAll, edgesAll){
     .text("Governance Dashboard — Verification Coverage");
   applyReadableText(header, { size: 18 });
 
+  if (bannerMsg){
+    const bg = svg.append("rect").attr("x",24).attr("y",46).attr("width", w-48).attr("height", 34)
+      .attr("rx",10).attr("fill","rgba(244,162,97,0.18)").attr("stroke","rgba(244,162,97,0.35)");
+    const t = svg.append("text").attr("x", 36).attr("y", 68).text(bannerMsg);
+    applyReadableText(t, { size: 12, fill:"#FDE68A", stroke:"rgba(0,0,0,0.9)" });
+  }
+
+
   const kpi = [
     ["Nodes", totalNodes],
     ["Edges", totalEdges],
     ["L4 (Hard)", levelCounts.get(4) || 0],
     ["L3 (Public)", levelCounts.get(3) || 0],
     ["L1 (Modelled)", levelCounts.get(1) || 0],
-    ["Unreviewed", unreviewed]
+    ["Unreviewed", unreviewed],
+    ["Missing verification_level", missing["verification_level"]],
+    ["Missing source_url", missing["source_url"]]
   ];
 
   const kpiG = svg.append("g").attr("transform", "translate(24,60)");
   kpiG.selectAll("g.k").data(kpi).join("g")
     .attr("class","k")
-    .attr("transform",(d,i)=>`translate(${i*220},0)`)
+    .attr("transform",(d,i)=>`translate(${(i%4)*340},${Math.floor(i/4)*64})`)
     .each(function(d){
       const g = d3.select(this);
       g.append("text").attr("x",0).attr("y",18).text(d[0]);
@@ -499,7 +535,7 @@ function renderGovernance(nodesAll, edgesAll){
     });
 
   // Mini chart
-  const chartX = 24, chartY = 130, chartW = 620, chartH = 220;
+  const chartX = 24, chartY = 150, chartW = 620, chartH = 220;
   const chart = svg.append("g").attr("transform", `translate(${chartX},${chartY})`);
 
   chart.append("text").attr("x",0).attr("y",-10).text("Edge Distribution by Verification Level");
@@ -599,6 +635,40 @@ function renderGovernance(nodesAll, edgesAll){
     ],
     rows: layersTbl
   });
+  // Evidence status table
+  const statusRows = Array.from(statusCounts.entries())
+    .map(([k,v]) => ({ status:k, count:v, pct: v/(totalEdges||1) }))
+    .sort((a,b)=>b.count-a.count);
+
+  renderTable(svg, {
+    title: "Evidence Status (edges)",
+    x: 680, y: 390,
+    columns: [
+      { key:"status", label:"Status", w: 160 },
+      { key:"count", label:"Count", w: 90, fmt: d=>String(d) },
+      { key:"pct", label:"%", w: 80, fmt: d=>pct(d,1) }
+    ],
+    rows: statusRows
+  });
+
+  // Missing fields table
+  const missingRows = Object.entries(missing)
+    .map(([k,v]) => ({ field:k, missing:v, pct: v/(totalEdges||1) }))
+    .sort((a,b)=>b.missing-a.missing)
+    .slice(0, 7);
+
+  renderTable(svg, {
+    title: "Top Missing Fields (edges)",
+    x: 680, y: 560,
+    columns: [
+      { key:"field", label:"Field", w: 220 },
+      { key:"missing", label:"Missing", w: 90, fmt: d=>String(d) },
+      { key:"pct", label:"%", w: 80, fmt: d=>pct(d,1) }
+    ],
+    rows: missingRows
+  });
+
+
 }
 
 // ----- GRID VIEW -----
