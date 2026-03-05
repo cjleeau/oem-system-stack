@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Global OEM System Stack — Interactive</title>
+  <title>OEM System Stack Intelligence — Interactive</title>
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
   <!-- Google tag (gtag.js) -->
@@ -20,10 +20,11 @@
 <body>
   <header>
     <div class="titlebar">
-      <h1>Global OEM System Stack</h1>
+      <h1>OEM System Stack Intelligence</h1>
       <div class="tabs">
         <button id="tab-grid" class="tab active">Grid</button>
         <button id="tab-network" class="tab">Network</button>
+        <button id="tab-architecture" class="tab" type="button">Architecture</button>
         <button id="tab-governance" class="tab" type="button">Governance</button>
       </div>
     </div>
@@ -58,6 +59,10 @@
       <label style="margin-left:12px;">
         <input type="checkbox" id="evidenceOnly" />
         Evidence Only (VERIFIED)
+      </label>
+      <label style="margin-left:12px;">
+        <input type="checkbox" id="archTight" />
+        Architecture Tight Mode
       </label>
       </div>
   </header>
