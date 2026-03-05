@@ -1,7 +1,7 @@
-# Global OEM System Stack – D3 Intelligence Model
+# OEM System Stack Intelligence – D3 Intelligence Model
 
-- Version: v5.0 (Phase 10)
-- Created: 2026-03-03
+- Version: v7.0 (Phase 11)
+- Created: 2026-03-05
 
 ## Overview
 This project models the global automotive OEM digital ecosystem using a layered systems architecture and D3 visualisation.
@@ -11,7 +11,7 @@ This model blends regulatory evidence, public disclosures, and structured archit
 Relationships are tagged by verification level to distinguish confirmed partnerships from modelled system dependencies.
 
 ## Core Capabilities
-- Grid (default) and Network view
+- Grid (default), Network, and Architecture view (layered lanes)
 - CSV-driven architecture
 - Telemetry filter
 - Evidence-only (VERIFIED) filter
@@ -57,4 +57,6 @@ In Evidence Only mode:
 - v5.0 – Provenance + documentation + branding
 - v6.0 - UX hardening and governance ergonomics
 
-
+## Analytics
+- Google Analytics (gtag) is loaded in index.html.
+- app.js emits a lightweight `view_change` event and a `page_view` on tab switches when `gtag` is available.
