@@ -34,7 +34,7 @@ const vizEl = d3.select("#viz");
 const tooltip = d3.select("#tooltip");
 
 const state = {
-  view: "grid", // grid | network | architecture | governance
+  view: "grid", // grid | network | architecture | governance | docs
   region: "all",
   oem: "all",
   layer: "all",
@@ -43,7 +43,6 @@ const state = {
   search: "",
   telemetryOnly: false,
   evidenceOnly: false,
-      archTight: false,
   archTight: false
 };
 
@@ -316,14 +315,15 @@ Promise.all([
   const tabNet = document.querySelector("#tab-network");
   const tabArch = document.querySelector("#tab-architecture");
   const tabGov = document.querySelector("#tab-governance");
+  const tabDocs = document.querySelector("#tab-docs") || document.querySelector("#tab-documentation");
 
   function setView(v){
     state.view = v;
     if (tabGrid) tabGrid.classList.toggle("active", v==="grid");
     if (tabNet) tabNet.classList.toggle("active", v==="network");
-    if (tabGrid) tabGrid.classList.toggle("active", v==="grid");
     if (tabArch) tabArch.classList.toggle("active", v==="architecture");
     if (tabGov) tabGov.classList.toggle("active", v==="governance");
+    if (tabDocs) tabDocs.classList.toggle("active", v==="docs");
     trackView(v);
     render();
   }
@@ -331,6 +331,44 @@ Promise.all([
   if (tabNet) tabNet.addEventListener("click", ()=>setView("network"));
   if (tabArch) tabArch.addEventListener("click", ()=>setView("architecture"));
   if (tabGov) tabGov.addEventListener("click", ()=>setView("governance"));
+  if (tabDocs) tabDocs.addEventListener("click", ()=>setView("docs"));
+function ensureCheckbox(id, labelText, defaultChecked=false) {
+  // If checkbox exists, do nothing.
+  if (document.querySelector(`#${id}`)) return;
+  const host = document.querySelector("#controls") || document.querySelector(".controls") || document.querySelector("header") || document.body;
+  // Try to anchor near evidenceOnly if present
+  const evidenceHost = document.querySelector("#evidenceOnly")?.closest("label") || document.querySelector("#evidenceOnly")?.parentElement;
+  const wrap = document.createElement("label");
+  wrap.style.display = "inline-flex";
+  wrap.style.alignItems = "center";
+  wrap.style.gap = "8px";
+  wrap.style.marginLeft = "10px";
+  wrap.style.fontSize = "12px";
+  wrap.style.color = "#D1D5DB";
+
+  const cb = document.createElement("input");
+  cb.type = "checkbox";
+  cb.id = id;
+  cb.checked = !!defaultChecked;
+  cb.style.transform = "translateY(1px)";
+
+  const txt = document.createElement("span");
+  txt.textContent = labelText;
+
+  wrap.appendChild(cb);
+  wrap.appendChild(txt);
+
+  if (evidenceHost && evidenceHost.parentElement) {
+    evidenceHost.parentElement.appendChild(wrap);
+  } else {
+    host.appendChild(wrap);
+  }
+}
+
+// Ensure both checkboxes exist (some versions of index.html may be missing one)
+ensureCheckbox("telemetryOnly", "Telemetry only", false);
+ensureCheckbox("evidenceOnly", "Evidence only", false);
+ensureCheckbox("archTight", "Tight architecture lanes", false);
 
   // Controls
   const regionSel = document.querySelector("#region");
@@ -366,7 +404,8 @@ Promise.all([
       confidence: "all",
       search: "",
       telemetryOnly: false,
-      evidenceOnly: false
+      evidenceOnly: false,
+      archTight: false
     });
 
     if (regionSel) regionSel.value = "all";
@@ -383,6 +422,7 @@ Promise.all([
     if (tabNet) tabNet.classList.remove("active");
     if (tabArch) tabArch.classList.remove("active");
     if (tabGov) tabGov.classList.remove("active");
+    if (tabDocs) tabDocs.classList.remove("active");
 
     render();
   });
@@ -393,12 +433,16 @@ Promise.all([
 function render() {
   if (!_nodesAll || !_edgesAll) return;
 
-  if (state.view !== "governance") rebuildDependentDropdowns(_nodesAll);
+  if (state.view !== "governance" && state.view !== "docs") rebuildDependentDropdowns(_nodesAll);
 
   vizEl.selectAll("*").remove();
 
   if (state.view === "governance") {
     renderGovernance(_nodesAll, _edgesAll);
+    return;
+  }
+  if (state.view === "docs") {
+    renderDocs();
     return;
   }
 
@@ -787,6 +831,68 @@ function renderGovernance(nodesAll, edgesAll){
 }
 
 
+
+// ----- DOCS VIEW -----
+function renderDocs(){
+  // Lightweight in-app documentation (keeps the project self-explanatory on GitHub Pages)
+  const root = vizEl.append("div")
+    .attr("class","docs-root")
+    .style("width","100%")
+    .style("height","100%")
+    .style("padding","18px 18px 28px 18px")
+    .style("box-sizing","border-box")
+    .style("color","#E5E7EB")
+    .style("font-size","13px")
+    .style("line-height","1.55");
+
+  root.append("div")
+    .style("font-size","22px")
+    .style("font-weight","800")
+    .style("color","#F9FAFB")
+    .style("margin","6px 0 10px 0")
+    .text("Documentation");
+
+  root.append("div")
+    .style("opacity",".9")
+    .style("max-width","980px")
+    .html(`
+      <p><strong>Global OEM System Stack</strong> is a CSV-driven, evidence-aware map of OEM ecosystems.</p>
+      <p>This app renders the dataset in 3 ways:</p>
+      <ul>
+        <li><strong>Grid</strong> — quick scan by OEM × layer</li>
+        <li><strong>Network</strong> — relationship graph</li>
+        <li><strong>Architecture</strong> — layered lanes (best for “telemetry path” reading)</li>
+        <li><strong>Governance</strong> — verification coverage and missing-evidence hotspots</li>
+      </ul>
+
+      <h3 style="margin:16px 0 6px 0;color:#F9FAFB">Filters & behaviour</h3>
+      <ul>
+        <li><strong>Evidence only</strong> shows edges that look “defensible” (VERIFIED, verified_edge=true, or a non-empty source_url) and restricts nodes to connected endpoints.</li>
+        <li><strong>Telemetry only</strong> filters edges down to your telemetry relationship set (ingest/stream/store/process/transfer etc.).</li>
+        <li>Disabled dropdown options mean “no data exists for that selection under the current filter state”.</li>
+      </ul>
+
+      <h3 style="margin:16px 0 6px 0;color:#F9FAFB">Data files</h3>
+      <p>The app loads:</p>
+      <pre style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:10px;border-radius:10px;overflow:auto">/docs/data/nodes.csv
+/docs/data/edges.csv</pre>
+
+      <p>Keep the schema stable. If you add columns, keep existing ones untouched and add new fields at the end.</p>
+
+      <h3 style="margin:16px 0 6px 0;color:#F9FAFB">Evidence model (recommended)</h3>
+      <ul>
+        <li><strong>verification_level</strong>: 4=VERIFIED (OEM primary), 3=PUBLIC_INDIRECT, 2=TRADE/secondary, 1=MODELLED/ASSUMED, 0=UNREVIEWED</li>
+        <li><strong>evidence_status</strong>: VERIFIED / UNVERIFIED / UNREVIEWED (or blank)</li>
+        <li><strong>source_name</strong>, <strong>source_url</strong>, <strong>evidence_note</strong>: required for anything you want to present as defensible</li>
+      </ul>
+
+      <h3 style="margin:16px 0 6px 0;color:#F9FAFB">Next improvements</h3>
+      <ul>
+        <li>Add a <em>“schema validator”</em> panel that flags invalid enums, missing required fields, and duplicate IDs.</li>
+        <li>Add a <em>“telemetry pathway”</em> highlight mode (trace from TCU → connectivity → cloud → lake/stream → analytics/API).</li>
+      </ul>
+    `);
+}
 
 // ----- ARCHITECTURE VIEW (layered lanes, zoom/pan) -----
 function renderArchitecture(nodes, edges){
