@@ -877,8 +877,6 @@ function renderDocs(){
       <pre style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:10px;border-radius:10px;overflow:auto">/docs/data/nodes.csv
 /docs/data/edges.csv</pre>
 
-      <p>Keep the schema stable. If you add columns, keep existing ones untouched and add new fields at the end.</p>
-
       <h3 style="margin:16px 0 6px 0;color:#F9FAFB">Evidence model (recommended)</h3>
       <ul>
         <li><strong>verification_level</strong>: 4=VERIFIED (OEM primary), 3=PUBLIC_INDIRECT, 2=TRADE/secondary, 1=MODELLED/ASSUMED, 0=UNREVIEWED</li>
