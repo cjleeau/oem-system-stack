@@ -1,5 +1,11 @@
 # Changelog
 
+## v7.0 (Phase 11)
+- Added **Architecture** tab (layered swimlane view for “how the stack hangs together”)
+- Added optional **Architecture Tight Mode** for readability
+- Added Google Analytics tab-change tracking (gtag `view_change` + `page_view`)
+- Renamed app title to “OEM System Stack Intelligence”
+
 ## v6.0 (Phase 10)
 - Fixed Reset button (state + UI sync)
 - Dropdown options disabled/greyed when unavailable under current selections
