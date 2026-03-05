@@ -12,29 +12,22 @@ const LAYERS = [
   "Telematics & TCU",
   "Connectivity Providers",
   "Cloud Infrastructure",
-  "Streaming & Data Lake",
-  "Data Governance & Sovereignty",
-  "AI / Analytics",
-  "Product APIs",
-  "Dealer Systems",
+  "ADAS & Mapping",
+  "Dealer & Retail Tech",
+  "Fleet & Commercial",
   "Finance & Insurance",
-  "External Insurance & Risk Ecosystem",
-  "Fleet & Enterprise Integrations",
   "Regulators",
-  "Energy & Charging"
+  "Security & Identity",
+  "Data Platforms & Analytics",
+  "Developer & API Ecosystem",
+  "Customer Apps & Portals",
+  "Mobility Services"
 ];
 
-const TELEMETRY_RELATIONS = new Set([
-  "ROUTES DATA","INGESTS","STREAMS","STORES","PROCESSES","EXPOSES DATA",
-  "HOSTS TELEMETRY","DATA LOCALIZATION REQUIRED","MANDATORY REPORTING",
-  "TRANSFERS DATA"
-]);
-
-const vizEl = d3.select("#viz");
-const tooltip = d3.select("#tooltip");
+const CONFIDENCE_ENUM = ["hard","high","medium","soft"];
 
 const state = {
-  view: "grid", // grid | network | governance
+  view: "grid", // grid | network | architecture | governance | docs
   region: "all",
   oem: "all",
   layer: "all",
@@ -51,24 +44,94 @@ function uniq(arr) { return Array.from(new Set(arr)).sort((a,b)=>a.localeCompare
 
 function applyReadableText(textSel, opts = {}) {
   const size = opts.size ?? 12;
-  const fill = opts.fill ?? "#F9FAFB";
-  const stroke = opts.stroke ?? "rgba(0,0,0,0.85)";
-  const strokeWidth = opts.strokeWidth ?? 3;
-  textSel.attr("font-size", size).attr("opacity", 1).attr("fill", fill)
-    .attr("stroke", stroke).attr("stroke-width", strokeWidth).attr("paint-order", "stroke");
+  const fill =
+    opts.fill ??
+    getComputedStyle(document.documentElement).getPropertyValue("--label")?.trim() ||
+    "#E5E7EB";
+  textSel
+    .style("font-family", "Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif")
+    .style("font-size", `${size}px`)
+    .style("font-weight", opts.weight ?? 600)
+    .style("fill", fill)
+    .style("paint-order", "stroke")
+    .style("stroke", "rgba(0,0,0,.55)")
+    .style("stroke-width", "3px");
+}
+
+function clampEnum(v, allowed){
+  const s = norm(v);
+  if (!s) return "";
+  return allowed.includes(s) ? s : "";
+}
+
+function hasCol(obj, col){ return obj && Object.prototype.hasOwnProperty.call(obj, col); }
+
+const tip = document.querySelector("#tip");
+function showTip(html, x, y){
+  if (!tip) return;
+  tip.innerHTML = html;
+  tip.style.left = `${x+14}px`;
+  tip.style.top = `${y+14}px`;
+  tip.style.opacity = 1;
+}
+function hideTip(){
+  if (!tip) return;
+  tip.style.opacity = 0;
+}
+
+function showNodeTip(evt, d){
+  const html = `
+    <div style="font-weight:700;margin-bottom:6px">${safe(d.label)}</div>
+    <div style="opacity:.9">
+      <div><span style="opacity:.7">id:</span> ${safe(d.id)}</div>
+      <div><span style="opacity:.7">type:</span> ${safe(d.type)}</div>
+      <div><span style="opacity:.7">layer:</span> ${safe(d.layer)}</div>
+      <div><span style="opacity:.7">region:</span> ${safe(d.region)}</div>
+      <div><span style="opacity:.7">oem:</span> ${safe(d.oem_group)}</div>
+      ${hasCol(d,"confidence") ? `<div><span style="opacity:.7">confidence:</span> ${safe(d.confidence)}</div>` : ""}
+      ${hasCol(d,"control_boundary") ? `<div><span style="opacity:.7">boundary:</span> ${safe(d.control_boundary)}</div>` : ""}
+    </div>`;
+  showTip(html, evt.clientX, evt.clientY);
+}
+
+function showEdgeTip(evt, e){
+  const html = `
+    <div style="font-weight:700;margin-bottom:6px">${safe(e.relationship) || "relationship"}</div>
+    <div style="opacity:.9">
+      <div><span style="opacity:.7">source:</span> ${safe(e.source)}</div>
+      <div><span style="opacity:.7">target:</span> ${safe(e.target)}</div>
+      <div><span style="opacity:.7">layer:</span> ${safe(e.layer)}</div>
+      <div><span style="opacity:.7">region:</span> ${safe(e.region)}</div>
+      <div><span style="opacity:.7">evidence_status:</span> ${safe(e.evidence_status)}</div>
+      <div><span style="opacity:.7">verification_level:</span> ${safe(e.verification_level)}</div>
+      ${safe(e.source_name) ? `<div style="margin-top:6px"><span style="opacity:.7">source:</span> ${safe(e.source_name)}</div>` : ""}
+      ${safe(e.source_url) ? `<div><span style="opacity:.7">url:</span> ${safe(e.source_url)}</div>` : ""}
+      ${safe(e.evidence_note) ? `<div style="margin-top:6px;opacity:.85">${safe(e.evidence_note)}</div>` : ""}
+    </div>`;
+  showTip(html, evt.clientX, evt.clientY);
 }
 
 function nodeFill(d){
-  if (d.control_boundary === "regulatory") return "#F4A261";
-  if (d.control_boundary === "external") return "#6C8CFF";
-  return "#3B82F6";
+  const t = norm(d.type);
+  if (t.includes("oem")) return "#16A34A";
+  if (t.includes("platform") || t.includes("software")) return "#8B5CF6";
+  if (t.includes("supplier")) return "#F59E0B";
+  if (t.includes("cloud")) return "#3B82F6";
+  if (t.includes("regulator")) return "#EF4444";
+  return "#6B7280";
 }
 
-function isVerifiedEdge(e){
-  const status = safe(e.evidence_status).toUpperCase();
-  const verifiedBool = (e.verified_edge === true) || (safe(e.verified_edge).toLowerCase() === "true");
-  const hasUrl = !!safe(e.source_url);
-  return status === "VERIFIED" || verifiedBool || hasUrl;
+function edgeDash(e){
+  const rel = norm(e.relationship);
+  if (rel.includes("potential") || rel.includes("assumed")) return "6 4";
+  const status = norm(e.evidence_status);
+  if (status === "inferred" || status === "modelled" || status === "assumed") return "6 4";
+  return null;
+}
+
+function isTelemetryEdge(e){
+  const rel = norm(e.relationship);
+  return rel.includes("telemetry") || rel.includes("ingest") || rel.includes("v2c") || rel.includes("vehicle-to-cloud");
 }
 
 function isEvidencePass(e){
@@ -79,312 +142,165 @@ function isEvidencePass(e){
   return status === "VERIFIED" || verifiedBool || (hasLvl && lvl >= 3);
 }
 
-function isTelemetryEdge(e){
-  const rel = safe(e.relation);
-  const telemetryBool = (e.telemetry_edge === true) || (safe(e.telemetry_edge).toLowerCase() === "true");
-  return telemetryBool || TELEMETRY_RELATIONS.has(rel);
+const root = d3.select(document.documentElement);
+
+const vizEl = d3.select("#viz");
+
+const selRegion = document.querySelector("#sel-region");
+const selOEM = document.querySelector("#sel-oem");
+const selLayer = document.querySelector("#sel-layer");
+const selType = document.querySelector("#sel-type");
+const selConfidence = document.querySelector("#sel-confidence");
+const inpSearch = document.querySelector("#inp-search");
+const chkTelemetry = document.querySelector("#chk-telemetry");
+const chkEvidence = document.querySelector("#chk-evidence");
+const btnReset = document.querySelector("#btn-reset");
+
+let _nodesAll = [];
+let _edgesAll = [];
+let _oems = [];
+let _regions = [];
+let _types = [];
+let _layers = [];
+
+function setDisabled(selectEl, disabled){
+  if (!selectEl) return;
+  selectEl.disabled = !!disabled;
+  selectEl.classList.toggle("disabled", !!disabled);
 }
 
-function edgeDash(e){ return isVerifiedEdge(e) ? "0" : "5 4"; }
+function setOptionDisabled(selectEl, value, disabled){
+  if (!selectEl) return;
+  const opt = Array.from(selectEl.options).find(o => o.value === value);
+  if (!opt) return;
+  opt.disabled = !!disabled;
+}
 
-function matchesNodeFilters(n, override = {}) {
-  const region = override.region ?? state.region;
-  const oem = override.oem ?? state.oem;
-  const layer = override.layer ?? state.layer;
-  const type = override.type ?? state.type;
-  const confidence = override.confidence ?? state.confidence;
-  const search = override.search ?? state.search;
+function rebuildDependentDropdowns(nodes){
+  // Grey-out dropdowns/options that have no data in current filtered set.
+  // Build availability sets based on current filters except the dropdown being rebuilt.
 
-  if (region !== "all" && n.region !== region) return false;
-  if (oem !== "all" && n.oem_group !== oem) return false;
-  if (layer !== "all" && n.layer !== layer) return false;
-  if (type !== "all" && n.node_type !== type) return false;
-  if (confidence !== "all" && n.confidence !== confidence) return false;
+  const regionVals = new Set(nodes.map(d => safe(d.region)));
+  const oemVals = new Set(nodes.map(d => safe(d.oem_group)));
+  const layerVals = new Set(nodes.map(d => safe(d.layer)));
+  const typeVals = new Set(nodes.map(d => safe(d.type)));
+  const confVals = new Set(nodes.map(d => safe(d.confidence)));
 
-  if (search) {
-    const q = norm(search);
-    const hay = norm(`${n.label} ${n.id} ${n.notes ?? ""}`);
-    if (!hay.includes(q)) return false;
+  // Disable whole dropdown if only "all" would remain
+  const regionHas = regionVals.size > 0;
+  const oemHas = oemVals.size > 0;
+  const layerHas = layerVals.size > 0;
+  const typeHas = typeVals.size > 0;
+  const confHas = confVals.size > 0;
+
+  setDisabled(selRegion, !regionHas);
+  setDisabled(selOEM, !oemHas);
+  setDisabled(selLayer, !layerHas);
+  setDisabled(selType, !typeHas);
+
+  // Confidence may not exist in schema; guard
+  if (selConfidence) setDisabled(selConfidence, !confHas);
+
+  // Grey-out options
+  if (selRegion) {
+    Array.from(selRegion.options).forEach(o => {
+      if (o.value === "all") return;
+      o.disabled = !regionVals.has(o.value);
+    });
+  }
+  if (selOEM) {
+    Array.from(selOEM.options).forEach(o => {
+      if (o.value === "all") return;
+      o.disabled = !oemVals.has(o.value);
+    });
+  }
+  if (selLayer) {
+    Array.from(selLayer.options).forEach(o => {
+      if (o.value === "all") return;
+      o.disabled = !layerVals.has(o.value);
+    });
+  }
+  if (selType) {
+    Array.from(selType.options).forEach(o => {
+      if (o.value === "all") return;
+      o.disabled = !typeVals.has(o.value);
+    });
+  }
+  if (selConfidence) {
+    Array.from(selConfidence.options).forEach(o => {
+      if (o.value === "all") return;
+      o.disabled = !confVals.has(o.value);
+    });
+  }
+}
+
+function populateSelect(selectEl, values){
+  if (!selectEl) return;
+  const cur = selectEl.value || "all";
+  selectEl.innerHTML = "";
+  const optAll = document.createElement("option");
+  optAll.value = "all";
+  optAll.textContent = "All";
+  selectEl.appendChild(optAll);
+  values.forEach(v => {
+    const o = document.createElement("option");
+    o.value = v;
+    o.textContent = v;
+    selectEl.appendChild(o);
+  });
+  selectEl.value = Array.from(selectEl.options).some(o => o.value === cur) ? cur : "all";
+}
+
+function matchesNodeFilters(n){
+  if (state.region !== "all" && safe(n.region) !== state.region) return false;
+  if (state.oem !== "all" && safe(n.oem_group) !== state.oem) return false;
+  if (state.layer !== "all" && safe(n.layer) !== state.layer) return false;
+  if (state.type !== "all" && safe(n.type) !== state.type) return false;
+  if (state.confidence !== "all" && safe(n.confidence) !== state.confidence) return false;
+  if (state.search) {
+    const hay = `${safe(n.label)} ${safe(n.description)} ${safe(n.id)} ${safe(n.oem_group)} ${safe(n.layer)} ${safe(n.type)}`.toLowerCase();
+    if (!hay.includes(state.search.toLowerCase())) return false;
   }
   return true;
 }
 
-function filterEdges(edges, nodeById) {
-  return edges
-    .filter(e => nodeById.has(e.source) && nodeById.has(e.target))
+function filterEdges(edgesAll, nodeById){
+  return edgesAll
+    .filter(e => nodeById.get(e.source) && nodeById.get(e.target))
+    .filter(e => state.region==="all" || safe(e.region)===state.region)
+    .filter(e => state.layer==="all" || safe(e.layer)===state.layer)
     .filter(e => !state.telemetryOnly || isTelemetryEdge(e))
     .filter(e => !state.evidenceOnly || isEvidencePass(e));
 }
 
-function restrictNodesToEdges(nodes, edges) {
-  if (!state.evidenceOnly) return nodes;
+function restrictNodesToEdges(nodes, edges){
   const keep = new Set();
   edges.forEach(e => { keep.add(e.source); keep.add(e.target); });
   return nodes.filter(n => keep.has(n.id));
 }
 
-// ---------- Dependent dropdown disabling ----------
+function resetUI(){
+  state.view = "grid";
+  state.region = "all";
+  state.oem = "all";
+  state.layer = "all";
+  state.type = "all";
+  state.confidence = "all";
+  state.search = "";
+  state.telemetryOnly = false;
+  state.evidenceOnly = false;
 
-function setOptionsWithDisable(selectEl, values, isEnabledFn) {
-  const current = selectEl.value || "all";
-  selectEl.innerHTML = "";
-
-  const optAll = document.createElement("option");
-  optAll.value = "all";
-  optAll.textContent = "All";
-  optAll.disabled = false;
-  selectEl.appendChild(optAll);
-
-  values.forEach(v => {
-    const opt = document.createElement("option");
-    opt.value = v;
-    opt.textContent = v;
-    opt.disabled = !isEnabledFn(v);
-    selectEl.appendChild(opt);
-  });
-
-  const stillThere = Array.from(selectEl.options).some(o => o.value === current && !o.disabled);
-  selectEl.value = stillThere ? current : "all";
+  if (selRegion) selRegion.value = "all";
+  if (selOEM) selOEM.value = "all";
+  if (selLayer) selLayer.value = "all";
+  if (selType) selType.value = "all";
+  if (selConfidence) selConfidence.value = "all";
+  if (inpSearch) inpSearch.value = "";
+  if (chkTelemetry) chkTelemetry.checked = false;
+  if (chkEvidence) chkEvidence.checked = false;
 }
 
-function rebuildDependentDropdowns(nodesAll) {
-  const regionSel = document.querySelector("#region");
-  const oemSel = document.querySelector("#oem");
-  const layerSel = document.querySelector("#layer");
-  const typeSel = document.querySelector("#type");
-  const confSel = document.querySelector("#confidence");
-  if (!regionSel || !oemSel || !layerSel || !typeSel || !confSel) return;
-
-  const regions = uniq(nodesAll.map(d => d.region));
-  const oems = uniq(nodesAll.map(d => d.oem_group));
-  const types = uniq(nodesAll.map(d => d.node_type));
-  const confs = uniq(nodesAll.map(d => d.confidence));
-
-  function existsWith(override) { return nodesAll.some(n => matchesNodeFilters(n, override)); }
-
-  setOptionsWithDisable(regionSel, regions, (v) =>
-    existsWith({ region: v, oem: state.oem, layer: state.layer, type: state.type, confidence: state.confidence, search: state.search })
-  );
-  setOptionsWithDisable(oemSel, oems, (v) =>
-    existsWith({ region: state.region, oem: v, layer: state.layer, type: state.type, confidence: state.confidence, search: state.search })
-  );
-  setOptionsWithDisable(layerSel, LAYERS, (v) =>
-    existsWith({ region: state.region, oem: state.oem, layer: v, type: state.type, confidence: state.confidence, search: state.search })
-  );
-  setOptionsWithDisable(typeSel, types, (v) =>
-    existsWith({ region: state.region, oem: state.oem, layer: state.layer, type: v, confidence: state.confidence, search: state.search })
-  );
-  setOptionsWithDisable(confSel, confs, (v) =>
-    existsWith({ region: state.region, oem: state.oem, layer: state.layer, type: state.type, confidence: v, search: state.search })
-  );
-
-  state.region = regionSel.value;
-  state.oem = oemSel.value;
-  state.layer = layerSel.value;
-  state.type = typeSel.value;
-  state.confidence = confSel.value;
-}
-
-// ---------- Tooltip with greyed-out empty fields ----------
-
-function fieldRow(label, value) {
-  const v = safe(value);
-  if (!v) return `<div style="opacity:.45"><strong>${label}:</strong> —</div>`;
-  return `<div><strong>${label}:</strong> ${v}</div>`;
-}
-
-function evidenceBlock(d){
-  const rows = [
-    fieldRow("Evidence status", d.evidence_status),
-    fieldRow("Evidence class", d.evidence_class),
-    fieldRow("Verification level", d.verification_level),
-    fieldRow("Verification status", d.verification_status),
-    fieldRow("Source", d.source_name),
-    fieldRow("Date", d.source_date),
-    fieldRow("Evidence note", d.evidence_note),
-    fieldRow("URL", d.source_url),
-    fieldRow("Provenance ID", d.provenance_id),
-    fieldRow("Citation required", d.citation_required),
-    fieldRow("Last validated", d.last_validated_date),
-    fieldRow("Last reviewed", d.last_reviewed),
-    fieldRow("Owner", d.verification_owner)
-  ];
-  return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.12)">${rows.join("")}</div>`;
-}
-
-function showTip(evt, d) {
-  tooltip.style("display","block")
-    .style("left", (evt.pageX + 12) + "px")
-    .style("top", (evt.pageY + 12) + "px")
-    .html(`
-      <div><strong>${safe(d.label)}</strong></div>
-      <div style="opacity:.85">${safe(d.region)} • ${safe(d.layer)}</div>
-      <div style="opacity:.85">${safe(d.node_type)} • ${safe(d.control_boundary)} • ${safe(d.confidence)}</div>
-      ${fieldRow("Notes", d.notes)}
-      ${evidenceBlock(d)}
-    `);
-}
-
-function showEdgeTip(evt, e) {
-  tooltip.style("display","block")
-    .style("left", (evt.pageX + 12) + "px")
-    .style("top", (evt.pageY + 12) + "px")
-    .html(`
-      <div><strong>${safe(e.relation)}</strong></div>
-      <div style="opacity:.85">${safe(e.region)} • ${safe(e.confidence)}</div>
-      ${fieldRow("Notes", e.notes)}
-      ${evidenceBlock(e)}
-    `);
-}
-
-function hideTip(){ tooltip.style("display","none"); }
-
-// ---------- Load + render ----------
-
-let _nodesAll = null;
-let _edgesAll = null;
-
-Promise.all([
-  d3.csv("data/nodes.csv", d3.autoType),
-  d3.csv("data/edges.csv", d3.autoType)
-]).then(([nodesRaw, edgesRaw]) => {
-
-  _nodesAll = nodesRaw.map(d => ({
-    ...d,
-    id: safe(d.id),
-    label: safe(d.label),
-    region: safe(d.region),
-    layer: safe(d.layer),
-    oem_group: safe(d.oem_group),
-    node_type: safe(d.node_type),
-    control_boundary: safe(d.control_boundary),
-    confidence: safe(d.confidence),
-    notes: d.notes ?? "",
-
-    source_name: d.source_name ?? "",
-    source_url: d.source_url ?? "",
-    source_date: d.source_date ?? "",
-    evidence_note: d.evidence_note ?? "",
-    evidence_status: safe(d.evidence_status).toUpperCase(),
-    provenance_id: d.provenance_id ?? "",
-    citation_required: d.citation_required ?? "",
-    last_validated_date: d.last_validated_date ?? "",
-
-    evidence_class: d.evidence_class ?? "",
-    verification_level: d.verification_level ?? "",
-    verification_status: d.verification_status ?? "",
-    verification_owner: d.verification_owner ?? "",
-    last_reviewed: d.last_reviewed ?? ""
-  }))
-  .map(d => ({...d, layerIndex: LAYERS.indexOf(d.layer)}))
-  .filter(d => d.layerIndex >= 0);
-
-  _edgesAll = edgesRaw.map(e => ({
-    ...e,
-    id: safe(e.id),
-    source: safe(e.source),
-    target: safe(e.target),
-    relation: safe(e.relation),
-    confidence: safe(e.confidence),
-    region: safe(e.region),
-    notes: e.notes ?? "",
-
-    source_name: e.source_name ?? "",
-    source_url: e.source_url ?? "",
-    source_date: e.source_date ?? "",
-    evidence_note: e.evidence_note ?? "",
-    evidence_status: safe(e.evidence_status).toUpperCase(),
-    telemetry_edge: e.telemetry_edge,
-    verified_edge: e.verified_edge,
-    provenance_id: e.provenance_id ?? "",
-    citation_required: e.citation_required ?? "",
-    last_validated_date: e.last_validated_date ?? "",
-
-    evidence_class: e.evidence_class ?? "",
-    verification_level: e.verification_level ?? "",
-    verification_status: e.verification_status ?? "",
-    verification_owner: e.verification_owner ?? "",
-    last_reviewed: e.last_reviewed ?? ""
-  }));
-
-  // Tabs
-  const tabGrid = document.querySelector("#tab-grid");
-  const tabNet = document.querySelector("#tab-network");
-  const tabGov = document.querySelector("#tab-governance");
-  const tabDocs = document.querySelector("#tab-docs");
-
-  function setView(v){
-    state.view = v;
-    if (tabGrid) tabGrid.classList.toggle("active", v==="grid");
-    if (tabNet) tabNet.classList.toggle("active", v==="network");
-    if (tabGov) tabGov.classList.toggle("active", v==="governance");
-    if (tabDocs) tabDocs.classList.toggle("active", v==="docs");
-    render();
-  }
-  if (tabGrid) tabGrid.addEventListener("click", ()=>setView("grid"));
-  if (tabNet) tabNet.addEventListener("click", ()=>setView("network"));
-  if (tabGov) tabGov.addEventListener("click", ()=>setView("governance"));
-  if (tabDocs) tabDocs.addEventListener("click", ()=>setView("docs"));
-
-  // Controls
-  const regionSel = document.querySelector("#region");
-  const oemSel = document.querySelector("#oem");
-  const layerSel = document.querySelector("#layer");
-  const typeSel = document.querySelector("#type");
-  const confSel = document.querySelector("#confidence");
-  const searchEl = document.querySelector("#search");
-  const telem = document.querySelector("#telemetryOnly");
-  const evidence = document.querySelector("#evidenceOnly");
-  const resetBtn = document.querySelector("#reset");
-
-  if (regionSel) regionSel.addEventListener("change", (e)=>{ state.region=e.target.value; render(); });
-  if (oemSel) oemSel.addEventListener("change", (e)=>{ state.oem=e.target.value; render(); });
-  if (layerSel) layerSel.addEventListener("change", (e)=>{ state.layer=e.target.value; render(); });
-  if (typeSel) typeSel.addEventListener("change", (e)=>{ state.type=e.target.value; render(); });
-  if (confSel) confSel.addEventListener("change", (e)=>{ state.confidence=e.target.value; render(); });
-
-  if (searchEl) searchEl.addEventListener("input", (e)=>{ state.search=e.target.value; render(); });
-  if (telem) telem.addEventListener("change", (e)=>{ state.telemetryOnly=e.target.checked; render(); });
-  if (evidence) evidence.addEventListener("change", (e)=>{ state.evidenceOnly=e.target.checked; render(); });
-
-  // Reset fix
-  if (resetBtn) resetBtn.addEventListener("click", ()=>{
-    Object.assign(state, {
-      view: "grid",
-      region: "all",
-      oem: "all",
-      layer: "all",
-      type: "all",
-      confidence: "all",
-      search: "",
-      telemetryOnly: false,
-      evidenceOnly: false
-    });
-
-    if (regionSel) regionSel.value = "all";
-    if (oemSel) oemSel.value = "all";
-    if (layerSel) layerSel.value = "all";
-    if (typeSel) typeSel.value = "all";
-    if (confSel) confSel.value = "all";
-    if (searchEl) searchEl.value = "";
-    if (telem) telem.checked = false;
-    if (evidence) evidence.checked = false;
-
-    if (tabGrid) tabGrid.classList.add("active");
-    if (tabNet) tabNet.classList.remove("active");
-    if (tabGov) tabGov.classList.remove("active");
-
-    render();
-  });
-
-  render();
-});
-
-function render() {
-  if (!_nodesAll || !_edgesAll) return;
-
-  if (state.view !== "governance" && state.view !== "docs") rebuildDependentDropdowns(_nodesAll);
-
+function render(){
   vizEl.selectAll("*").remove();
 
   if (state.view === "governance") {
@@ -403,393 +319,13 @@ function render() {
   nodes = restrictNodesToEdges(nodes, edges);
 
   if (state.view === "network") renderNetwork(nodes, edges);
+  else if (state.view === "architecture") renderArchitecture(nodes, edges, uniq(nodes.map(d => d.oem_group)));
   else renderGrid(nodes, edges, uniq(nodes.map(d => d.oem_group)));
 }
 
-// ----- Governance View -----
-
-function parseLevel(v){
-  const s = safe(v);
-  if (!s) return 1; // blank => modelled default
-  const n = Number(s);
-  if (Number.isFinite(n) && n >= 0) return n;
-  return 1;
-}
-
-function pct(n, d){
-  if (!d) return "0%";
-  return `${Math.round((n/d)*1000)/10}%`;
-}
-
-function renderTable(svg, cfg){
-  const { title, x, y, columns, rows } = cfg;
-  const rowH = 22;
-  const headerH = 24;
-  const tableW = columns.reduce((s,c)=>s+c.w, 0);
-
-  const g = svg.append("g").attr("transform", `translate(${x},${y})`);
-
-  g.append("text").attr("x",0).attr("y",-10).text(title);
-  applyReadableText(g.select("text"), { size: 13, fill:"#D1D5DB", stroke:"rgba(0,0,0,0.9)" });
-
-  g.append("rect")
-    .attr("x",0).attr("y",0)
-    .attr("width", tableW)
-    .attr("height", headerH + rows.length*rowH + 10)
-    .attr("fill","rgba(255,255,255,0.03)")
-    .attr("stroke","rgba(255,255,255,0.08)")
-    .attr("rx", 10);
-
-  let cx = 10;
-  columns.forEach(col => {
-    const t = g.append("text").attr("x", cx).attr("y", 18).text(col.label);
-    applyReadableText(t, { size: 11, fill:"#D1D5DB", stroke:"rgba(0,0,0,0.9)" });
-    cx += col.w;
-  });
-
-  rows.forEach((r, i) => {
-    const y0 = headerH + 6 + i*rowH;
-
-    if (i % 2 === 1){
-      g.append("rect")
-        .attr("x",6).attr("y", y0-16)
-        .attr("width", tableW-12).attr("height", rowH)
-        .attr("fill","rgba(255,255,255,0.02)")
-        .attr("rx", 6);
-    }
-
-    let x0 = 10;
-    columns.forEach(col => {
-      const val = r[col.key];
-      const out = col.fmt ? col.fmt(val) : String(val ?? "");
-      const t = g.append("text").attr("x", x0).attr("y", y0).text(out);
-      applyReadableText(t, { size: 11 });
-      x0 += col.w;
-    });
-  });
-}
-
-function renderGovernance(nodesAll, edgesAll){
-  // HTML-first dashboard to avoid SVG/table overlap
-  const nodes = nodesAll.filter(n => matchesNodeFilters(n));
-  const nodeById = new Map(nodes.map(d=>[d.id,d]));
-  const edges = edgesAll.filter(e => nodeById.has(e.source) && nodeById.has(e.target));
-
-  const totalNodes = nodes.length;
-  const totalEdges = edges.length;
-
-  // Data completeness checks (edges)
-  const fields = ["evidence_status","verification_level","verification_status","source_url","source_name","source_date","provenance_id"];
-  const missing = {};
-  fields.forEach(k => missing[k] = 0);
-  edges.forEach(e => { fields.forEach(k => { if (!safe(e[k])) missing[k] += 1; }); });
-
-  // Verification level counts (treat blank as L1 by parseLevel)
-  const levels = [4,3,2,1,0];
-  const levelCounts = new Map(levels.map(l => [l,0]));
-  edges.forEach(e => {
-    const l = parseLevel(e.verification_level);
-    levelCounts.set(l, (levelCounts.get(l) || 0) + 1);
-  });
-
-  const unreviewed = edges.filter(e => safe(e.verification_status).toUpperCase() === "UNREVIEWED").length;
-
-  const bannerMsg =
-    (missing["verification_level"] / (totalEdges || 1) > 0.5)
-      ? `Most edges have no verification_level set (${missing["verification_level"]}/${totalEdges}). Dashboard is showing defaults. Populate verification_level (0–4) to get meaningful coverage.`
-      : null;
-
-  // evidence_status distribution
-  const statusCounts = new Map([["VERIFIED",0],["UNVERIFIED",0],["UNREVIEWED",0],["BLANK",0]]);
-  edges.forEach(e => {
-    const s = safe(e.evidence_status).toUpperCase();
-    if (!s) statusCounts.set("BLANK", statusCounts.get("BLANK")+1);
-    else if (statusCounts.has(s)) statusCounts.set(s, statusCounts.get(s)+1);
-    else statusCounts.set(s, (statusCounts.get(s)||0)+1);
-  });
-  const statusRows = Array.from(statusCounts.entries())
-    .map(([status,count]) => ({ status, count, pct: count/(totalEdges||1) }))
-    .sort((a,b)=>b.count-a.count);
-
-  // OEM aggregation
-  const oemAgg = new Map();
-  edges.forEach(e => {
-    const src = nodeById.get(e.source);
-    const tgt = nodeById.get(e.target);
-    const oem = (src && safe(src.oem_group)) || (tgt && safe(tgt.oem_group)) || "UNKNOWN";
-    if (!oemAgg.has(oem)) oemAgg.set(oem, { oem, edges:0, l4:0, l3:0, l1:0 });
-    const a = oemAgg.get(oem);
-    a.edges += 1;
-    const l = parseLevel(e.verification_level);
-    if (l===4) a.l4 += 1;
-    else if (l===3) a.l3 += 1;
-    else if (l===1) a.l1 += 1;
-  });
-
-  const oems = Array.from(oemAgg.values()).map(r => ({
-    ...r,
-    verified_pct: (r.l4 + r.l3) / (r.edges || 1)
-  })).sort((a,b)=>b.verified_pct - a.verified_pct);
-
-  // Layer aggregation (weakest first)
-  const layerAgg = new Map();
-  edges.forEach(e => {
-    const src = nodeById.get(e.source);
-    const tgt = nodeById.get(e.target);
-    const layers = new Set([src ? safe(src.layer) : "", tgt ? safe(tgt.layer) : ""]);
-    layers.forEach(layer => {
-      if (!layer) return;
-      if (!layerAgg.has(layer)) layerAgg.set(layer, { layer, edges:0, l4:0, l3:0, l1:0 });
-      const a = layerAgg.get(layer);
-      a.edges += 1;
-      const l = parseLevel(e.verification_level);
-      if (l===4) a.l4 += 1;
-      else if (l===3) a.l3 += 1;
-      else if (l===1) a.l1 += 1;
-    });
-  });
-
-  const layersTbl = Array.from(layerAgg.values()).map(r => ({
-    ...r,
-    verified_pct: (r.l4 + r.l3) / (r.edges || 1),
-    modelled_pct: r.l1 / (r.edges || 1)
-  })).sort((a,b)=>a.verified_pct - b.verified_pct);
-
-  const missingRows = Object.entries(missing)
-    .map(([field,missingCount]) => ({ field, missing: missingCount, pct: missingCount/(totalEdges||1) }))
-    .sort((a,b)=>b.missing-a.missing);
-
-  // -------- HTML dashboard --------
-  const root = vizEl.append("div")
-    .attr("class","gov-root")
-    .style("width","100%")
-    .style("height","100%")
-    .style("padding","18px 18px 28px 18px")
-    .style("box-sizing","border-box");
-
-  root.append("div")
-    .style("font-size","18px")
-    .style("font-weight","700")
-    .style("color","#F9FAFB")
-    .style("margin","6px 0 10px 0")
-    .text("Governance Dashboard — Verification Coverage");
-
-  if (bannerMsg){
-    root.append("div")
-      .style("background","rgba(244,162,97,0.18)")
-      .style("border","1px solid rgba(244,162,97,0.35)")
-      .style("color","#FDE68A")
-      .style("padding","10px 12px")
-      .style("border-radius","10px")
-      .style("margin","0 0 12px 0")
-      .style("font-size","12px")
-      .text(bannerMsg);
-  }
-
-  function card(parent, title){
-    const c = parent.append("div")
-      .style("background","rgba(255,255,255,0.03)")
-      .style("border","1px solid rgba(255,255,255,0.08)")
-      .style("border-radius","12px")
-      .style("padding","12px 12px 10px 12px")
-      .style("box-sizing","border-box")
-      .style("min-height","0");
-    c.append("div")
-      .style("font-size","12px")
-      .style("color","#D1D5DB")
-      .style("margin-bottom","8px")
-      .text(title);
-    return c;
-  }
-
-  function htmlTable(parent, cols, rows, maxRows=18, maxHeight=360){
-    const wrap = parent.append("div")
-      .style("overflow","auto")
-      .style("max-height", `${maxHeight}px`)
-      .style("border-radius","10px");
-
-    const table = wrap.append("table")
-      .style("width","100%")
-      .style("border-collapse","collapse")
-      .style("font-size","12px")
-      .style("color","#E5E7EB");
-
-    const thead = table.append("thead");
-    const trh = thead.append("tr");
-
-    cols.forEach(c => trh.append("th")
-      .style("position","sticky")
-      .style("top","0")
-      .style("background","rgba(0,0,0,0.35)")
-      .style("backdrop-filter","blur(4px)")
-      .style("text-align", c.align || "left")
-      .style("padding","8px 8px")
-      .style("border-bottom","1px solid rgba(255,255,255,0.10)")
-      .text(c.label));
-
-    const tbody = table.append("tbody");
-    rows.slice(0,maxRows).forEach((r,i) => {
-      const tr = tbody.append("tr")
-        .style("background", i%2 ? "rgba(255,255,255,0.02)" : "transparent");
-      cols.forEach(c => tr.append("td")
-        .style("padding","7px 8px")
-        .style("border-bottom","1px solid rgba(255,255,255,0.06)")
-        .style("text-align", c.align || "left")
-        .text(c.fmt ? c.fmt(r[c.key], r) : (r[c.key] ?? "")));
-    });
-    return wrap;
-  }
-
-  // KPI row
-  const kpiRow = root.append("div")
-    .style("display","grid")
-    .style("grid-template-columns","repeat(8, minmax(120px, 1fr))")
-    .style("gap","10px")
-    .style("margin","0 0 12px 0");
-
-  const kpis = [
-    ["Nodes", totalNodes],
-    ["Edges", totalEdges],
-    ["L4 (Hard)", levelCounts.get(4) || 0],
-    ["L3 (Public)", levelCounts.get(3) || 0],
-    ["L2 (Trade)", levelCounts.get(2) || 0],
-    ["L1 (Modelled)", levelCounts.get(1) || 0],
-    ["Unreviewed", unreviewed],
-    ["Missing verification_level", missing["verification_level"]]
-  ];
-
-  kpis.forEach(([k,v]) => {
-    const c = card(kpiRow, k);
-    c.append("div")
-      .style("font-size","20px")
-      .style("font-weight","700")
-      .style("color","#F9FAFB")
-      .text(String(v));
-  });
-
-  // Two-column layout
-  const grid = root.append("div")
-    .style("display","grid")
-    .style("grid-template-columns","minmax(520px, 1fr) minmax(520px, 1fr)")
-    .style("gap","12px");
-
-  const left = grid.append("div")
-    .style("display","flex")
-    .style("flex-direction","column")
-    .style("gap","12px")
-    .style("min-height","0");
-
-  const right = grid.append("div")
-    .style("display","flex")
-    .style("flex-direction","column")
-    .style("gap","12px")
-    .style("min-height","0");
-
-  // Chart card (SVG inside card)
-  const chartCard = card(left, "Edge Distribution by Verification Level");
-  const svgW = 520, svgH = 240, pad = {l:34,r:10,t:8,b:28};
-  const svg = chartCard.append("svg").attr("viewBox", `0 0 ${svgW} ${svgH}`);
-
-  const data = levels.map(l => ({ level: String(l), count: levelCounts.get(l) || 0 }));
-  const x = d3.scaleBand().domain(data.map(d=>d.level)).range([pad.l, svgW-pad.r]).padding(0.22);
-  const y = d3.scaleLinear().domain([0, d3.max(data, d=>d.count) || 1]).nice().range([svgH-pad.b, pad.t]);
-
-  svg.append("g")
-    .attr("transform", `translate(0,${svgH-pad.b})`)
-    .call(d3.axisBottom(x))
-    .selectAll("text").attr("fill","#D1D5DB");
-
-  svg.append("g")
-    .attr("transform", `translate(${pad.l},0)`)
-    .call(d3.axisLeft(y).ticks(5))
-    .selectAll("text").attr("fill","#D1D5DB");
-
-  svg.selectAll("rect.bar").data(data).join("rect")
-    .attr("x", d=>x(d.level))
-    .attr("y", d=>y(d.count))
-    .attr("width", x.bandwidth())
-    .attr("height", d=>(svgH-pad.b) - y(d.count))
-    .attr("fill","rgba(37,99,235,0.9)")
-    .attr("stroke","rgba(255,255,255,0.20)");
-
-  svg.selectAll("text.lbl").data(data).join("text")
-    .attr("x", d=>x(d.level) + x.bandwidth()/2)
-    .attr("y", d=>y(d.count) - 6)
-    .attr("text-anchor","middle")
-    .attr("fill","#F9FAFB")
-    .attr("stroke","rgba(0,0,0,0.85)")
-    .attr("stroke-width", 3)
-    .attr("paint-order","stroke")
-    .style("font-size","11px")
-    .text(d=>d.count);
-
-  // Weakest layers table
-  const weakCard = card(left, "Weakest Layers (lowest % Verified)");
-  htmlTable(weakCard,
-    [
-      {key:"layer", label:"Layer"},
-      {key:"edges", label:"Edges", align:"right"},
-      {key:"verified_pct", label:"% Verified", align:"right", fmt:(v)=>pct(v,1)},
-      {key:"modelled_pct", label:"% Modelled (L1)", align:"right", fmt:(v)=>pct(v,1)}
-    ],
-    layersTbl,
-    40,
-    520
-  );
-
-  // OEM table
-  const oemCard = card(right, "Top OEMs by % Verified (L3+L4)");
-  htmlTable(oemCard,
-    [
-      {key:"oem", label:"OEM"},
-      {key:"edges", label:"Edges", align:"right"},
-      {key:"l4", label:"L4", align:"right"},
-      {key:"l3", label:"L3", align:"right"},
-      {key:"l1", label:"L1", align:"right"},
-      {key:"verified_pct", label:"% Verified", align:"right", fmt:(v)=>pct(v,1)}
-    ],
-    oems,
-    40,
-    520
-  );
-
-  // Evidence status table
-  const statusCard = card(right, "Evidence Status (edges)");
-  htmlTable(statusCard,
-    [
-      {key:"status", label:"Status"},
-      {key:"count", label:"Count", align:"right"},
-      {key:"pct", label:"%", align:"right", fmt:(v)=>pct(v,1)}
-    ],
-    statusRows,
-    10,
-    220
-  );
-
-  // Missing fields table
-  const missCard = card(right, "Top Missing Fields (edges)");
-  htmlTable(missCard,
-    [
-      {key:"field", label:"Field"},
-      {key:"missing", label:"Missing", align:"right"},
-      {key:"pct", label:"%", align:"right", fmt:(v)=>pct(v,1)}
-    ],
-    missingRows,
-    12,
-    260
-  );
-}
-
-
-// ----- GRID VIEW -----
-
-function renderGrid(nodes, edges, cols){
-  const margin = {top: 30, right: 20, bottom: 20, left: 220};
-  const cellW = 240;
-  const cellH = 78;
-
-  const w = margin.left + margin.right + cols.length * cellW;
-  const h = margin.top + margin.bottom + LAYERS.length * cellH;
+function renderGrid(nodes, edges, oems){
+  const w = 1400;
+  const h = 820;
 
   const svg = vizEl.append("svg").attr("viewBox", `0 0 ${w} ${h}`);
   svg.style("touch-action", "none");
@@ -797,100 +333,220 @@ function renderGrid(nodes, edges, cols){
 
   const gRoot = svg.append("g");
 
-  const headerSel = gRoot.append("g").selectAll("text")
-    .data(cols).join("text")
-    .attr("x", (d,i)=> margin.left + i*cellW + 8)
-    .attr("y", 20)
-    .text(d=>d);
-  applyReadableText(headerSel, { size: 13 });
+  const cols = oems.length ? oems : uniq(nodes.map(d => d.oem_group));
+  const x = d3.scaleBand().domain(cols).range([40, w-30]).paddingInner(0.18);
 
-  const rowSel = gRoot.append("g").selectAll("text")
-    .data(LAYERS).join("text")
-    .attr("x", 12)
-    .attr("y", (d,i)=> margin.top + i*cellH + 48)
-    .text(d=>d);
-  applyReadableText(rowSel, { size: 12, fill: "#D1D5DB", stroke: "rgba(0,0,0,0.9)" });
+  const layers = LAYERS.slice();
+  const y = d3.scaleBand().domain(layers).range([40, h-30]).paddingInner(0.12);
 
-  const grid = gRoot.append("g").attr("opacity", 0.28);
-  for (let r=0; r<LAYERS.length; r++){
-    for (let c=0; c<cols.length; c++){
-      grid.append("rect")
-        .attr("x", margin.left + c*cellW)
-        .attr("y", margin.top + r*cellH)
-        .attr("width", cellW)
-        .attr("height", cellH)
-        .attr("fill","none")
-        .attr("stroke","rgba(255,255,255,.10)");
-    }
-  }
+  // Lane background
+  gRoot.append("g").selectAll("rect").data(layers).join("rect")
+    .attr("x", 40)
+    .attr("y", d => y(d))
+    .attr("width", (w-30) - 40)
+    .attr("height", y.bandwidth())
+    .attr("fill", "rgba(255,255,255,0.02)")
+    .attr("stroke","rgba(255,255,255,0.05)");
 
-  const grouped = d3.group(nodes, d=>d.layer, d=>d.oem_group);
-  const pos = new Map();
+  // Layer labels
+  const layerLbl = gRoot.append("g").selectAll("text").data(layers).join("text")
+    .attr("x", 10).attr("y", d => y(d) + y.bandwidth()/2 + 4)
+    .text(d => d);
+  applyReadableText(layerLbl, { size: 11 });
 
-  for (const [layer, byCol] of grouped){
-    const r = LAYERS.indexOf(layer);
-    for (const [col, list] of byCol){
-      const c = cols.indexOf(col);
-      const x0 = margin.left + c*cellW + 10;
-      const y0 = margin.top + r*cellH + 10;
-      const boxH = 24;
-      list.slice(0,3).forEach((n,i)=>{
-        pos.set(n.id, {x:x0, y:y0 + i*(boxH+6), w:cellW-20, h:boxH});
+  // Column labels
+  const colLbl = gRoot.append("g").selectAll("text").data(cols).join("text")
+    .attr("x", d => x(d) + x.bandwidth()/2)
+    .attr("y", 22)
+    .attr("text-anchor","middle")
+    .text(d => d);
+  applyReadableText(colLbl, { size: 12 });
+
+  // Node positions in grid cells
+  const buckets = d3.group(nodes, d => d.layer, d => d.oem_group);
+  const placed = [];
+
+  layers.forEach(layer => {
+    cols.forEach(col => {
+      const list = buckets.get(layer)?.get(col) ? Array.from(buckets.get(layer).get(col)) : [];
+      if (!list.length) return;
+      list.sort((a,b) => safe(a.label).localeCompare(safe(b.label)));
+      const cx = x(col) + x.bandwidth()/2;
+      const cy = y(layer) + y.bandwidth()/2;
+      const step = 16;
+      const start = cy - ((list.length-1)*step)/2;
+      list.forEach((d,i)=>{
+        placed.push({ ...d, __x: cx, __y: start + i*step });
       });
-    }
-  }
+    });
+  });
 
-  gRoot.append("g").selectAll("path")
-    .data(edges).join("path")
-    .attr("fill","none")
-    .attr("stroke","#9CA3AF")
-    .attr("stroke-width", 1.5)
-    .attr("opacity", 0.85)
+  const nodeById = new Map(placed.map(d => [d.id, d]));
+  const links = edges.map(e=>({
+    ...e,
+    source: nodeById.get(e.source),
+    target: nodeById.get(e.target)
+  })).filter(l=>l.source && l.target);
+
+  gRoot.append("g").selectAll("line")
+    .data(links).join("line")
+    .attr("x1", d => d.source.__x)
+    .attr("y1", d => d.source.__y)
+    .attr("x2", d => d.target.__x)
+    .attr("y2", d => d.target.__y)
+    .attr("stroke", "#9CA3AF")
+    .attr("stroke-width", 1.2)
+    .attr("opacity", 0.55)
     .style("stroke-dasharray", edgeDash)
-    .attr("d", e=>{
-      const a = pos.get(e.source), b = pos.get(e.target);
-      if (!a || !b) return "";
-      const x1 = a.x + a.w, y1 = a.y + a.h/2;
-      const x2 = b.x, y2 = b.y + b.h/2;
-      const mx = (x1+x2)/2;
-      return `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`;
-    })
-    .on("mousemove", showEdgeTip)
+    .on("mousemove", (evt, e) => showEdgeTip(evt, e))
     .on("mouseleave", hideTip);
 
-  const visibleNodes = nodes.filter(n=>pos.has(n.id));
-  const nodeSel = gRoot.append("g").selectAll("g.node")
-    .data(visibleNodes, d=>d.id)
-    .join(enter=>{
-      const g = enter.append("g").attr("class","node");
-      g.append("rect");
-      g.append("text");
-      return g;
-    })
-    .attr("transform", d=>{
-      const p = pos.get(d.id);
-      return `translate(${p.x},${p.y})`;
-    });
+  const gNodes = gRoot.append("g").selectAll("g")
+    .data(placed, d=>d.id).join("g")
+    .attr("transform", d => `translate(${d.__x},${d.__y})`)
+    .on("mousemove", (evt, d) => showNodeTip(evt, d))
+    .on("mouseleave", hideTip);
 
-  nodeSel.select("rect")
-    .attr("width", d=>pos.get(d.id).w)
-    .attr("height", d=>pos.get(d.id).h)
+  gNodes.append("circle")
+    .attr("r", 6)
     .attr("fill", d => (safe(d.evidence_status).toUpperCase()==="VERIFIED") ? "#2563EB" : nodeFill(d))
-    .attr("stroke","rgba(255,255,255,.40)")
-    .attr("rx", 6);
+    .attr("stroke","rgba(255,255,255,.40)");
 
-  const nodeText = nodeSel.select("text")
-    .attr("x", 10).attr("y", 16)
-    .text(d=>d.label);
-  applyReadableText(nodeText, { size: 12 });
+  const labels = gNodes.append("text")
+    .attr("x", 10).attr("y", 4)
+    .text(d => d.label);
+  applyReadableText(labels, { size: 11 });
 
-  nodeSel.on("mousemove", showTip).on("mouseleave", hideTip);
-
-  const zoom = d3.zoom().scaleExtent([0.6, 3.5]).on("zoom", (event) => gRoot.attr("transform", event.transform));
+  // Zoom/pan
+  const zoom = d3.zoom().scaleExtent([0.7, 2.8]).on("zoom", (event) => {
+    gRoot.attr("transform", event.transform);
+  });
   svg.call(zoom);
+  svg.on("dblclick.zoom", null);
 }
 
-// ----- NETWORK VIEW -----
+// ----- Architecture View -----
+// Lane-based "stack" view: layers as horizontal lanes, OEM groups as columns.
+// Designed to be readable + zoom/pan friendly, not a force simulation.
+
+function renderArchitecture(nodes, edges, oemCols){
+  const w = 1400;
+  const h = 820;
+
+  vizEl.selectAll("*").remove();
+
+  const svg = vizEl.append("svg").attr("viewBox", `0 0 ${w} ${h}`);
+  svg.style("touch-action", "none");
+  svg.append("rect").attr("width", w).attr("height", h).attr("fill","transparent").style("pointer-events","all");
+
+  const gRoot = svg.append("g");
+
+  const margin = { top: 56, right: 30, bottom: 24, left: 160 };
+
+  const layers = LAYERS.slice(); // fixed order
+  const y = d3.scaleBand().domain(layers).range([margin.top, h-margin.bottom]).paddingInner(0.08);
+
+  const cols = (oemCols && oemCols.length) ? oemCols : uniq(nodes.map(d => d.oem_group));
+  const x = d3.scaleBand().domain(cols).range([margin.left, w-margin.right]).paddingInner(0.2);
+
+  // Lane backgrounds + labels
+  const lanes = gRoot.append("g");
+  lanes.selectAll("rect").data(layers).join("rect")
+    .attr("x", margin.left)
+    .attr("y", d => y(d))
+    .attr("width", (w-margin.right) - margin.left)
+    .attr("height", y.bandwidth())
+    .attr("fill", "rgba(255,255,255,0.03)")
+    .attr("stroke", "rgba(255,255,255,0.06)");
+
+  lanes.selectAll("text").data(layers).join("text")
+    .attr("x", margin.left - 14)
+    .attr("y", d => y(d) + y.bandwidth()/2 + 4)
+    .attr("text-anchor","end")
+    .text(d => d)
+    .call(sel => applyReadableText(sel, { size: 11 }));
+
+  // Column headers
+  const headers = gRoot.append("g");
+  headers.selectAll("text").data(cols).join("text")
+    .attr("x", d => x(d) + x.bandwidth()/2)
+    .attr("y", 28)
+    .attr("text-anchor","middle")
+    .text(d => d)
+    .call(sel => applyReadableText(sel, { size: 12 }));
+
+  // Compute node positions (stack within each lane/col)
+  const byBucket = d3.group(nodes, d => d.layer, d => d.oem_group);
+  const pos = new Map();
+
+  layers.forEach(layer => {
+    cols.forEach(col => {
+      const list = (byBucket.get(layer)?.get(col)) ? Array.from(byBucket.get(layer).get(col)) : [];
+      if (!list.length) return;
+
+      // Sort for stable layout
+      list.sort((a,b) => safe(a.label).localeCompare(safe(b.label)));
+
+      const cx = x(col) + x.bandwidth()/2;
+      const baseY = y(layer) + y.bandwidth()/2;
+
+      const step = 16; // vertical separation in bucket
+      const start = baseY - ((list.length-1) * step)/2;
+
+      list.forEach((d,i) => {
+        pos.set(d.id, { x: cx, y: start + i*step });
+      });
+    });
+  });
+
+  // Build link objects with positions
+  const links = edges.map(e => ({
+    ...e,
+    source: pos.get(e.source),
+    target: pos.get(e.target)
+  })).filter(l => l.source && l.target);
+
+  // Links
+  gRoot.append("g").selectAll("line")
+    .data(links).join("line")
+    .attr("x1", d => d.source.x)
+    .attr("y1", d => d.source.y)
+    .attr("x2", d => d.target.x)
+    .attr("y2", d => d.target.y)
+    .attr("stroke", "#9CA3AF")
+    .attr("stroke-width", 1.4)
+    .attr("opacity", 0.7)
+    .style("stroke-dasharray", edgeDash)
+    .on("mousemove", (evt, e) => showEdgeTip(evt, e))
+    .on("mouseleave", hideTip);
+
+  // Nodes
+  const nodeDraw = nodes.map(d => ({...d, __p: pos.get(d.id)})).filter(d => d.__p);
+  const gNodes = gRoot.append("g").selectAll("g")
+    .data(nodeDraw, d => d.id).join("g")
+    .attr("transform", d => `translate(${d.__p.x},${d.__p.y})`)
+    .on("mousemove", (evt, d) => showNodeTip(evt, d))
+    .on("mouseleave", hideTip);
+
+  gNodes.append("circle")
+    .attr("r", 6)
+    .attr("fill", d => (safe(d.evidence_status).toUpperCase()==="VERIFIED") ? "#2563EB" : nodeFill(d))
+    .attr("stroke", "rgba(255,255,255,.40)");
+
+  const labels = gNodes.append("text")
+    .attr("x", 10)
+    .attr("y", 4)
+    .text(d => d.label);
+
+  applyReadableText(labels, { size: 11 });
+
+  // Zoom/pan
+  const zoom = d3.zoom().scaleExtent([0.6, 2.4]).on("zoom", (event) => {
+    gRoot.attr("transform", event.transform);
+  });
+  svg.call(zoom);
+  svg.on("dblclick.zoom", null);
+}
 
 function renderNetwork(nodes, edges){
   const w = 1400;
@@ -939,24 +595,425 @@ function renderNetwork(nodes, edges){
   const labelSel = nodeSel.append("text").attr("x", 12).attr("y", 4).text(d=>d.label);
   applyReadableText(labelSel, { size: 12 });
 
-  nodeSel.on("mousemove", showTip).on("mouseleave", hideTip);
+  nodeSel.on("mousemove", (evt, d) => showNodeTip(evt, d)).on("mouseleave", hideTip);
 
   const sim = d3.forceSimulation(nodesLocal)
-    .force("link", d3.forceLink(links).distance(90).strength(0.25))
-    .force("charge", d3.forceManyBody().strength(-220))
-    .force("collide", d3.forceCollide().radius(18))
-    .force("x", d3.forceX(d=>xScale(d.region)).strength(0.25))
-    .force("y", d3.forceY(h/2).strength(0.08));
+    .force("link", d3.forceLink(links).id(d=>d.id).distance(120).strength(0.9))
+    .force("charge", d3.forceManyBody().strength(-260))
+    .force("center", d3.forceCenter(w/2, h/2))
+    .force("collide", d3.forceCollide(26));
 
   sim.on("tick", () => {
-    linkSel.attr("x1", d=>d.source.x).attr("y1", d=>d.source.y).attr("x2", d=>d.target.x).attr("y2", d=>d.target.y);
+    linkSel
+      .attr("x1", d=>d.source.x)
+      .attr("y1", d=>d.source.y)
+      .attr("x2", d=>d.target.x)
+      .attr("y2", d=>d.target.y);
+
     nodeSel.attr("transform", d=>`translate(${d.x},${d.y})`);
   });
 
-  function dragstarted(event, d) { if (!event.active) sim.alphaTarget(0.25).restart(); d.fx = d.x; d.fy = d.y; }
-  function dragged(event, d) { d.fx = event.x; d.fy = event.y; }
-  function dragended(event, d) { if (!event.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }
-
-  const zoom = d3.zoom().scaleExtent([0.6, 3.5]).on("zoom", (event) => gRoot.attr("transform", event.transform));
+  const zoom = d3.zoom().scaleExtent([0.5, 2.8]).on("zoom", (event) => {
+    gRoot.attr("transform", event.transform);
+  });
   svg.call(zoom);
+  svg.on("dblclick.zoom", null);
+
+  function dragstarted(event){
+    if (!event.active) sim.alphaTarget(0.3).restart();
+    event.subject.fx = event.subject.x;
+    event.subject.fy = event.subject.y;
+  }
+  function dragged(event){
+    event.subject.fx = event.x;
+    event.subject.fy = event.y;
+  }
+  function dragended(event){
+    if (!event.active) sim.alphaTarget(0);
+    event.subject.fx = null;
+    event.subject.fy = null;
+  }
 }
+
+// ----- Docs View -----
+
+function renderDocs(){
+  // Render a simple docs panel inside #viz using HTML (so it remains readable).
+  vizEl.selectAll("*").remove();
+
+  const root = vizEl.append("div")
+    .attr("class","docs-root")
+    .style("width","100%")
+    .style("height","100%")
+    .style("overflow","auto")
+    .style("padding","18px 18px 28px 18px")
+    .style("box-sizing","border-box")
+    .style("color","#E5E7EB");
+
+  root.append("div")
+    .style("font-size","18px")
+    .style("font-weight","800")
+    .style("color","#F9FAFB")
+    .style("margin","6px 0 10px 0")
+    .text("About & Documentation");
+
+  const card = (title) => {
+    const c = root.append("div")
+      .style("background","rgba(255,255,255,0.03)")
+      .style("border","1px solid rgba(255,255,255,0.08)")
+      .style("border-radius","12px")
+      .style("padding","12px 12px 10px 12px")
+      .style("box-sizing","border-box")
+      .style("margin","0 0 12px 0");
+    c.append("div")
+      .style("font-size","12px")
+      .style("color","#D1D5DB")
+      .style("margin-bottom","8px")
+      .style("font-weight","700")
+      .text(title);
+    return c;
+  };
+
+  const c1 = card("What this is");
+  c1.append("div")
+    .style("font-size","13px")
+    .style("line-height","1.5")
+    .html("An interactive, CSV-driven map of OEM system stacks and ecosystem relationships (suppliers, platforms, governance and telemetry paths). Use <strong>Grid</strong> for scanability, <strong>Architecture</strong> for stack/lane views, <strong>Network</strong> for relationship shape, and <strong>Governance</strong> for verification coverage.");
+
+  const c2 = card("The structural mistake to avoid");
+  c2.append("div")
+    .style("font-size","13px")
+    .style("line-height","1.5")
+    .html("Most ecosystem maps mix <em>commercial relationships</em> with <em>data-flow</em> and <em>control boundaries</em>, then treat them as the same thing. In this project: <ul style='margin:8px 0 0 18px;line-height:1.6'><li><strong>relationship</strong> describes what the edge means (SUPPLIES, HOSTS, USES, INGESTS)</li><li><strong>Telemetry Paths Only</strong> limits to true vehicle→cloud telemetry paths</li><li><strong>verification_level / evidence_status</strong> indicate confidence and evidence type</li></ul>");
+
+  const c3 = card("Where the data lives");
+  c3.append("div")
+    .style("font-size","13px")
+    .style("line-height","1.5")
+    .html("The visual loads <code>data/nodes.csv</code> and <code>data/edges.csv</code>. Keep column names stable. Normalise and validate before commit (see your governance docs).");
+
+  const c4 = card("Quick links");
+  c4.append("div")
+    .style("font-size","13px")
+    .style("line-height","1.9")
+    .html("<a href='./README.md' target='_blank' style='color:#60A5FA;text-decoration:none'>README.md</a><br/><a href='./CHANGELOG.md' target='_blank' style='color:#60A5FA;text-decoration:none'>CHANGELOG.md</a><br/><span style='opacity:.75'>Tip: GitHub Pages may not render Markdown. If links open raw text, view them in the repo UI.</span>");
+}
+
+// ----- Governance View -----
+
+function parseLevel(v){
+  const s = safe(v);
+  const n = Number(s);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function countBy(arr, keyFn){
+  const m = new Map();
+  arr.forEach(d=>{
+    const k = keyFn(d);
+    m.set(k, (m.get(k) || 0) + 1);
+  });
+  return Array.from(m.entries()).sort((a,b)=>b[1]-a[1]);
+}
+
+function renderMiniBarChart(container, items, opts = {}){
+  const w = opts.w ?? 260;
+  const h = opts.h ?? 88;
+
+  const max = d3.max(items, d=>d.value) || 1;
+  const x = d3.scaleLinear().domain([0,max]).range([0, w-80]);
+  const y = d3.scaleBand().domain(items.map(d=>d.label)).range([0,h]).paddingInner(0.2);
+
+  const svg = container.append("svg").attr("width", w).attr("height", h);
+
+  svg.append("g").selectAll("rect")
+    .data(items).join("rect")
+    .attr("x", 80)
+    .attr("y", d=>y(d.label))
+    .attr("width", d=>x(d.value))
+    .attr("height", y.bandwidth())
+    .attr("fill", "rgba(255,255,255,0.10)");
+
+  const t = svg.append("g").selectAll("text")
+    .data(items).join("text")
+    .attr("x", 76)
+    .attr("y", d=>y(d.label)+y.bandwidth()/2+4)
+    .attr("text-anchor","end")
+    .text(d=>d.label);
+  applyReadableText(t, { size: 10 });
+
+  const v = svg.append("g").selectAll("text.value")
+    .data(items).join("text")
+    .attr("x", d=>80 + x(d.value) + 6)
+    .attr("y", d=>y(d.label)+y.bandwidth()/2+4)
+    .text(d=>d.value);
+  applyReadableText(v, { size: 10, fill: "rgba(229,231,235,0.85)" });
+}
+
+function renderGovernance(nodesAll, edgesAll){
+  // HTML-first dashboard to avoid SVG/table overlap
+  vizEl.selectAll("*").remove();
+
+  const root = vizEl.append("div")
+    .attr("class","gov-root")
+    .style("width","100%")
+    .style("height","100%")
+    .style("overflow","auto")
+    .style("padding","14px 14px 24px 14px")
+    .style("box-sizing","border-box")
+    .style("color","#E5E7EB");
+
+  root.append("div")
+    .style("display","flex")
+    .style("justify-content","space-between")
+    .style("align-items","baseline")
+    .style("gap","12px")
+    .html(`<div style="font-size:18px;font-weight:800;color:#F9FAFB">Governance & Verification</div>
+           <div style="font-size:12px;opacity:.75">Counts reflect currently loaded CSVs.</div>`);
+
+  // Summaries
+  const edgesLvl = edgesAll.map(e=>({ lvl: parseLevel(e.verification_level) }));
+  const lvlCounts = countBy(edgesLvl, d=>`L${d.lvl}`).map(([k,v])=>({label:k, value:v}));
+
+  const oemCounts = countBy(edgesAll, e=>safe(e.region)+" · "+safe(e.layer)).slice(0,10)
+    .map(([k,v])=>({label:k.length>28 ? (k.slice(0,26)+"…") : k, value:v}));
+
+  const row = root.append("div")
+    .style("display","grid")
+    .style("grid-template-columns","1fr 1fr")
+    .style("gap","12px")
+    .style("margin","12px 0 12px 0");
+
+  const card = (title) => {
+    const c = row.append("div")
+      .style("background","rgba(255,255,255,0.03)")
+      .style("border","1px solid rgba(255,255,255,0.08)")
+      .style("border-radius","12px")
+      .style("padding","12px")
+      .style("box-sizing","border-box");
+    c.append("div").style("font-size","12px").style("opacity",".85").style("margin-bottom","8px").text(title);
+    return c;
+  };
+
+  renderMiniBarChart(card("Edges by verification level").append("div"), lvlCounts.slice(0,6), { w: 360, h: 120 });
+  renderMiniBarChart(card("Top 10 region/layer edge density").append("div"), oemCounts, { w: 420, h: 240 });
+
+  // Tables
+  const makeTable = (title, cols, rowsData) => {
+    const wrap = root.append("div")
+      .style("margin","0 0 14px 0")
+      .style("background","rgba(255,255,255,0.03)")
+      .style("border","1px solid rgba(255,255,255,0.08)")
+      .style("border-radius","12px")
+      .style("overflow","hidden");
+
+    wrap.append("div")
+      .style("padding","10px 12px")
+      .style("font-size","12px")
+      .style("font-weight","700")
+      .style("border-bottom","1px solid rgba(255,255,255,0.08)")
+      .text(title);
+
+    const table = wrap.append("table")
+      .style("width","100%")
+      .style("border-collapse","collapse")
+      .style("font-size","12px");
+
+    const thead = table.append("thead").append("tr");
+    thead.selectAll("th").data(cols).join("th")
+      .style("text-align","left")
+      .style("padding","8px 10px")
+      .style("opacity",".75")
+      .style("font-weight","700")
+      .style("border-bottom","1px solid rgba(255,255,255,0.08)")
+      .text(d=>d.label);
+
+    const tbody = table.append("tbody");
+    const tr = tbody.selectAll("tr").data(rowsData).join("tr")
+      .style("border-bottom","1px solid rgba(255,255,255,0.06)");
+
+    tr.selectAll("td")
+      .data(row => cols.map(c => row[c.key]))
+      .join("td")
+      .style("padding","8px 10px")
+      .style("vertical-align","top")
+      .style("opacity",".95")
+      .text(d=>d);
+
+    return wrap;
+  };
+
+  const worst = countBy(edgesAll, e => `${safe(e.oem_group||"")}${safe(e.oem_group)? " · ":""}${safe(e.layer)}`)
+    .slice(0, 25)
+    .map(([k,v]) => ({ key: k, edges: v }));
+
+  makeTable("Highest edge counts by (oem_group · layer)", [
+    { key: "key", label: "oem_group · layer" },
+    { key: "edges", label: "edge count" }
+  ], worst);
+
+  const missingEvidence = edgesAll
+    .filter(e => parseLevel(e.verification_level) >= 3)
+    .filter(e => !safe(e.source_name) || !safe(e.source_url) || !safe(e.evidence_note))
+    .slice(0, 200)
+    .map(e => ({
+      source: safe(e.source),
+      target: safe(e.target),
+      layer: safe(e.layer),
+      lvl: `L${parseLevel(e.verification_level)}`,
+      missing: [
+        !safe(e.source_name) ? "source_name" : "",
+        !safe(e.source_url) ? "source_url" : "",
+        !safe(e.evidence_note) ? "evidence_note" : ""
+      ].filter(Boolean).join(", ")
+    }));
+
+  makeTable("Edges (L3/L4) missing required evidence fields (first 200)", [
+    { key: "source", label: "source" },
+    { key: "target", label: "target" },
+    { key: "layer", label: "layer" },
+    { key: "lvl", label: "level" },
+    { key: "missing", label: "missing fields" }
+  ], missingEvidence);
+
+  root.append("div")
+    .style("font-size","11px")
+    .style("opacity",".65")
+    .style("margin-top","10px")
+    .html("Tip: Use filters in the header first, then return to Governance to see scoped audit results.");
+}
+
+function normaliseRows(nodes, edges){
+  const nodesOut = nodes.map(n => {
+    const out = { ...n };
+    if (hasCol(out,"confidence")) {
+      const c = clampEnum(out.confidence, CONFIDENCE_ENUM);
+      out.confidence = c || out.confidence || "";
+    }
+    return out;
+  });
+
+  const edgesOut = edges.map(e => ({
+    ...e,
+    verification_level: e.verification_level ?? "",
+    verification_status: e.verification_status ?? "",
+    verification_owner: e.verification_owner ?? "",
+    last_reviewed: e.last_reviewed ?? ""
+  }));
+
+  // Tabs
+  const tabGrid = document.querySelector("#tab-grid");
+  const tabNet = document.querySelector("#tab-network");
+  const tabArch = document.querySelector("#tab-architecture");
+  const tabGov = document.querySelector("#tab-governance");
+  const tabDocs = document.querySelector("#tab-docs");
+
+  function setView(v){
+    state.view = v;
+    if (tabGrid) tabGrid.classList.toggle("active", v==="grid");
+    if (tabNet) tabNet.classList.toggle("active", v==="network");
+    if (tabArch) tabArch.classList.toggle("active", v==="architecture");
+    if (tabGov) tabGov.classList.toggle("active", v==="governance");
+    if (tabDocs) tabDocs.classList.toggle("active", v==="docs");
+    render();
+  }
+  if (tabGrid) tabGrid.addEventListener("click", ()=>setView("grid"));
+  if (tabNet) tabNet.addEventListener("click", ()=>setView("network"));
+  if (tabArch) tabArch.addEventListener("click", ()=>setView("architecture"));
+  if (tabGov) tabGov.addEventListener("click", ()=>setView("governance"));
+  if (tabDocs) tabDocs.addEventListener("click", ()=>setView("docs"));
+
+  // Wire filter controls
+  if (selRegion) selRegion.addEventListener("change", () => { state.region = selRegion.value; render(); });
+  if (selOEM) selOEM.addEventListener("change", () => { state.oem = selOEM.value; render(); });
+  if (selLayer) selLayer.addEventListener("change", () => { state.layer = selLayer.value; render(); });
+  if (selType) selType.addEventListener("change", () => { state.type = selType.value; render(); });
+  if (selConfidence) selConfidence.addEventListener("change", () => { state.confidence = selConfidence.value; render(); });
+  if (inpSearch) inpSearch.addEventListener("input", () => { state.search = inpSearch.value; render(); });
+  if (chkTelemetry) chkTelemetry.addEventListener("change", () => { state.telemetryOnly = chkTelemetry.checked; render(); });
+  if (chkEvidence) chkEvidence.addEventListener("change", () => { state.evidenceOnly = chkEvidence.checked; render(); });
+
+  // Reset
+  if (btnReset) btnReset.addEventListener("click", () => {
+    resetUI();
+    // Rebuild dropdown option disabling based on full dataset
+    if (state.view !== "governance" && state.view !== "docs") rebuildDependentDropdowns(_nodesAll);
+    render();
+  });
+
+  return { nodesOut, edgesOut };
+}
+
+function init(){
+  Promise.all([
+    d3.csv("data/nodes.csv", d3.autoType),
+    d3.csv("data/edges.csv", d3.autoType)
+  ]).then(([nodesRaw, edgesRaw]) => {
+    // Ensure expected columns exist; do not invent
+    _nodesAll = nodesRaw.map(n => ({
+      id: safe(n.id),
+      label: safe(n.label),
+      type: safe(n.type),
+      layer: safe(n.layer),
+      region: safe(n.region),
+      oem_group: safe(n.oem_group),
+      description: safe(n.description),
+      confidence: hasCol(n,"confidence") ? clampEnum(n.confidence, CONFIDENCE_ENUM) || safe(n.confidence) : safe(n.confidence),
+      evidence_status: safe(n.evidence_status),
+      control_boundary: safe(n.control_boundary),
+      provenance_id: safe(n.provenance_id)
+    }));
+
+    _edgesAll = edgesRaw.map(e => ({
+      source: safe(e.source),
+      target: safe(e.target),
+      relationship: safe(e.relationship),
+      layer: safe(e.layer),
+      region: safe(e.region),
+      evidence_status: safe(e.evidence_status),
+      verification_level: safe(e.verification_level),
+      source_name: safe(e.source_name),
+      source_url: safe(e.source_url),
+      source_date: safe(e.source_date),
+      evidence_note: safe(e.evidence_note),
+      provenance_id: safe(e.provenance_id),
+      verified_edge: safe(e.verified_edge),
+      verification_status: safe(e.verification_status),
+      verification_owner: safe(e.verification_owner),
+      last_reviewed: safe(e.last_reviewed),
+      oem_group: safe(e.oem_group)
+    }));
+
+    _oems = uniq(_nodesAll.map(d => d.oem_group).filter(Boolean));
+    _regions = uniq(_nodesAll.map(d => d.region).filter(Boolean));
+    _types = uniq(_nodesAll.map(d => d.type).filter(Boolean));
+    _layers = uniq(_nodesAll.map(d => d.layer).filter(Boolean));
+
+    populateSelect(selRegion, _regions);
+    populateSelect(selOEM, _oems);
+    populateSelect(selLayer, uniq(LAYERS));
+    populateSelect(selType, _types);
+
+    if (selConfidence && _nodesAll.some(n => safe(n.confidence))) {
+      populateSelect(selConfidence, uniq(_nodesAll.map(d => d.confidence).filter(Boolean)));
+    }
+
+    const { nodesOut, edgesOut } = normaliseRows(_nodesAll, _edgesAll);
+    _nodesAll = nodesOut;
+    _edgesAll = edgesOut;
+
+    // Initial dependent dropdown disabling based on full dataset
+    if (state.view !== "governance" && state.view !== "docs") rebuildDependentDropdowns(_nodesAll);
+
+    render();
+  }).catch(err => {
+    console.error(err);
+    vizEl.append("div")
+      .style("padding","18px")
+      .style("color","#FCA5A5")
+      .style("font-weight","700")
+      .text("Failed to load data/nodes.csv or data/edges.csv — check file paths and CSV headers.");
+  });
+}
+
+init();
