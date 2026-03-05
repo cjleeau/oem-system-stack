@@ -34,7 +34,7 @@ const vizEl = d3.select("#viz");
 const tooltip = d3.select("#tooltip");
 
 const state = {
-  view: "grid", // grid | network | architecture | governance
+  view: "grid", // grid | network | governance
   region: "all",
   oem: "all",
   layer: "all",
@@ -42,21 +42,9 @@ const state = {
   confidence: "all",
   search: "",
   telemetryOnly: false,
-  evidenceOnly: false,
-      archTight: false,
-  archTight: false
+  evidenceOnly: false
 };
 
-
-// ---------- Analytics (optional: gtag) ----------
-function trackView(viewName){
-  try{
-    if (typeof gtag === "function"){
-      gtag('event', 'view_change', { view: viewName });
-      gtag('event', 'page_view', { page_title: document.title, page_path: `/${viewName}` });
-    }
-  }catch(_e){}
-}
 function safe(v){ return (v ?? "").toString().trim(); }
 function norm(s){ return safe(s).toLowerCase(); }
 function uniq(arr) { return Array.from(new Set(arr)).sort((a,b)=>a.localeCompare(b)); }
@@ -81,6 +69,14 @@ function isVerifiedEdge(e){
   const verifiedBool = (e.verified_edge === true) || (safe(e.verified_edge).toLowerCase() === "true");
   const hasUrl = !!safe(e.source_url);
   return status === "VERIFIED" || verifiedBool || hasUrl;
+}
+
+function isEvidencePass(e){
+  const status = safe(e.evidence_status).toUpperCase();
+  const verifiedBool = (e.verified_edge === true) || (safe(e.verified_edge).toLowerCase() === "true");
+  const lvl = Number(safe(e.verification_level));
+  const hasLvl = Number.isFinite(lvl);
+  return status === "VERIFIED" || verifiedBool || (hasLvl && lvl >= 3);
 }
 
 function isTelemetryEdge(e){
@@ -117,7 +113,7 @@ function filterEdges(edges, nodeById) {
   return edges
     .filter(e => nodeById.has(e.source) && nodeById.has(e.target))
     .filter(e => !state.telemetryOnly || isTelemetryEdge(e))
-    .filter(e => !state.evidenceOnly || isVerifiedEdge(e));
+    .filter(e => !state.evidenceOnly || isEvidencePass(e));
 }
 
 function restrictNodesToEdges(nodes, edges) {
@@ -314,23 +310,21 @@ Promise.all([
   // Tabs
   const tabGrid = document.querySelector("#tab-grid");
   const tabNet = document.querySelector("#tab-network");
-  const tabArch = document.querySelector("#tab-architecture");
   const tabGov = document.querySelector("#tab-governance");
+  const tabDocs = document.querySelector("#tab-docs");
 
   function setView(v){
     state.view = v;
     if (tabGrid) tabGrid.classList.toggle("active", v==="grid");
     if (tabNet) tabNet.classList.toggle("active", v==="network");
-    if (tabGrid) tabGrid.classList.toggle("active", v==="grid");
-    if (tabArch) tabArch.classList.toggle("active", v==="architecture");
     if (tabGov) tabGov.classList.toggle("active", v==="governance");
-    trackView(v);
+    if (tabDocs) tabDocs.classList.toggle("active", v==="docs");
     render();
   }
   if (tabGrid) tabGrid.addEventListener("click", ()=>setView("grid"));
   if (tabNet) tabNet.addEventListener("click", ()=>setView("network"));
-  if (tabArch) tabArch.addEventListener("click", ()=>setView("architecture"));
   if (tabGov) tabGov.addEventListener("click", ()=>setView("governance"));
+  if (tabDocs) tabDocs.addEventListener("click", ()=>setView("docs"));
 
   // Controls
   const regionSel = document.querySelector("#region");
@@ -341,7 +335,6 @@ Promise.all([
   const searchEl = document.querySelector("#search");
   const telem = document.querySelector("#telemetryOnly");
   const evidence = document.querySelector("#evidenceOnly");
-  const archTight = document.querySelector("#archTight");
   const resetBtn = document.querySelector("#reset");
 
   if (regionSel) regionSel.addEventListener("change", (e)=>{ state.region=e.target.value; render(); });
@@ -353,7 +346,6 @@ Promise.all([
   if (searchEl) searchEl.addEventListener("input", (e)=>{ state.search=e.target.value; render(); });
   if (telem) telem.addEventListener("change", (e)=>{ state.telemetryOnly=e.target.checked; render(); });
   if (evidence) evidence.addEventListener("change", (e)=>{ state.evidenceOnly=e.target.checked; render(); });
-  if (archTight) archTight.addEventListener("change", (e)=>{ state.archTight=e.target.checked; render(); });
 
   // Reset fix
   if (resetBtn) resetBtn.addEventListener("click", ()=>{
@@ -377,11 +369,9 @@ Promise.all([
     if (searchEl) searchEl.value = "";
     if (telem) telem.checked = false;
     if (evidence) evidence.checked = false;
-    if (archTight) archTight.checked = false;
 
     if (tabGrid) tabGrid.classList.add("active");
     if (tabNet) tabNet.classList.remove("active");
-    if (tabArch) tabArch.classList.remove("active");
     if (tabGov) tabGov.classList.remove("active");
 
     render();
@@ -393,12 +383,17 @@ Promise.all([
 function render() {
   if (!_nodesAll || !_edgesAll) return;
 
-  if (state.view !== "governance") rebuildDependentDropdowns(_nodesAll);
+  if (state.view !== "governance" && state.view !== "docs") rebuildDependentDropdowns(_nodesAll);
 
   vizEl.selectAll("*").remove();
 
   if (state.view === "governance") {
     renderGovernance(_nodesAll, _edgesAll);
+    return;
+  }
+
+  if (state.view === "docs") {
+    renderDocs();
     return;
   }
 
@@ -408,7 +403,6 @@ function render() {
   nodes = restrictNodesToEdges(nodes, edges);
 
   if (state.view === "network") renderNetwork(nodes, edges);
-  else if (state.view === "architecture") renderArchitecture(nodes, edges);
   else renderGrid(nodes, edges, uniq(nodes.map(d => d.oem_group)));
 }
 
@@ -786,118 +780,6 @@ function renderGovernance(nodesAll, edgesAll){
   );
 }
 
-
-
-// ----- ARCHITECTURE VIEW (layered lanes, zoom/pan) -----
-function renderArchitecture(nodes, edges){
-  const w = 1600;
-  const h = 980;
-  const margin = {top: 30, right: 20, bottom: 20, left: 240};
-  const laneH = Math.max(44, Math.floor((h - margin.top - margin.bottom) / LAYERS.length));
-  const maxPerLane = state.archTight ? 10 : 24; // tighter = fewer nodes per lane for readability
-
-  const svg = vizEl.append("svg").attr("viewBox", `0 0 ${w} ${h}`);
-  svg.style("touch-action","none");
-  svg.append("rect").attr("width", w).attr("height", h).attr("fill","transparent").style("pointer-events","all");
-
-  const gRoot = svg.append("g");
-
-  // Lane labels + separators
-  const laneG = gRoot.append("g");
-  LAYERS.forEach((layer, i) => {
-    const y = margin.top + i*laneH;
-    laneG.append("line")
-      .attr("x1", margin.left).attr("x2", w - margin.right)
-      .attr("y1", y).attr("y2", y)
-      .attr("stroke", "rgba(255,255,255,0.08)");
-    const t = laneG.append("text")
-      .attr("x", 12).attr("y", y + Math.min(28, laneH-10))
-      .text(layer);
-    applyReadableText(t, { size: 12, fill: "#D1D5DB", stroke:"rgba(0,0,0,0.9)" });
-  });
-
-  // Position nodes within lanes (grouped by layer then OEM)
-  const cols = uniq(nodes.map(d=>d.oem_group));
-  const xScale = d3.scaleBand().domain(cols).range([margin.left, w - margin.right]).padding(0.12);
-
-  const grouped = d3.group(nodes, d=>d.layer, d=>d.oem_group);
-  const pos = new Map();
-
-  for (const [layer, byOem] of grouped){
-    const li = LAYERS.indexOf(layer);
-    if (li < 0) continue;
-    const y0 = margin.top + li*laneH + 8;
-    for (const [oem, list] of byOem){
-      const x0 = xScale(oem) ?? margin.left;
-      const colW = xScale.bandwidth();
-      const boxW = Math.max(160, colW - 12);
-      const boxH = 22;
-      list.slice(0, maxPerLane).forEach((n, idx) => {
-        const yy = y0 + (idx % Math.max(1, Math.floor((laneH-16)/(boxH+4)))) * (boxH+4);
-        const xx = x0 + 6 + (Math.floor(idx / Math.max(1, Math.floor((laneH-16)/(boxH+4)))) * (boxW + 10));
-        pos.set(n.id, {x: xx, y: yy, w: boxW, h: boxH});
-      });
-    }
-  }
-
-  // Draw OEM headers (top)
-  const header = gRoot.append("g").selectAll("text")
-    .data(cols).join("text")
-    .attr("x", d => (xScale(d) ?? margin.left) + 8)
-    .attr("y", 20)
-    .text(d => d);
-  applyReadableText(header, { size: 13 });
-
-  // Edges (only for positioned nodes)
-  const edgesVis = edges.filter(e => pos.has(e.source) && pos.has(e.target));
-  gRoot.append("g").selectAll("path")
-    .data(edgesVis).join("path")
-    .attr("fill","none")
-    .attr("stroke","#9CA3AF")
-    .attr("stroke-width", 1.4)
-    .attr("opacity", 0.75)
-    .style("stroke-dasharray", edgeDash)
-    .attr("d", e => {
-      const a = pos.get(e.source), b = pos.get(e.target);
-      const x1 = a.x + a.w, y1 = a.y + a.h/2;
-      const x2 = b.x, y2 = b.y + b.h/2;
-      const dx = Math.max(40, (x2 - x1) * 0.5);
-      return `M${x1},${y1} C${x1+dx},${y1} ${x2-dx},${y2} ${x2},${y2}`;
-    })
-    .on("mousemove", showEdgeTip)
-    .on("mouseleave", hideTip);
-
-  const nodesVis = nodes.filter(n => pos.has(n.id));
-  const nodeSel = gRoot.append("g").selectAll("g.node")
-    .data(nodesVis, d=>d.id)
-    .join(enter=>{
-      const g = enter.append("g").attr("class","node");
-      g.append("rect");
-      g.append("text");
-      return g;
-    })
-    .attr("transform", d => {
-      const p = pos.get(d.id);
-      return `translate(${p.x},${p.y})`;
-    });
-
-  nodeSel.select("rect")
-    .attr("width", d => pos.get(d.id).w)
-    .attr("height", d => pos.get(d.id).h)
-    .attr("fill", d => (safe(d.evidence_status).toUpperCase()==="VERIFIED") ? "#2563EB" : nodeFill(d))
-    .attr("stroke","rgba(255,255,255,.32)")
-    .attr("rx", 6);
-
-  const nodeText = nodeSel.select("text")
-    .attr("x", 10).attr("y", 16)
-    .text(d => d.label);
-  applyReadableText(nodeText, { size: 12 });
-
-  nodeSel.on("mousemove", showTip).on("mouseleave", hideTip);
-
-  const zoom = d3.zoom().scaleExtent([0.6, 3.5]).on("zoom", (event) => gRoot.attr("transform", event.transform));
-  svg.call(zoom);
-}
 
 // ----- GRID VIEW -----
 
