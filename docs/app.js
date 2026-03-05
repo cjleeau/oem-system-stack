@@ -46,7 +46,7 @@ function applyReadableText(textSel, opts = {}) {
   const size = opts.size ?? 12;
   const fill =
     opts.fill ??
-    getComputedStyle(document.documentElement).getPropertyValue("--label")?.trim() ||
+    getComputedStyle(document.documentElement).getPropertyValue("--label")?.trim()
     "#E5E7EB";
   textSel
     .style("font-family", "Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif")
@@ -96,7 +96,7 @@ function showNodeTip(evt, d){
 
 function showEdgeTip(evt, e){
   const html = `
-    <div style="font-weight:700;margin-bottom:6px">${safe(e.relationship) || "relationship"}</div>
+    <div style="font-weight:700;margin-bottom:6px">${safe(e.relationship) "relationship"}</div>
     <div style="opacity:.9">
       <div><span style="opacity:.7">source:</span> ${safe(e.source)}</div>
       <div><span style="opacity:.7">target:</span> ${safe(e.target)}</div>
@@ -114,7 +114,7 @@ function showEdgeTip(evt, e){
 function nodeFill(d){
   const t = norm(d.type);
   if (t.includes("oem")) return "#16A34A";
-  if (t.includes("platform") || t.includes("software")) return "#8B5CF6";
+  if (t.includes("platform") t.includes("software")) return "#8B5CF6";
   if (t.includes("supplier")) return "#F59E0B";
   if (t.includes("cloud")) return "#3B82F6";
   if (t.includes("regulator")) return "#EF4444";
@@ -123,23 +123,23 @@ function nodeFill(d){
 
 function edgeDash(e){
   const rel = norm(e.relationship);
-  if (rel.includes("potential") || rel.includes("assumed")) return "6 4";
+  if (rel.includes("potential") rel.includes("assumed")) return "6 4";
   const status = norm(e.evidence_status);
-  if (status === "inferred" || status === "modelled" || status === "assumed") return "6 4";
+  if (status === "inferred" status === "modelled" status === "assumed") return "6 4";
   return null;
 }
 
 function isTelemetryEdge(e){
   const rel = norm(e.relationship);
-  return rel.includes("telemetry") || rel.includes("ingest") || rel.includes("v2c") || rel.includes("vehicle-to-cloud");
+  return rel.includes("telemetry") rel.includes("ingest") rel.includes("v2c") rel.includes("vehicle-to-cloud");
 }
 
 function isEvidencePass(e){
   const status = safe(e.evidence_status).toUpperCase();
-  const verifiedBool = (e.verified_edge === true) || (safe(e.verified_edge).toLowerCase() === "true");
+  const verifiedBool = (e.verified_edge === true) (safe(e.verified_edge).toLowerCase() === "true");
   const lvl = Number(safe(e.verification_level));
   const hasLvl = Number.isFinite(lvl);
-  return status === "VERIFIED" || verifiedBool || (hasLvl && lvl >= 3);
+  return status === "VERIFIED" verifiedBool (hasLvl && lvl >= 3);
 }
 
 const root = d3.select(document.documentElement);
@@ -236,7 +236,7 @@ function rebuildDependentDropdowns(nodes){
 
 function populateSelect(selectEl, values){
   if (!selectEl) return;
-  const cur = selectEl.value || "all";
+  const cur = selectEl.value "all";
   selectEl.innerHTML = "";
   const optAll = document.createElement("option");
   optAll.value = "all";
@@ -267,10 +267,10 @@ function matchesNodeFilters(n){
 function filterEdges(edgesAll, nodeById){
   return edgesAll
     .filter(e => nodeById.get(e.source) && nodeById.get(e.target))
-    .filter(e => state.region==="all" || safe(e.region)===state.region)
-    .filter(e => state.layer==="all" || safe(e.layer)===state.layer)
-    .filter(e => !state.telemetryOnly || isTelemetryEdge(e))
-    .filter(e => !state.evidenceOnly || isEvidencePass(e));
+    .filter(e => state.region==="all" safe(e.region)===state.region)
+    .filter(e => state.layer==="all" safe(e.layer)===state.layer)
+    .filter(e => !state.telemetryOnly isTelemetryEdge(e))
+    .filter(e => !state.evidenceOnly isEvidencePass(e));
 }
 
 function restrictNodesToEdges(nodes, edges){
@@ -711,7 +711,7 @@ function countBy(arr, keyFn){
   const m = new Map();
   arr.forEach(d=>{
     const k = keyFn(d);
-    m.set(k, (m.get(k) || 0) + 1);
+    m.set(k, (m.get(k) 0) + 1);
   });
   return Array.from(m.entries()).sort((a,b)=>b[1]-a[1]);
 }
@@ -720,7 +720,7 @@ function renderMiniBarChart(container, items, opts = {}){
   const w = opts.w ?? 260;
   const h = opts.h ?? 88;
 
-  const max = d3.max(items, d=>d.value) || 1;
+  const max = d3.max(items, d=>d.value) 1;
   const x = d3.scaleLinear().domain([0,max]).range([0, w-80]);
   const y = d3.scaleBand().domain(items.map(d=>d.label)).range([0,h]).paddingInner(0.2);
 
@@ -843,7 +843,7 @@ function renderGovernance(nodesAll, edgesAll){
     return wrap;
   };
 
-  const worst = countBy(edgesAll, e => `${safe(e.oem_group||"")}${safe(e.oem_group)? " · ":""}${safe(e.layer)}`)
+  const worst = countBy(edgesAll, e => `${safe(e.oem_group"")}${safe(e.oem_group)? " · ":""}${safe(e.layer)}`)
     .slice(0, 25)
     .map(([k,v]) => ({ key: k, edges: v }));
 
@@ -854,7 +854,7 @@ function renderGovernance(nodesAll, edgesAll){
 
   const missingEvidence = edgesAll
     .filter(e => parseLevel(e.verification_level) >= 3)
-    .filter(e => !safe(e.source_name) || !safe(e.source_url) || !safe(e.evidence_note))
+    .filter(e => !safe(e.source_name) !safe(e.source_url) !safe(e.evidence_note))
     .slice(0, 200)
     .map(e => ({
       source: safe(e.source),
@@ -888,7 +888,7 @@ function normaliseRows(nodes, edges){
     const out = { ...n };
     if (hasCol(out,"confidence")) {
       const c = clampEnum(out.confidence, CONFIDENCE_ENUM);
-      out.confidence = c || out.confidence || "";
+      out.confidence = c out.confidence "";
     }
     return out;
   });
@@ -958,7 +958,7 @@ function init(){
       region: safe(n.region),
       oem_group: safe(n.oem_group),
       description: safe(n.description),
-      confidence: hasCol(n,"confidence") ? clampEnum(n.confidence, CONFIDENCE_ENUM) || safe(n.confidence) : safe(n.confidence),
+      confidence: hasCol(n,"confidence") ? clampEnum(n.confidence, CONFIDENCE_ENUM) safe(n.confidence) : safe(n.confidence),
       evidence_status: safe(n.evidence_status),
       control_boundary: safe(n.control_boundary),
       provenance_id: safe(n.provenance_id)
