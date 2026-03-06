@@ -42,12 +42,88 @@ const state = {
   confidence: "all",
   search: "",
   telemetryOnly: false,
-  evidenceOnly: false
+  evidenceOnly: false,
+  archTight: false,
+  archAdjacentOnly: true,
+  archSupplierFocus: false
 };
 
+
+// ---------- Analytics (optional: gtag) ----------
+function trackView(viewName){
+  try{
+    if (typeof gtag === "function"){
+      gtag('event', 'view_change', { view: viewName });
+      gtag('event', 'page_view', { page_title: document.title, page_path: `/${viewName}` });
+    }
+  }catch(_e){}
+}
 function safe(v){ return (v ?? "").toString().trim(); }
 function norm(s){ return safe(s).toLowerCase(); }
 function uniq(arr) { return Array.from(new Set(arr)).sort((a,b)=>a.localeCompare(b)); }
+
+const INTL_INT = new Intl.NumberFormat("en-US");
+function fmtInt(v){
+  const n = Number(v);
+  return Number.isFinite(n) ? INTL_INT.format(n) : String(v ?? "");
+}
+function fmtMaybe(v){
+  const n = Number(v);
+  return Number.isFinite(n) ? INTL_INT.format(n) : String(v ?? "");
+}
+function ensureToggle(id, label, checked=false){
+  let el = document.querySelector(`#${id}`);
+  if (el) return el;
+  const host = document.querySelector(".toggles");
+  if (!host) return null;
+  const lab = document.createElement("label");
+  lab.style.marginLeft = "12px";
+  const input = document.createElement("input");
+  input.type = "checkbox";
+  input.id = id;
+  input.checked = !!checked;
+  lab.appendChild(input);
+  lab.appendChild(document.createTextNode(" " + label));
+  host.appendChild(lab);
+  return input;
+}
+function renderLegendBox(svg, title, items, x, y){
+  const g = svg.append("g").attr("transform", `translate(${x},${y})`);
+  const lineH = 18;
+  const boxW = 220;
+  const boxH = 30 + items.length * lineH + 8;
+
+  g.append("rect")
+    .attr("width", boxW)
+    .attr("height", boxH)
+    .attr("rx", 10)
+    .attr("fill", "rgba(17,24,39,0.78)")
+    .attr("stroke", "rgba(255,255,255,0.12)");
+
+  const titleText = g.append("text").attr("x", 12).attr("y", 18).text(title);
+  applyReadableText(titleText, { size: 11, fill: "#F9FAFB" });
+
+  items.forEach((it, i) => {
+    const yy = 34 + i*lineH;
+    if (it.type === "line"){
+      g.append("line")
+        .attr("x1", 12).attr("x2", 36).attr("y1", yy-4).attr("y2", yy-4)
+        .attr("stroke", it.color || "#9CA3AF")
+        .attr("stroke-width", 2)
+        .style("stroke-dasharray", it.dash || null);
+    } else {
+      g.append("rect")
+        .attr("x", 12).attr("y", yy-10)
+        .attr("width", 18).attr("height", 10)
+        .attr("rx", 3)
+        .attr("fill", it.color || "#3B82F6")
+        .attr("stroke", "rgba(255,255,255,0.25)");
+    }
+    const t = g.append("text").attr("x", 44).attr("y", yy-1).text(it.label);
+    applyReadableText(t, { size: 10, fill: "#E5E7EB" });
+  });
+  return g;
+}
 
 function applyReadableText(textSel, opts = {}) {
   const size = opts.size ?? 12;
@@ -312,22 +388,21 @@ Promise.all([
   const tabNet = document.querySelector("#tab-network");
   const tabArch = document.querySelector("#tab-architecture");
   const tabGov = document.querySelector("#tab-governance");
-  const tabDocs = document.querySelector("#tab-docs");
 
   function setView(v){
     state.view = v;
     if (tabGrid) tabGrid.classList.toggle("active", v==="grid");
     if (tabNet) tabNet.classList.toggle("active", v==="network");
+    if (tabGrid) tabGrid.classList.toggle("active", v==="grid");
     if (tabArch) tabArch.classList.toggle("active", v==="architecture");
     if (tabGov) tabGov.classList.toggle("active", v==="governance");
-    if (tabDocs) tabDocs.classList.toggle("active", v==="docs");
+    trackView(v);
     render();
   }
   if (tabGrid) tabGrid.addEventListener("click", ()=>setView("grid"));
   if (tabNet) tabNet.addEventListener("click", ()=>setView("network"));
   if (tabArch) tabArch.addEventListener("click", ()=>setView("architecture"));
   if (tabGov) tabGov.addEventListener("click", ()=>setView("governance"));
-  if (tabDocs) tabDocs.addEventListener("click", ()=>setView("docs"));
 
   // Controls
   const regionSel = document.querySelector("#region");
@@ -338,6 +413,7 @@ Promise.all([
   const searchEl = document.querySelector("#search");
   const telem = document.querySelector("#telemetryOnly");
   const evidence = document.querySelector("#evidenceOnly");
+  const archTight = document.querySelector("#archTight");
   const resetBtn = document.querySelector("#reset");
 
   if (regionSel) regionSel.addEventListener("change", (e)=>{ state.region=e.target.value; render(); });
@@ -349,6 +425,7 @@ Promise.all([
   if (searchEl) searchEl.addEventListener("input", (e)=>{ state.search=e.target.value; render(); });
   if (telem) telem.addEventListener("change", (e)=>{ state.telemetryOnly=e.target.checked; render(); });
   if (evidence) evidence.addEventListener("change", (e)=>{ state.evidenceOnly=e.target.checked; render(); });
+  if (archTight) archTight.addEventListener("change", (e)=>{ state.archTight=e.target.checked; render(); });
 
   // Reset fix
   if (resetBtn) resetBtn.addEventListener("click", ()=>{
@@ -361,7 +438,10 @@ Promise.all([
       confidence: "all",
       search: "",
       telemetryOnly: false,
-      evidenceOnly: false
+      evidenceOnly: false,
+      archTight: false,
+      archAdjacentOnly: true,
+      archSupplierFocus: false
     });
 
     if (regionSel) regionSel.value = "all";
@@ -372,12 +452,15 @@ Promise.all([
     if (searchEl) searchEl.value = "";
     if (telem) telem.checked = false;
     if (evidence) evidence.checked = false;
+    if (archAdjacentOnly) archAdjacentOnly.checked = true;
+    if (archSupplierFocus) archSupplierFocus.checked = false;
+    if (archTight) archTight.checked = false;
+    if (archTight) archTight.checked = false;
 
     if (tabGrid) tabGrid.classList.add("active");
     if (tabNet) tabNet.classList.remove("active");
     if (tabArch) tabArch.classList.remove("active");
     if (tabGov) tabGov.classList.remove("active");
-    if (tabDocs) tabDocs.classList.remove("active");
 
     render();
   });
@@ -408,7 +491,7 @@ function render() {
   nodes = restrictNodesToEdges(nodes, edges);
 
   if (state.view === "network") renderNetwork(nodes, edges);
-  else if (state.view === "architecture") renderArchitecture(nodes, edges, uniq(nodes.map(d => d.oem_group)));
+  else if (state.view === "architecture") renderArchitecture(nodes, edges);
   else renderGrid(nodes, edges, uniq(nodes.map(d => d.oem_group)));
 }
 
@@ -433,7 +516,7 @@ function renderDocs(){
     .style("margin","6px 0 10px 0")
     .text("About & Documentation");
 
-  function card(title){
+  function makeCard(title, html){
     const c = root.append("div")
       .style("background","rgba(255,255,255,0.03)")
       .style("border","1px solid rgba(255,255,255,0.08)")
@@ -441,40 +524,14 @@ function renderDocs(){
       .style("padding","12px 12px 10px 12px")
       .style("box-sizing","border-box")
       .style("margin","0 0 12px 0");
-    c.append("div")
-      .style("font-size","12px")
-      .style("color","#D1D5DB")
-      .style("margin-bottom","8px")
-      .style("font-weight","700")
-      .text(title);
-    return c;
+    c.append("div").style("font-size","12px").style("color","#D1D5DB").style("margin-bottom","8px").style("font-weight","700").text(title);
+    c.append("div").style("font-size","13px").style("line-height","1.5").html(html);
   }
 
-  const c1 = card("What this is");
-  c1.append("div")
-    .style("font-size","13px")
-    .style("line-height","1.5")
-    .html("An interactive, CSV-driven map of OEM system stacks and ecosystem relationships. Use <strong>Grid</strong> for scanability, <strong>Architecture</strong> for lane-based stack views, <strong>Network</strong> for relationship shape, and <strong>Governance</strong> for verification coverage.");
-
-  const c2 = card("How to interpret the visual");
-  c2.append("div")
-    .style("font-size","13px")
-    .style("line-height","1.5")
-    .html("Solid links are stronger / more verified relationships. Dashed links indicate weaker or modelled edges. The <strong>Evidence Only</strong> toggle shows only relationships that are VERIFIED, explicitly marked as verified, or have verification_level >= 3.");
-
-  const c3 = card("Structural rule");
-  c3.append("div")
-    .style("font-size","13px")
-    .style("line-height","1.5")
-    .html("Do not mix commercial relationships, data-flow relationships, and control boundaries as if they were the same thing. This project separates those concepts via relationship type, evidence status, and node metadata.");
-
-  const c4 = card("Quick links");
-  c4.append("div")
-    .style("font-size","13px")
-    .style("line-height","1.9")
-    .html("<a href='./README.md' target='_blank' style='color:#60A5FA;text-decoration:none'>README.md</a><br/><a href='./CHANGELOG.md' target='_blank' style='color:#60A5FA;text-decoration:none'>CHANGELOG.md</a>");
+  makeCard("What this is", "An interactive, CSV-driven map of OEM system stacks and ecosystem relationships. Use <strong>Grid</strong> for scanability, <strong>Architecture</strong> for lane-based stack views, <strong>Network</strong> for relationship shape, and <strong>Governance</strong> for verification coverage.");
+  makeCard("Structural rule", "Do not mix commercial relationships, data-flow, and control boundaries as if they were the same thing. This project separates them through relationship type, evidence status, and node metadata.");
+  makeCard("Quick links", "<a href='./README.md' target='_blank' style='color:#60A5FA;text-decoration:none'>README.md</a><br/><a href='./CHANGELOG.md' target='_blank' style='color:#60A5FA;text-decoration:none'>CHANGELOG.md</a>");
 }
-
 
 // ----- Governance View -----
 
@@ -734,7 +791,7 @@ function renderGovernance(nodesAll, edgesAll){
       .style("font-size","20px")
       .style("font-weight","700")
       .style("color","#F9FAFB")
-      .text(String(v));
+      .text(fmtInt(v));
   });
 
   // Two-column layout
@@ -791,7 +848,7 @@ function renderGovernance(nodesAll, edgesAll){
     .attr("stroke-width", 3)
     .attr("paint-order","stroke")
     .style("font-size","11px")
-    .text(d=>d.count);
+    .text(d=>fmtInt(d.count));
 
   // Weakest layers table
   const weakCard = card(left, "Weakest Layers (lowest % Verified)");
@@ -850,6 +907,118 @@ function renderGovernance(nodesAll, edgesAll){
   );
 }
 
+
+
+// ----- ARCHITECTURE VIEW (layered lanes, zoom/pan) -----
+function renderArchitecture(nodes, edges){
+  const w = 1600;
+  const h = 980;
+  const margin = {top: 30, right: 20, bottom: 20, left: 240};
+  const laneH = Math.max(44, Math.floor((h - margin.top - margin.bottom) / LAYERS.length));
+  const maxPerLane = state.archTight ? 10 : 24; // tighter = fewer nodes per lane for readability
+
+  const svg = vizEl.append("svg").attr("viewBox", `0 0 ${w} ${h}`);
+  svg.style("touch-action","none");
+  svg.append("rect").attr("width", w).attr("height", h).attr("fill","transparent").style("pointer-events","all");
+
+  const gRoot = svg.append("g");
+
+  // Lane labels + separators
+  const laneG = gRoot.append("g");
+  LAYERS.forEach((layer, i) => {
+    const y = margin.top + i*laneH;
+    laneG.append("line")
+      .attr("x1", margin.left).attr("x2", w - margin.right)
+      .attr("y1", y).attr("y2", y)
+      .attr("stroke", "rgba(255,255,255,0.08)");
+    const t = laneG.append("text")
+      .attr("x", 12).attr("y", y + Math.min(28, laneH-10))
+      .text(layer);
+    applyReadableText(t, { size: 12, fill: "#D1D5DB", stroke:"rgba(0,0,0,0.9)" });
+  });
+
+  // Position nodes within lanes (grouped by layer then OEM)
+  const cols = uniq(nodes.map(d=>d.oem_group));
+  const xScale = d3.scaleBand().domain(cols).range([margin.left, w - margin.right]).padding(0.12);
+
+  const grouped = d3.group(nodes, d=>d.layer, d=>d.oem_group);
+  const pos = new Map();
+
+  for (const [layer, byOem] of grouped){
+    const li = LAYERS.indexOf(layer);
+    if (li < 0) continue;
+    const y0 = margin.top + li*laneH + 8;
+    for (const [oem, list] of byOem){
+      const x0 = xScale(oem) ?? margin.left;
+      const colW = xScale.bandwidth();
+      const boxW = Math.max(160, colW - 12);
+      const boxH = 22;
+      list.slice(0, maxPerLane).forEach((n, idx) => {
+        const yy = y0 + (idx % Math.max(1, Math.floor((laneH-16)/(boxH+4)))) * (boxH+4);
+        const xx = x0 + 6 + (Math.floor(idx / Math.max(1, Math.floor((laneH-16)/(boxH+4)))) * (boxW + 10));
+        pos.set(n.id, {x: xx, y: yy, w: boxW, h: boxH});
+      });
+    }
+  }
+
+  // Draw OEM headers (top)
+  const header = gRoot.append("g").selectAll("text")
+    .data(cols).join("text")
+    .attr("x", d => (xScale(d) ?? margin.left) + 8)
+    .attr("y", 20)
+    .text(d => d);
+  applyReadableText(header, { size: 13 });
+
+  // Edges (only for positioned nodes)
+  const edgesVis = edges.filter(e => pos.has(e.source) && pos.has(e.target));
+  gRoot.append("g").selectAll("path")
+    .data(edgesVis).join("path")
+    .attr("fill","none")
+    .attr("stroke","#9CA3AF")
+    .attr("stroke-width", 1.4)
+    .attr("opacity", 0.75)
+    .style("stroke-dasharray", edgeDash)
+    .attr("d", e => {
+      const a = pos.get(e.source), b = pos.get(e.target);
+      const x1 = a.x + a.w, y1 = a.y + a.h/2;
+      const x2 = b.x, y2 = b.y + b.h/2;
+      const dx = Math.max(40, (x2 - x1) * 0.5);
+      return `M${x1},${y1} C${x1+dx},${y1} ${x2-dx},${y2} ${x2},${y2}`;
+    })
+    .on("mousemove", showEdgeTip)
+    .on("mouseleave", hideTip);
+
+  const nodesVis = nodes.filter(n => pos.has(n.id));
+  const nodeSel = gRoot.append("g").selectAll("g.node")
+    .data(nodesVis, d=>d.id)
+    .join(enter=>{
+      const g = enter.append("g").attr("class","node");
+      g.append("rect");
+      g.append("text");
+      return g;
+    })
+    .attr("transform", d => {
+      const p = pos.get(d.id);
+      return `translate(${p.x},${p.y})`;
+    });
+
+  nodeSel.select("rect")
+    .attr("width", d => pos.get(d.id).w)
+    .attr("height", d => pos.get(d.id).h)
+    .attr("fill", d => (safe(d.evidence_status).toUpperCase()==="VERIFIED") ? "#2563EB" : nodeFill(d))
+    .attr("stroke","rgba(255,255,255,.32)")
+    .attr("rx", 6);
+
+  const nodeText = nodeSel.select("text")
+    .attr("x", 10).attr("y", 16)
+    .text(d => d.label);
+  applyReadableText(nodeText, { size: 12 });
+
+  nodeSel.on("mousemove", showTip).on("mouseleave", hideTip);
+
+  const zoom = d3.zoom().scaleExtent([0.6, 3.5]).on("zoom", (event) => gRoot.attr("transform", event.transform));
+  svg.call(zoom);
+}
 
 // ----- GRID VIEW -----
 
@@ -960,116 +1129,6 @@ function renderGrid(nodes, edges, cols){
   svg.call(zoom);
 }
 
-
-
-function renderArchitecture(nodes, edges, cols){
-  const margin = {top: 34, right: 20, bottom: 20, left: 220};
-  const laneH = 92;
-  const colW = 240;
-
-  const w = Math.max(1200, margin.left + margin.right + Math.max(1, cols.length) * colW);
-  const h = Math.max(780, margin.top + margin.bottom + LAYERS.length * laneH);
-
-  const svg = vizEl.append("svg").attr("viewBox", `0 0 ${w} ${h}`);
-  svg.style("touch-action", "none");
-  svg.append("rect").attr("width", w).attr("height", h).attr("fill","transparent").style("pointer-events","all");
-
-  const gRoot = svg.append("g");
-
-  const headerSel = gRoot.append("g").selectAll("text")
-    .data(cols).join("text")
-    .attr("x", (d,i)=> margin.left + i*colW + 8)
-    .attr("y", 20)
-    .text(d=>d);
-  applyReadableText(headerSel, { size: 13 });
-
-  const rowSel = gRoot.append("g").selectAll("text")
-    .data(LAYERS).join("text")
-    .attr("x", 12)
-    .attr("y", (d,i)=> margin.top + i*laneH + 50)
-    .text(d=>d);
-  applyReadableText(rowSel, { size: 12, fill: "#D1D5DB", stroke: "rgba(0,0,0,0.9)" });
-
-  const lanes = gRoot.append("g").attr("opacity", 0.24);
-  for (let r=0; r<LAYERS.length; r++){
-    lanes.append("rect")
-      .attr("x", margin.left)
-      .attr("y", margin.top + r*laneH)
-      .attr("width", Math.max(1, cols.length)*colW)
-      .attr("height", laneH)
-      .attr("fill","none")
-      .attr("stroke","rgba(255,255,255,.10)");
-  }
-
-  const grouped = d3.group(nodes, d=>d.layer, d=>d.oem_group);
-  const pos = new Map();
-
-  for (const [layer, byCol] of grouped){
-    const r = LAYERS.indexOf(layer);
-    for (const [col, list] of byCol){
-      const c = cols.indexOf(col);
-      if (c < 0 || r < 0) continue;
-      const x0 = margin.left + c*colW + 12;
-      const y0 = margin.top + r*laneH + 12;
-      const boxH = 22;
-      const maxVisible = 4;
-      list.slice(0, maxVisible).forEach((n,i)=>{
-        pos.set(n.id, {x:x0, y:y0 + i*(boxH+8), w:colW-24, h:boxH});
-      });
-    }
-  }
-
-  const visibleEdges = edges.filter(e => pos.has(e.source) && pos.has(e.target));
-
-  gRoot.append("g").selectAll("path")
-    .data(visibleEdges).join("path")
-    .attr("fill","none")
-    .attr("stroke","#9CA3AF")
-    .attr("stroke-width", 1.4)
-    .attr("opacity", 0.72)
-    .style("stroke-dasharray", edgeDash)
-    .attr("d", e=>{
-      const a = pos.get(e.source), b = pos.get(e.target);
-      const x1 = a.x + a.w, y1 = a.y + a.h/2;
-      const x2 = b.x, y2 = b.y + b.h/2;
-      const mx = (x1+x2)/2;
-      return `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`;
-    })
-    .on("mousemove", showEdgeTip)
-    .on("mouseleave", hideTip);
-
-  const visibleNodes = nodes.filter(n=>pos.has(n.id));
-  const nodeSel = gRoot.append("g").selectAll("g.node")
-    .data(visibleNodes, d=>d.id)
-    .join(enter=>{
-      const g = enter.append("g").attr("class","node");
-      g.append("rect");
-      g.append("text");
-      return g;
-    })
-    .attr("transform", d=>{
-      const p = pos.get(d.id);
-      return `translate(${p.x},${p.y})`;
-    });
-
-  nodeSel.select("rect")
-    .attr("width", d=>pos.get(d.id).w)
-    .attr("height", d=>pos.get(d.id).h)
-    .attr("fill", d => (safe(d.evidence_status).toUpperCase()==="VERIFIED") ? "#2563EB" : nodeFill(d))
-    .attr("stroke","rgba(255,255,255,.40)")
-    .attr("rx", 6);
-
-  const nodeText = nodeSel.select("text")
-    .attr("x", 8).attr("y", 15)
-    .text(d=>d.label);
-  applyReadableText(nodeText, { size: 11 });
-
-  nodeSel.on("mousemove", showTip).on("mouseleave", hideTip);
-
-  const zoom = d3.zoom().scaleExtent([0.55, 2.8]).on("zoom", (event) => gRoot.attr("transform", event.transform));
-  svg.call(zoom);
-}
-
 // ----- NETWORK VIEW -----
 
 function renderNetwork(nodes, edges){
@@ -1136,6 +1195,15 @@ function renderNetwork(nodes, edges){
   function dragstarted(event, d) { if (!event.active) sim.alphaTarget(0.25).restart(); d.fx = d.x; d.fy = d.y; }
   function dragged(event, d) { d.fx = event.x; d.fy = event.y; }
   function dragended(event, d) { if (!event.active) sim.alphaTarget(0); d.fx = null; d.fy = null; }
+
+  renderLegendBox(svg, "Network legend", [
+    {type:"box", color:"#2563EB", label:"Verified node"},
+    {type:"box", color:"#3B82F6", label:"Internal / default node"},
+    {type:"box", color:"#6C8CFF", label:"External boundary node"},
+    {type:"box", color:"#F4A261", label:"Regulatory node"},
+    {type:"line", color:"#9CA3AF", label:"Verified / stronger edge"},
+    {type:"line", color:"#9CA3AF", dash:"5 4", label:"Modelled / weaker edge"}
+  ], w - 236, 12);
 
   const zoom = d3.zoom().scaleExtent([0.6, 3.5]).on("zoom", (event) => gRoot.attr("transform", event.transform));
   svg.call(zoom);
