@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  font-family: Inter, system-ui, Arial, sans-serif;
+  --background: 5 5 10;
+  --foreground: 245 247 251;
+  --card: 10 10 10;
+  --muted: 38 38 38;
+  --border: 38 38 38;
+  --muted-foreground: 161 161 161;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at top, rgba(24, 144, 255, 0.08), transparent 28%),
+    radial-gradient(circle at top right, rgba(122, 214, 255, 0.06), transparent 22%),
+    #050510;
+  color: #f4f7fb;
+  overflow: hidden;
+}
+
+a {
+  color: inherit;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.svg-text,
+.svg-label,
+.svg-muted {
+  paint-order: stroke;
+  stroke: rgba(2, 8, 20, 0.92);
+  stroke-width: 3px;
+}
+
+.svg-text {
+  fill: #f4f7fb;
+  font-size: 12px;
+}
+
+.svg-label {
+  fill: #e6f3ff;
+  font-size: 13px;
+}
+
+.svg-muted {
+  fill: #b6c7db;
+  font-size: 12px;
+}
+
+.prose code {
+  color: #cfe1ff;
+}
