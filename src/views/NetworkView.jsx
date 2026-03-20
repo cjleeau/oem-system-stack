@@ -118,10 +118,7 @@ function buildClusterGraph(nodes, edges, degreeMap, threshold) {
   );
 
   const keptNodes = nodes.filter((node) => keptIds.has(node.id));
-  const grouped = d3.group(
-    keptNodes,
-    (node) => `${node.region || 'Unknown'}||${node.layer || 'Unknown'}`
-  );
+  const grouped = d3.group(keptNodes, (node) => `${node.region || 'Unknown'}||${node.layer || 'Unknown'}`);
 
   const clusterNodes = [];
   const membership = new Map();
@@ -242,12 +239,13 @@ function shouldShowDetailLabel({
   regionRanks,
   selectedId,
   hoveredId,
-  focusSet,
+  selectedFocusSet,
+  hoveredFocusSet,
   pinnedIds
 }) {
-  if (selectedId === node.id || hoveredId === node.id || pinnedIds.has(node.id) || focusSet.has(node.id)) {
-    return true;
-  }
+  if (selectedId === node.id || hoveredId === node.id || pinnedIds.has(node.id)) return true;
+  if (selectedId && selectedFocusSet.has(node.id)) return true;
+  if (!selectedId && hoveredId && hoveredFocusSet.has(node.id)) return true;
 
   const degree = degreeMap.get(node.id) || 0;
   const rank = regionRanks.get(node.id) ?? 999;
@@ -277,10 +275,7 @@ function buildDetailSublaneTargets(nodes, regions, xScale, height, topPad, botto
       a.localeCompare(b)
     );
 
-    const sublaneScale = d3
-      .scalePoint()
-      .domain(layers)
-      .range([-110, 110]);
+    const sublaneScale = d3.scalePoint().domain(layers).range([-110, 110]);
 
     layers.forEach((layer) => {
       const laneNodes = regionNodes
@@ -390,6 +385,7 @@ export default function NetworkView({
   const svgRef = useRef(null);
   const zoomBehaviorRef = useRef(null);
   const initialTransformRef = useRef(null);
+  const legendBeforeExpandRef = useRef(true);
 
   const [labelMode, setLabelMode] = useState('balanced');
   const [renderMode, setRenderMode] = useState('auto');
@@ -420,7 +416,6 @@ export default function NetworkView({
     if (resolvedMode === 'overview') {
       return buildClusterGraph(nodes, edges, baseDegreeMap, degreeThreshold);
     }
-
     return buildDetailGraph(nodes, edges, baseDegreeMap, degreeThreshold, expandedClusterKey);
   }, [resolvedMode, nodes, edges, baseDegreeMap, degreeThreshold, expandedClusterKey]);
 
@@ -431,6 +426,12 @@ export default function NetworkView({
       setSelectedId(null);
     }
   }, [graph.nodes, selectedId]);
+
+  useEffect(() => {
+    if (expanded && legendVisible) {
+      setLegendVisible(false);
+    }
+  }, [expanded, legendVisible]);
 
   useEffect(() => {
     if (!hasData || !wrapRef.current) return undefined;
@@ -454,10 +455,7 @@ export default function NetworkView({
 
     const root = svg.append('g');
     const regions = uniqueValues(graph.nodes, (node) => node.region);
-    const xScale = d3
-      .scalePoint()
-      .domain(regions)
-      .range([leftPad + 120, width - rightPad - 120]);
+    const xScale = d3.scalePoint().domain(regions).range([leftPad + 120, width - rightPad - 120]);
 
     function drawFrame() {
       root
@@ -500,10 +498,7 @@ export default function NetworkView({
 
     if (resolvedMode === 'overview') {
       const layers = uniqueValues(graph.nodes, (node) => node.layer);
-      const yScale = d3
-        .scalePoint()
-        .domain(layers)
-        .range([topPad + 54, height - bottomPad - 40]);
+      const yScale = d3.scalePoint().domain(layers).range([topPad + 54, height - bottomPad - 40]);
 
       const layoutNodes = graph.nodes.map((node, index) => ({
         ...node,
@@ -710,31 +705,22 @@ export default function NetworkView({
       }))
       .filter((edge) => edge.source && edge.target);
 
-    const adjacency = buildAdjacency(
-      layoutLinks.map((edge) => ({
-        source: edge.source.id,
-        target: edge.target.id
-      }))
-    );
-    const degreeMap = buildDegreeMap(
-      layoutLinks.map((edge) => ({
-        source: edge.source.id,
-        target: edge.target.id
-      }))
-    );
+    const adjacency = buildAdjacency(layoutLinks.map((edge) => ({ source: edge.source.id, target: edge.target.id })));
+    const degreeMap = buildDegreeMap(layoutLinks.map((edge) => ({ source: edge.source.id, target: edge.target.id })));
     const regionRanks = buildRegionRanks(layoutNodes, degreeMap);
 
     const selectedNode = selectedId ? nodeMap.get(selectedId) : null;
-    const focusSet = new Set();
+    const selectedFocusSet = new Set();
+    const hoveredFocusSet = new Set();
 
     if (selectedNode) {
-      focusSet.add(selectedNode.id);
-      (adjacency.get(selectedNode.id) || new Set()).forEach((id) => focusSet.add(id));
+      selectedFocusSet.add(selectedNode.id);
+      (adjacency.get(selectedNode.id) || new Set()).forEach((id) => selectedFocusSet.add(id));
     }
 
     if (hoveredId) {
-      focusSet.add(hoveredId);
-      (adjacency.get(hoveredId) || new Set()).forEach((id) => focusSet.add(id));
+      hoveredFocusSet.add(hoveredId);
+      (adjacency.get(hoveredId) || new Set()).forEach((id) => hoveredFocusSet.add(id));
     }
 
     const simulation = d3
@@ -836,19 +822,31 @@ export default function NetworkView({
     const refreshDetailStyles = () => {
       circleSelection
         .attr('fill', (d) => {
-          if (selectedId === d.id || hoveredId === d.id) return '#7cefd1';
-          if ((selectedId || hoveredId) && focusSet.has(d.id)) return '#6dc0ff';
+          if (selectedId === d.id) return '#7cefd1';
+          if (hoveredId === d.id) return '#b8f8e7';
+          if (selectedId && selectedFocusSet.has(d.id)) return '#6dc0ff';
+          if (!selectedId && hoveredId && hoveredFocusSet.has(d.id)) return '#6dc0ff';
           return nodeFill(d);
         })
         .attr('opacity', (d) => {
-          if (!selectedId && !hoveredId) return 0.94;
-          if (focusSet.has(d.id)) return 1;
-          return 0.12;
+          if (selectedId) {
+            if (selectedFocusSet.has(d.id)) return 1;
+            if (hoveredId && hoveredFocusSet.has(d.id) && d.id !== hoveredId) return 0.22;
+            return 0.1;
+          }
+
+          if (hoveredId) {
+            if (hoveredFocusSet.has(d.id)) return 1;
+            return 0.12;
+          }
+
+          return 0.94;
         })
         .attr('stroke', (d) => {
           if (selectedId === d.id) return 'rgba(255,255,255,0.95)';
           if (hoveredId === d.id) return 'rgba(255,255,255,0.82)';
-          if ((selectedId || hoveredId) && focusSet.has(d.id)) return 'rgba(255,255,255,0.42)';
+          if (selectedId && selectedFocusSet.has(d.id)) return 'rgba(255,255,255,0.42)';
+          if (!selectedId && hoveredId && hoveredFocusSet.has(d.id)) return 'rgba(255,255,255,0.42)';
           return 'rgba(255,255,255,0.16)';
         })
         .attr('stroke-width', (d) => {
@@ -859,12 +857,24 @@ export default function NetworkView({
 
       linkSelection
         .attr('opacity', (edge) => {
-          if (!selectedId && !hoveredId) return 0.14;
-          if (focusSet.has(edge.source.id) && focusSet.has(edge.target.id)) return 0.82;
-          return 0.035;
+          if (selectedId) {
+            if (selectedFocusSet.has(edge.source.id) && selectedFocusSet.has(edge.target.id)) return 0.82;
+            if (hoveredId && hoveredFocusSet.has(edge.source.id) && hoveredFocusSet.has(edge.target.id)) return 0.08;
+            return 0.03;
+          }
+
+          if (hoveredId) {
+            if (hoveredFocusSet.has(edge.source.id) && hoveredFocusSet.has(edge.target.id)) return 0.82;
+            return 0.035;
+          }
+
+          return 0.14;
         })
         .attr('stroke', (edge) => {
-          if ((selectedId || hoveredId) && focusSet.has(edge.source.id) && focusSet.has(edge.target.id)) {
+          if (selectedId && selectedFocusSet.has(edge.source.id) && selectedFocusSet.has(edge.target.id)) {
+            return '#7cefd1';
+          }
+          if (!selectedId && hoveredId && hoveredFocusSet.has(edge.source.id) && hoveredFocusSet.has(edge.target.id)) {
             return '#7cefd1';
           }
           return edgeStroke(edge);
@@ -880,17 +890,29 @@ export default function NetworkView({
             regionRanks,
             selectedId,
             hoveredId,
-            focusSet,
+            selectedFocusSet,
+            hoveredFocusSet,
             pinnedIds
           });
 
           if (!visible) return 0;
-          if (!selectedId && !hoveredId) return 0.94;
-          return focusSet.has(d.id) ? 1 : 0.07;
+
+          if (selectedId) {
+            if (selectedFocusSet.has(d.id)) return 1;
+            if (hoveredId === d.id) return 0.6;
+            return 0.06;
+          }
+
+          if (hoveredId) {
+            return hoveredFocusSet.has(d.id) ? 1 : 0.07;
+          }
+
+          return 0.94;
         })
         .style('font-weight', (d) => {
           if (selectedId === d.id || hoveredId === d.id) return '700';
-          if ((selectedId || hoveredId) && focusSet.has(d.id)) return '600';
+          if (selectedId && selectedFocusSet.has(d.id)) return '600';
+          if (!selectedId && hoveredId && hoveredFocusSet.has(d.id)) return '600';
           return '500';
         });
     };
@@ -909,6 +931,7 @@ export default function NetworkView({
       .on('click', (_, d) => {
         const nextId = selectedId === d.id ? null : d.id;
         setSelectedId(nextId);
+        setHoveredId(null);
         onNodeSelect?.(nextId ? d : null);
       })
       .on('dblclick', (_, d) => {
@@ -1016,6 +1039,7 @@ export default function NetworkView({
     setHoveredClusterId(null);
     setExpandedClusterKey(null);
     setLayoutVersion((current) => current + 1);
+    setZoomPct(Math.round((initialTransformRef.current?.k ?? 1) * 100));
     onNodeSelect?.(null);
     onLeave?.();
 
@@ -1032,17 +1056,34 @@ export default function NetworkView({
     const svgNode = svgRef.current;
     const zoom = zoomBehaviorRef.current;
     if (!svgNode || !zoom) return;
+
     d3.select(svgNode)
       .transition()
       .duration(180)
       .call(zoom.scaleBy, direction === 'in' ? 1.18 : 0.84);
   };
 
-  const toggleExpanded = () => {
-    setExpanded((current) => !current);
-    if (!expanded) {
-      setLegendVisible(false);
+  const handleLegendToggle = () => {
+    if (expanded) {
+      setExpanded(false);
+      setLegendVisible(true);
+      legendBeforeExpandRef.current = true;
+      return;
     }
+
+    setLegendVisible((current) => !current);
+  };
+
+  const handleExpandToggle = () => {
+    if (!expanded) {
+      legendBeforeExpandRef.current = legendVisible;
+      setLegendVisible(false);
+      setExpanded(true);
+      return;
+    }
+
+    setExpanded(false);
+    setLegendVisible(legendBeforeExpandRef.current);
   };
 
   const helpText =
@@ -1134,9 +1175,9 @@ export default function NetworkView({
               <CardKicker>Display</CardKicker>
               <button
                 type="button"
-                onClick={() => setLegendVisible((current) => !current)}
+                onClick={handleLegendToggle}
                 className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${
-                  legendVisible
+                  legendVisible && !expanded
                     ? 'border-blue-500/40 bg-blue-600/10 text-blue-400'
                     : 'border-border/40 bg-muted/20 text-muted-foreground hover:text-foreground'
                 }`}
@@ -1185,7 +1226,7 @@ export default function NetworkView({
 
             <button
               type="button"
-              onClick={toggleExpanded}
+              onClick={handleExpandToggle}
               className="flex items-center gap-2 self-start rounded-md border border-border/40 bg-muted/20 px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-blue-500"
             >
               <ExpandIcon className="size-3.5" />
