@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { Pin, X, GitCompare } from 'lucide-react';
 import * as d3 from 'd3';
 import { edgeDash, edgeStroke, nodeFill } from '../lib/data';
 import { displayRegion } from '../lib/utils';
@@ -446,6 +447,84 @@ function buildAdjacency(edges) {
   });
 
   return map;
+}
+
+
+function makeEdgeKey(source, target) {
+  return [source, target].sort().join('::');
+}
+
+function buildShortestPath(edges, startId, endId, nodeMap = new Map()) {
+  if (!startId || !endId) return null;
+  if (startId === endId) {
+    return {
+      found: true,
+      nodeIds: [startId],
+      edgeKeys: [],
+      hops: 0,
+      layers: nodeMap.get(startId)?.layer ? [nodeMap.get(startId).layer] : []
+    };
+  }
+
+  const adjacency = new Map();
+
+  edges.forEach((edge) => {
+    const sourceId = typeof edge.source === 'object' ? edge.source?.id : edge.source;
+    const targetId = typeof edge.target === 'object' ? edge.target?.id : edge.target;
+    if (!sourceId || !targetId) return;
+
+    if (!adjacency.has(sourceId)) adjacency.set(sourceId, []);
+    if (!adjacency.has(targetId)) adjacency.set(targetId, []);
+
+    adjacency.get(sourceId).push(targetId);
+    adjacency.get(targetId).push(sourceId);
+  });
+
+  const queue = [startId];
+  const visited = new Set([startId]);
+  const previous = new Map();
+
+  while (queue.length) {
+    const current = queue.shift();
+    if (current === endId) break;
+
+    (adjacency.get(current) || []).forEach((nextId) => {
+      if (visited.has(nextId)) return;
+      visited.add(nextId);
+      previous.set(nextId, current);
+      queue.push(nextId);
+    });
+  }
+
+  if (!visited.has(endId)) {
+    return {
+      found: false,
+      nodeIds: [],
+      edgeKeys: [],
+      hops: null,
+      layers: []
+    };
+  }
+
+  const nodeIds = [];
+  let cursor = endId;
+  while (cursor) {
+    nodeIds.unshift(cursor);
+    cursor = previous.get(cursor) || null;
+  }
+
+  const edgeKeys = [];
+  for (let index = 0; index < nodeIds.length - 1; index += 1) {
+    edgeKeys.push(makeEdgeKey(nodeIds[index], nodeIds[index + 1]));
+  }
+
+  return {
+    found: true,
+    nodeIds,
+    edgeKeys,
+    hops: Math.max(0, nodeIds.length - 1),
+    layers: [...new Set(nodeIds.map((id) => nodeMap.get(id)?.layer).filter(Boolean))]
+  };
 }
 
 function buildDegreeMap(edges) {
@@ -941,6 +1020,8 @@ export default function NetworkView({
     description: false
   });
   const [expandedRelationshipGroups, setExpandedRelationshipGroups] = useState({});
+  const [compareIds, setCompareIds] = useState([]);
+  const [traceActive, setTraceActive] = useState(false);
 
   const getSafeHoverEvent = (event) => createSafeHoverEvent(event);
 
@@ -1638,8 +1719,13 @@ export default function NetworkView({
 
     const refreshDetailStyles = () => {
       const activeHoveredId = hoveredIdRef.current;
+      const traceIsVisible = Boolean(traceActive && tracedPath?.found && tracedNodeIds.size);
       circleSelection
         .attr('fill', (d) => {
+          if (traceIsVisible && tracedNodeIds.has(d.id)) {
+            if (selectedId === d.id) return '#f6d365';
+            return isDealerNode(d) ? 'rgba(246,211,101,0.45)' : 'rgba(246,211,101,0.34)';
+          }
           if (selectedId === d.id) return '#7cefd1';
           if (activeHoveredId === d.id) return '#b8f8e7';
           if (selectedId && selectedFocusSet.has(d.id)) return isDealerNode(d) ? dealerCategoryStyle(d).halo : '#6dc0ff';
@@ -1648,6 +1734,11 @@ export default function NetworkView({
           return nodeFill(d);
         })
         .attr('opacity', (d) => {
+          if (traceIsVisible) {
+            if (tracedNodeIds.has(d.id)) return 1;
+            return selectedId ? 0.06 : 0.08;
+          }
+
           if (selectedId) {
             if (selectedFocusSet.has(d.id)) return 1;
             if (activeHoveredId && hoveredFocusSet.has(d.id) && d.id !== activeHoveredId) return 0.22;
@@ -1662,6 +1753,7 @@ export default function NetworkView({
           return 0.94;
         })
         .attr('stroke', (d) => {
+          if (traceIsVisible && tracedNodeIds.has(d.id)) return 'rgba(246,211,101,0.96)';
           if (selectedId === d.id) return 'rgba(255,255,255,0.95)';
           if (activeHoveredId === d.id) return 'rgba(255,255,255,0.82)';
           if (selectedId && selectedFocusSet.has(d.id)) return isDealerNode(d) ? dealerCategoryStyle(d).stroke : 'rgba(255,255,255,0.42)';
@@ -1671,6 +1763,7 @@ export default function NetworkView({
         })
         .attr('stroke-width', (d) => {
           const controlPointBoost = controlPointVisualState(controlPointMetricsMap.get(d.id)).strokeBoost;
+          if (traceIsVisible && tracedNodeIds.has(d.id)) return 1.65 + controlPointBoost;
           if (selectedId === d.id) return 1.8 + controlPointBoost;
           if (activeHoveredId === d.id) return 1.4 + controlPointBoost * 0.8;
           return (isDealerNode(d) ? 1.05 : 0.8) + controlPointBoost * 0.7;
@@ -1694,6 +1787,9 @@ export default function NetworkView({
 
       dealerCoreSelection
         .attr('opacity', (d) => {
+          if (traceIsVisible) {
+            return tracedNodeIds.has(d.id) ? 0.94 : 0.05;
+          }
           if (selectedId) {
             return selectedFocusSet.has(d.id) ? 0.92 : 0.08;
           }
@@ -1705,6 +1801,9 @@ export default function NetworkView({
 
       dealerAccentSelection
         .attr('opacity', (d) => {
+          if (traceIsVisible) {
+            return tracedNodeIds.has(d.id) ? 0.96 : 0.04;
+          }
           if (selectedId) {
             return selectedFocusSet.has(d.id) ? 0.95 : 0.06;
           }
@@ -1722,6 +1821,11 @@ export default function NetworkView({
 
       linkSelection
         .attr('opacity', (edge) => {
+          const traceEdgeKey = makeEdgeKey(edge.source.id, edge.target.id);
+          if (traceIsVisible) {
+            if (tracedEdgeKeys.has(traceEdgeKey)) return 0.96;
+            return 0.025;
+          }
           if (selectedId) {
             if (selectedFocusSet.has(edge.source.id) && selectedFocusSet.has(edge.target.id)) return 0.82;
             if (activeHoveredId && hoveredFocusSet.has(edge.source.id) && hoveredFocusSet.has(edge.target.id)) return 0.08;
@@ -1736,6 +1840,10 @@ export default function NetworkView({
           return detailEdgeBaseStyle(edge).baseOpacity + (isDealerRelatedEdge(edge) ? 0.04 : 0);
         })
         .attr('stroke', (edge) => {
+          const traceEdgeKey = makeEdgeKey(edge.source.id, edge.target.id);
+          if (traceIsVisible && tracedEdgeKeys.has(traceEdgeKey)) {
+            return '#f6d365';
+          }
           if (selectedId && selectedFocusSet.has(edge.source.id) && selectedFocusSet.has(edge.target.id)) {
             return '#7cefd1';
           }
@@ -1748,6 +1856,11 @@ export default function NetworkView({
         .attr('stroke-width', (edge) => {
           const style = detailEdgeBaseStyle(edge);
           const dealerBoost = isDealerRelatedEdge(edge) ? 0.35 : 0;
+          const traceEdgeKey = makeEdgeKey(edge.source.id, edge.target.id);
+          if (traceIsVisible) {
+            if (tracedEdgeKeys.has(traceEdgeKey)) return 2.15 + dealerBoost + style.widthBoost;
+            return 0.65 + style.widthBoost * 0.15;
+          }
           if (selectedId) {
             if (selectedFocusSet.has(edge.source.id) && selectedFocusSet.has(edge.target.id)) return 1.7 + dealerBoost + style.widthBoost;
             return 0.75 + dealerBoost + style.widthBoost * 0.2;
@@ -1761,6 +1874,9 @@ export default function NetworkView({
 
       labelSelection
         .style('opacity', (d) => {
+          if (traceIsVisible) {
+            return tracedNodeIds.has(d.id) ? 1 : 0.03;
+          }
           const visible = shouldShowDetailLabel({
             node: d,
             zoomK,
@@ -1789,6 +1905,7 @@ export default function NetworkView({
           return 0.94;
         })
         .style('font-weight', (d) => {
+          if (traceIsVisible && tracedNodeIds.has(d.id)) return selectedId === d.id ? '700' : '600';
           if (selectedId === d.id || activeHoveredId === d.id) return '700';
           if (selectedId && selectedFocusSet.has(d.id)) return '600';
           if (!selectedId && activeHoveredId && hoveredFocusSet.has(d.id)) return '600';
@@ -1886,6 +2003,8 @@ export default function NetworkView({
 
   const resetLayout = () => {
     setPinnedPositions({});
+    setCompareIds([]);
+    setTraceActive(false);
     setSelectedId(null);
     hoveredIdRef.current = null;
     hoveredClusterIdRef.current = null;
@@ -1942,18 +2061,18 @@ export default function NetworkView({
 
   const activeFocusLabel = expandedClusterKey ? formatExpandedClusterLabel(expandedClusterKey) : '';
 
-  const selectedNodeDetail = useMemo(() => {
-    if (!selectedId) return null;
+  const buildNodeInsightDetail = (nodeId) => {
+    if (!nodeId) return null;
 
     const canonicalNodeMap = new Map(dealerAwareData.nodes.map((item) => [item.id, item]));
-    const node = canonicalNodeMap.get(selectedId) || graph.nodes.find((item) => item.id === selectedId) || null;
+    const node = canonicalNodeMap.get(nodeId) || graph.nodes.find((item) => item.id === nodeId) || null;
     if (!node) return null;
 
-    const relatedEdges = dealerAwareData.edges.filter((edge) => edge.source === selectedId || edge.target === selectedId);
+    const relatedEdges = dealerAwareData.edges.filter((edge) => edge.source === nodeId || edge.target === nodeId);
 
     const grouped = new Map();
     relatedEdges.forEach((edge) => {
-      const otherId = edge.source === selectedId ? edge.target : edge.source;
+      const otherId = edge.source === nodeId ? edge.target : edge.source;
       const otherNode = canonicalNodeMap.get(otherId) || graph.nodes.find((item) => item.id === otherId) || null;
       const key = edge.relationship || edge.relation || 'Connected';
       if (!grouped.has(key)) grouped.set(key, []);
@@ -1994,19 +2113,15 @@ export default function NetworkView({
 
     const dealerCategory = isDealerNode(node) ? normalizeDealerCategory(node) : null;
     const verificationSummary = summarizeVerification(node);
-    const uniqueRegions = [...new Set(relatedEdges.map((edge) => canonicalNodeMap.get(edge.source === selectedId ? edge.target : edge.source)?.region || edge.region).filter(Boolean))]
+    const uniqueRegions = [...new Set(relatedEdges.map((edge) => canonicalNodeMap.get(edge.source === nodeId ? edge.target : edge.source)?.region || edge.region).filter(Boolean))]
       .slice(0, 4)
       .map((region) => displayRegion(region));
     const strongestRelationship = relationshipGroups[0] || null;
-    const controlPointMetrics = calculateControlPointMetrics(node, canonicalNodeMap, dealerAwareData.edges);
-    const confidenceTone = confidenceVisualTone(node.confidence || node.verification_status || node.evidence_status);
 
     return {
       node,
       dealerCategory,
       verificationSummary,
-      controlPointMetrics,
-      confidenceTone,
       roleSummary: summarizeNodeRole(node, dealerCategory, relatedEdges.length, strongestRelationship?.label || null),
       relationshipSummary: relationshipInsight(relationshipGroups),
       strongestRelationship,
@@ -2016,7 +2131,65 @@ export default function NetworkView({
       evidenceSource: node.source_name || node.provenance_parent || 'Not specified',
       evidenceDate: node.source_date || node.last_validated_date || 'Not specified'
     };
-  }, [selectedId, dealerAwareData.nodes, dealerAwareData.edges, graph.nodes]);
+  };
+
+  const selectedNodeDetail = useMemo(() => buildNodeInsightDetail(selectedId), [selectedId, dealerAwareData.nodes, dealerAwareData.edges, graph.nodes]);
+
+  const compareNodeDetails = useMemo(
+    () => compareIds.map((nodeId) => buildNodeInsightDetail(nodeId)).filter(Boolean),
+    [compareIds, dealerAwareData.nodes, dealerAwareData.edges, graph.nodes]
+  );
+
+  const traceEndpoints = useMemo(() => {
+    const canonicalNodeMap = new Map(dealerAwareData.nodes.map((item) => [item.id, item]));
+
+    if (selectedId) {
+      const otherCompareId = compareIds.find((id) => id !== selectedId) || (!compareIds.includes(selectedId) ? compareIds[0] : null);
+      if (otherCompareId) {
+        return {
+          startId: selectedId,
+          endId: otherCompareId,
+          startLabel: canonicalNodeMap.get(selectedId)?.label || selectedId,
+          endLabel: canonicalNodeMap.get(otherCompareId)?.label || otherCompareId
+        };
+      }
+    }
+
+    if (compareIds.length === 2) {
+      return {
+        startId: compareIds[0],
+        endId: compareIds[1],
+        startLabel: canonicalNodeMap.get(compareIds[0])?.label || compareIds[0],
+        endLabel: canonicalNodeMap.get(compareIds[1])?.label || compareIds[1]
+      };
+    }
+
+    return null;
+  }, [selectedId, compareIds, dealerAwareData.nodes]);
+
+  const tracedPath = useMemo(() => {
+    if (!traceActive || !traceEndpoints) return null;
+    const canonicalNodeMap = new Map(dealerAwareData.nodes.map((item) => [item.id, item]));
+    return buildShortestPath(dealerAwareData.edges, traceEndpoints.startId, traceEndpoints.endId, canonicalNodeMap);
+  }, [traceActive, traceEndpoints, dealerAwareData.nodes, dealerAwareData.edges]);
+
+  const tracedNodeIds = useMemo(() => new Set(tracedPath?.nodeIds || []), [tracedPath]);
+  const tracedEdgeKeys = useMemo(() => new Set(tracedPath?.edgeKeys || []), [tracedPath]);
+
+  const toggleCompareNode = (nodeId) => {
+    if (!nodeId) return;
+    setCompareIds((current) => {
+      if (current.includes(nodeId)) return current.filter((id) => id !== nodeId);
+      if (current.length >= 2) return [current[1], nodeId];
+      return [...current, nodeId];
+    });
+  };
+
+  useEffect(() => {
+    if (!traceEndpoints) {
+      setTraceActive(false);
+    }
+  }, [traceEndpoints]);
 
   useEffect(() => {
     setExpandedRelationshipGroups({});
@@ -2065,6 +2238,31 @@ export default function NetworkView({
               <RotateIcon className="size-3.5" />
               Reset
             </button>
+          </div>
+
+          <div className="mt-3 mb-4 flex items-center justify-between rounded-lg border border-border/30 bg-muted/10 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <GitCompare className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium text-foreground">Compare {compareIds.length}/2</span>
+              <span className="text-xs text-muted-foreground">
+                {compareIds.length === 1
+                  ? 'Select another node to compare'
+                  : compareIds.length === 2
+                    ? 'Two nodes selected'
+                    : 'Pin nodes to compare'}
+              </span>
+            </div>
+
+            {compareIds.length > 0 ? (
+              <button
+                type="button"
+                onClick={() => setCompareIds([])}
+                className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" />
+                Clear
+              </button>
+            ) : null}
           </div>
 
           <div className="flex flex-wrap items-start gap-3 xl:gap-4">
@@ -2224,7 +2422,155 @@ export default function NetworkView({
       </div>
 
       <div className={`grid gap-4 ${legendVisible && !expanded ? 'xl:grid-cols-[1fr_260px]' : 'grid-cols-1'}`}>
-        <div className="rounded-lg border border-border/30 bg-card/10 px-4 py-3 backdrop-blur-sm">
+        <div className="space-y-4">
+          {compareNodeDetails.length ? (
+            <div className="rounded-lg border border-border/30 bg-card/10 px-4 py-3 backdrop-blur-sm">
+              <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                <div>
+                  <CardKicker>Compare</CardKicker>
+                  <div className="mt-1 text-sm font-bold text-foreground">
+                    {compareNodeDetails.length === 1 ? 'Pin one more node to compare side by side' : 'Side-by-side node comparison'}
+                  </div>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                    {compareNodeDetails.length === 1
+                      ? `Pinned: ${compareNodeDetails[0].node.label}. Select another node, then use Pin to compare in Selection Detail.`
+                      : 'Compare role, evidence, and strongest relationship signals across two selected nodes.'}
+                  </p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="inline-flex items-center gap-2 rounded-md border border-border/30 bg-muted/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-foreground/70">
+                    <GitCompare className="h-3.5 w-3.5" />
+                    Compare {compareNodeDetails.length}/2
+                  </div>
+                  {traceEndpoints ? (
+                    <button
+                      type="button"
+                      onClick={() => setTraceActive((current) => !current)}
+                      className={`inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest transition-colors ${
+                        traceActive
+                          ? 'bg-amber-500/15 text-amber-300 hover:bg-amber-500/20'
+                          : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
+                      }`}
+                    >
+                      <GitCompare className="h-3.5 w-3.5" />
+                      {traceActive ? 'Clear trace' : 'Trace path'}
+                    </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCompareIds([]);
+                      setTraceActive(false);
+                    }}
+                    className="inline-flex items-center gap-1 rounded-md px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                    Clear
+                  </button>
+                </div>
+              </div>
+
+              {traceActive && traceEndpoints ? (
+                <div className={`mt-3 rounded-lg border px-3 py-3 ${
+                  tracedPath?.found
+                    ? 'border-amber-500/30 bg-amber-500/10'
+                    : 'border-border/25 bg-black/10'
+                }`}>
+                  <div className="flex flex-wrap items-center gap-2 text-[10px] font-black uppercase tracking-widest">
+                    <span className={tracedPath?.found ? 'text-amber-300' : 'text-foreground/60'}>
+                      {tracedPath?.found ? 'Path trace active' : 'No visible path'}
+                    </span>
+                    {tracedPath?.found && tracedPath?.hops != null ? (
+                      <span className="rounded-md border border-amber-500/25 bg-black/20 px-2 py-0.5 text-amber-200">
+                        {tracedPath.hops} {tracedPath.hops === 1 ? 'hop' : 'hops'}
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="mt-2 text-sm font-semibold text-foreground">
+                    {traceEndpoints.startLabel} → {traceEndpoints.endLabel}
+                  </div>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                    {tracedPath?.found
+                      ? `Highlighted across ${tracedPath.layers.length || 1} layer${tracedPath.layers.length === 1 ? '' : 's'} in the current visible network.`
+                      : 'No path is available in the current filtered view. Try expanding the view, changing presets, or tracing a different pair.'}
+                  </p>
+                </div>
+              ) : null}
+
+              <div className="mt-4 grid gap-3 xl:grid-cols-2">
+                {[0, 1].map((slotIndex) => {
+                  const detail = compareNodeDetails[slotIndex] || null;
+                  if (!detail) {
+                    return (
+                      <div
+                        key={`compare-empty-${slotIndex}`}
+                        className="rounded-lg border border-dashed border-border/25 bg-black/10 px-4 py-4 text-left"
+                      >
+                        <div className="text-xs font-bold uppercase tracking-widest text-foreground/65">Open slot</div>
+                        <div className="mt-2 text-sm font-semibold text-foreground">Select another node to compare</div>
+                        <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                          Click any visible node, then use Pin to compare in Selection Detail.
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div key={detail.node.id} className="rounded-lg border border-border/25 bg-black/10 px-4 py-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="text-base font-bold text-foreground">{detail.node.label}</div>
+                          <div className="mt-2 flex flex-wrap gap-1.5 text-[10px] font-bold uppercase tracking-widest text-foreground/60">
+                            <span className="rounded-md border border-border/30 bg-muted/10 px-2 py-0.5">{detail.node.layer || 'Unknown layer'}</span>
+                            <span className="rounded-md border border-border/30 bg-muted/10 px-2 py-0.5">{displayRegion(detail.node.region || 'Unknown')}</span>
+                            {detail.dealerCategory ? (
+                              <span
+                                className="rounded-full border px-2 py-0.5"
+                                style={{
+                                  borderColor: dealerCategoryStyle(detail.node).stroke,
+                                  backgroundColor: dealerCategoryStyle(detail.node).halo,
+                                  color: dealerCategoryStyle(detail.node).stroke
+                                }}
+                              >
+                                {detail.dealerCategory}
+                              </span>
+                            ) : null}
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => toggleCompareNode(detail.node.id)}
+                          className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+                        >
+                          <X className="h-3 w-3" />
+                          Remove
+                        </button>
+                      </div>
+
+                      <p className="mt-3 text-[12px] leading-relaxed text-muted-foreground">{detail.roleSummary}</p>
+
+                      <div className="mt-4 grid gap-2 md:grid-cols-3 text-[11px] text-muted-foreground">
+                        <div className="rounded-md border border-border/25 bg-muted/10 px-3 py-2.5">
+                          <div className="text-[10px] font-black uppercase tracking-widest text-foreground/50">Links</div>
+                          <div className="mt-1 text-sm font-semibold text-foreground/90">{detail.relationshipCount}</div>
+                        </div>
+                        <div className="rounded-md border border-border/25 bg-muted/10 px-3 py-2.5">
+                          <div className="text-[10px] font-black uppercase tracking-widest text-foreground/50">Evidence</div>
+                          <div className="mt-1 text-sm font-semibold text-foreground/90">{detail.verificationSummary}</div>
+                        </div>
+                        <div className="rounded-md border border-border/25 bg-muted/10 px-3 py-2.5">
+                          <div className="text-[10px] font-black uppercase tracking-widest text-foreground/50">Top signal</div>
+                          <div className="mt-1 text-sm font-semibold text-foreground/90">{detail.strongestRelationship?.label || 'None yet'}</div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
+
+          <div className="rounded-lg border border-border/30 bg-card/10 px-4 py-3 backdrop-blur-sm">
           <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div>
               <CardKicker>Network Intelligence</CardKicker>
@@ -2294,6 +2640,7 @@ export default function NetworkView({
             </div>
           </div>
         </div>
+      </div>
 
         {legendVisible && !expanded ? (
           <aside className="space-y-4">
@@ -2336,19 +2683,34 @@ export default function NetworkView({
                       </div>
                     </div>
                     <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{selectedNodeDetail.roleSummary}</p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedId(null);
-                        hoveredIdRef.current = null;
-                        setHoveredId(null);
-                        onNodeSelect?.(null);
-                        onLeave?.();
-                      }}
-                      className="mt-3 w-full rounded-md border border-emerald-500/25 bg-emerald-500/5 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-emerald-300 transition-colors hover:border-emerald-400/40 hover:text-emerald-200"
-                    >
-                      Clear selection
-                    </button>
+                    <div className="mt-3 grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => toggleCompareNode(selectedNodeDetail.node.id)}
+                        className={`inline-flex items-center justify-center gap-2 rounded-md border px-3 py-2 text-[10px] font-bold uppercase tracking-widest transition-colors ${
+                          compareIds.includes(selectedNodeDetail.node.id)
+                            ? 'border-blue-500/35 bg-blue-500/10 text-blue-300 hover:border-blue-400/50 hover:text-blue-200'
+                            : 'border-border/30 bg-muted/10 text-muted-foreground hover:border-border/50 hover:bg-white/5 hover:text-foreground'
+                        }`}
+                      >
+                        <Pin className="h-3.5 w-3.5" />
+                        {compareIds.includes(selectedNodeDetail.node.id) ? 'Unpin' : 'Pin'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedId(null);
+                          hoveredIdRef.current = null;
+                          setHoveredId(null);
+                          onNodeSelect?.(null);
+                          onLeave?.();
+                        }}
+                        className="inline-flex items-center justify-center gap-2 rounded-md border border-emerald-500/25 bg-emerald-500/5 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-emerald-300 transition-colors hover:border-emerald-400/40 hover:text-emerald-200"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                        Clear
+                      </button>
+                    </div>
                   </div>
 
                   <div className="mt-3 space-y-3 pb-2">
