@@ -103,31 +103,43 @@ function dealerCategoryStyle(node) {
         stroke: '#67d7ff',
         halo: 'rgba(103,215,255,0.16)',
         dashArray: null,
-        edgeStroke: 'rgba(103,215,255,0.56)'
+        edgeStroke: 'rgba(103,215,255,0.58)',
+        markerMode: 'outer',
+        radiusBonus: 0.9,
+        accentOpacity: 0.9
       };
     case 'CRM':
       return {
         category,
         stroke: '#8fe388',
-        halo: 'rgba(143,227,136,0.14)',
+        halo: 'rgba(143,227,136,0.15)',
         dashArray: null,
-        edgeStroke: 'rgba(143,227,136,0.54)'
+        edgeStroke: 'rgba(143,227,136,0.56)',
+        markerMode: 'inner',
+        radiusBonus: 0.65,
+        accentOpacity: 0.88
       };
     case 'Finance':
       return {
         category,
         stroke: '#f7c76a',
-        halo: 'rgba(247,199,106,0.14)',
+        halo: 'rgba(247,199,106,0.15)',
         dashArray: '2 2',
-        edgeStroke: 'rgba(247,199,106,0.52)'
+        edgeStroke: 'rgba(247,199,106,0.54)',
+        markerMode: 'dashed',
+        radiusBonus: 0.7,
+        accentOpacity: 0.82
       };
     case 'Service':
       return {
         category,
         stroke: '#ffab73',
-        halo: 'rgba(255,171,115,0.14)',
+        halo: 'rgba(255,171,115,0.16)',
         dashArray: '4 2',
-        edgeStroke: 'rgba(255,171,115,0.52)'
+        edgeStroke: 'rgba(255,171,115,0.54)',
+        markerMode: 'halo',
+        radiusBonus: 0.72,
+        accentOpacity: 0.78
       };
     case 'Marketplace':
       return {
@@ -135,15 +147,21 @@ function dealerCategoryStyle(node) {
         stroke: '#d2a8ff',
         halo: 'rgba(210,168,255,0.16)',
         dashArray: null,
-        edgeStroke: 'rgba(210,168,255,0.52)'
+        edgeStroke: 'rgba(210,168,255,0.54)',
+        markerMode: 'outer-soft',
+        radiusBonus: 0.78,
+        accentOpacity: 0.78
       };
     default:
       return {
         category: 'Platform',
         stroke: '#a7b3c7',
-        halo: 'rgba(167,179,199,0.14)',
+        halo: 'rgba(167,179,199,0.15)',
         dashArray: '1.5 2.5',
-        edgeStroke: 'rgba(167,179,199,0.48)'
+        edgeStroke: 'rgba(167,179,199,0.5)',
+        markerMode: 'scale',
+        radiusBonus: 1.05,
+        accentOpacity: 0.7
       };
   }
 }
@@ -151,7 +169,7 @@ function dealerCategoryStyle(node) {
 function detailNodeRadius(node, degreeMap, selectedId, hoveredId) {
   const degree = degreeMap.get(node.id) || 0;
   const base = Math.min(6.2, 4 + degree * 0.16);
-  const dealerBonus = isDealerNode(node) ? 0.8 : 0;
+  const dealerBonus = isDealerNode(node) ? dealerCategoryStyle(node).radiusBonus : 0;
 
   if (selectedId === node.id) return base + dealerBonus + 2.4;
   if (hoveredId === node.id) return base + dealerBonus + 1.6;
@@ -401,6 +419,14 @@ function shouldShowOverviewLabel(cluster, zoomK, labelMode, hoveredClusterId, ex
   return cluster.memberCount >= 7;
 }
 
+
+function formatExpandedClusterLabel(expandedClusterKey) {
+  if (!expandedClusterKey) return '';
+  const [region, layer] = expandedClusterKey.split('||');
+  const regionLabel = region ? displayRegion(region) : 'Unknown';
+  return `${regionLabel} → ${layer || 'Unknown'}`;
+}
+
 function shouldShowDetailLabel({
   node,
   zoomK,
@@ -473,6 +499,123 @@ function buildDetailSublaneTargets(nodes, regions, xScale, height, topPad, botto
   });
 
   return targetMap;
+}
+
+function buildFocusDistanceMap(nodeIds, links, seedIds) {
+  const adjacency = new Map(nodeIds.map((id) => [id, new Set()]));
+
+  links.forEach((edge) => {
+    const sourceId = typeof edge.source === 'string' ? edge.source : edge.source?.id;
+    const targetId = typeof edge.target === 'string' ? edge.target : edge.target?.id;
+    if (!sourceId || !targetId) return;
+    if (!adjacency.has(sourceId)) adjacency.set(sourceId, new Set());
+    if (!adjacency.has(targetId)) adjacency.set(targetId, new Set());
+    adjacency.get(sourceId).add(targetId);
+    adjacency.get(targetId).add(sourceId);
+  });
+
+  const distanceMap = new Map();
+  const queue = [];
+
+  seedIds.forEach((id) => {
+    if (adjacency.has(id)) {
+      distanceMap.set(id, 0);
+      queue.push(id);
+    }
+  });
+
+  while (queue.length) {
+    const current = queue.shift();
+    const distance = distanceMap.get(current) ?? 0;
+
+    (adjacency.get(current) || new Set()).forEach((nextId) => {
+      if (!distanceMap.has(nextId)) {
+        distanceMap.set(nextId, distance + 1);
+        queue.push(nextId);
+      }
+    });
+  }
+
+  return distanceMap;
+}
+
+function buildConstellationTargets(nodes, links, width, height, leftPad, rightPad, topPad, bottomPad, seedIds) {
+  const targetMap = new Map();
+  const innerWidth = Math.max(360, width - leftPad - rightPad);
+  const innerHeight = Math.max(320, height - topPad - bottomPad);
+  const centerX = leftPad + innerWidth / 2;
+  const centerY = topPad + innerHeight / 2;
+  const nodeIds = nodes.map((node) => node.id);
+  const distanceMap = buildFocusDistanceMap(nodeIds, links, seedIds);
+
+  const seeds = nodes.filter((node) => seedIds.has(node.id));
+  const ringOne = nodes.filter((node) => !seedIds.has(node.id) && (distanceMap.get(node.id) ?? 99) === 1);
+  const ringTwo = nodes.filter((node) => !seedIds.has(node.id) && (distanceMap.get(node.id) ?? 99) >= 2);
+
+  const placeRing = (items, radiusX, radiusY, startAngle = -Math.PI * 0.85, endAngle = Math.PI * 0.85) => {
+    const sorted = [...items].sort((a, b) => {
+      const regionCompare = String(a.region || '').localeCompare(String(b.region || ''));
+      if (regionCompare !== 0) return regionCompare;
+      const layerCompare = String(a.layer || '').localeCompare(String(b.layer || ''));
+      if (layerCompare !== 0) return layerCompare;
+      return String(a.label || '').localeCompare(String(b.label || ''));
+    });
+
+    sorted.forEach((node, index) => {
+      const t = sorted.length === 1 ? 0.5 : index / Math.max(1, sorted.length - 1);
+      const angle = startAngle + (endAngle - startAngle) * t;
+      targetMap.set(node.id, {
+        targetX: centerX + Math.cos(angle) * radiusX,
+        targetY: centerY + Math.sin(angle) * radiusY,
+        laneLabel: `focus-${distanceMap.get(node.id) ?? 1}`
+      });
+    });
+  };
+
+  if (seeds.length === 1) {
+    targetMap.set(seeds[0].id, { targetX: centerX, targetY: centerY, laneLabel: 'focus-0' });
+  } else if (seeds.length > 1) {
+    const seedRadiusX = Math.min(82, innerWidth * 0.1);
+    const seedRadiusY = Math.min(52, innerHeight * 0.08);
+    seeds
+      .sort((a, b) => String(a.label || '').localeCompare(String(b.label || '')))
+      .forEach((node, index) => {
+        const angle = (-Math.PI / 2) + (Math.PI * 2 * index) / seeds.length;
+        targetMap.set(node.id, {
+          targetX: centerX + Math.cos(angle) * seedRadiusX,
+          targetY: centerY + Math.sin(angle) * seedRadiusY,
+          laneLabel: 'focus-0'
+        });
+      });
+  }
+
+  if (ringOne.length) {
+    placeRing(
+      ringOne,
+      Math.min(innerWidth * 0.3, 280),
+      Math.min(innerHeight * 0.26, 190),
+      -Math.PI * 0.95,
+      Math.PI * 0.95
+    );
+  }
+
+  if (ringTwo.length) {
+    placeRing(
+      ringTwo,
+      Math.min(innerWidth * 0.4, 380),
+      Math.min(innerHeight * 0.34, 250),
+      -Math.PI * 0.95,
+      Math.PI * 0.95
+    );
+  }
+
+  nodes.forEach((node) => {
+    if (!targetMap.has(node.id)) {
+      targetMap.set(node.id, { targetX: centerX, targetY: centerY, laneLabel: 'focus-1' });
+    }
+  });
+
+  return { targetMap, distanceMap };
 }
 
 function PlusIcon(props) {
@@ -907,29 +1050,44 @@ export default function NetworkView({
       };
     }
 
-    const sublaneTargets = buildDetailSublaneTargets(graph.nodes, regions, xScale, height, topPad, bottomPad);
+    const detailSeedIds = new Set();
 
-    const layoutNodes = graph.nodes.map((node, index) => {
-      const pinned = pinnedPositions[node.id];
-      const target = sublaneTargets.get(node.id) || {
-        targetX: xScale(node.region) || width / 2,
-        targetY: height / 2,
-        laneLabel: layerKey(node.layer)
-      };
+    if (selectedId && graph.nodes.some((node) => node.id === selectedId)) {
+      detailSeedIds.add(selectedId);
+    } else if (expandedClusterKey) {
+      const [detailRegion, detailLayer] = expandedClusterKey.split('||');
+      graph.nodes.forEach((node) => {
+        if ((node.region || 'Unknown') === detailRegion && (node.layer || 'Unknown') === detailLayer) {
+          detailSeedIds.add(node.id);
+        }
+      });
+    }
+
+    const useConstellationLayout = Boolean(selectedId || expandedClusterKey);
+    const sublaneTargets = useConstellationLayout
+      ? null
+      : buildDetailSublaneTargets(graph.nodes, regions, xScale, height, topPad, bottomPad);
+
+    const initialNodes = graph.nodes.map((node, index) => {
+      const target = useConstellationLayout
+        ? { targetX: width / 2, targetY: height / 2, laneLabel: 'focus-1' }
+        : sublaneTargets.get(node.id) || {
+            targetX: xScale(node.region) || width / 2,
+            targetY: height / 2,
+            laneLabel: layerKey(node.layer)
+          };
 
       return {
         ...node,
-        x: pinned?.x ?? target.targetX + ((index % 3) - 1) * 6,
-        y: pinned?.y ?? target.targetY,
-        fx: pinned?.x ?? null,
-        fy: pinned?.y ?? null,
+        x: target.targetX + ((index % 3) - 1) * 6,
+        y: target.targetY,
         targetX: target.targetX,
         targetY: target.targetY,
         laneLabel: target.laneLabel
       };
     });
 
-    const nodeMap = new Map(layoutNodes.map((node) => [node.id, node]));
+    const nodeMap = new Map(initialNodes.map((node) => [node.id, node]));
     const layoutLinks = graph.edges
       .map((edge) => ({
         ...edge,
@@ -938,6 +1096,50 @@ export default function NetworkView({
       }))
       .filter((edge) => edge.source && edge.target);
 
+    let focusDistanceMap = new Map();
+
+    if (useConstellationLayout) {
+      const { targetMap, distanceMap } = buildConstellationTargets(
+        initialNodes,
+        layoutLinks,
+        width,
+        height,
+        leftPad,
+        rightPad,
+        topPad,
+        bottomPad,
+        detailSeedIds
+      );
+
+      focusDistanceMap = distanceMap;
+
+      initialNodes.forEach((node) => {
+        const pinned = pinnedPositions[node.id];
+        const target = targetMap.get(node.id) || {
+          targetX: width / 2,
+          targetY: height / 2,
+          laneLabel: 'focus-1'
+        };
+
+        node.targetX = target.targetX;
+        node.targetY = target.targetY;
+        node.laneLabel = target.laneLabel;
+        node.x = pinned?.x ?? target.targetX;
+        node.y = pinned?.y ?? target.targetY;
+        node.fx = pinned?.x ?? null;
+        node.fy = pinned?.y ?? null;
+      });
+    } else {
+      initialNodes.forEach((node) => {
+        const pinned = pinnedPositions[node.id];
+        node.x = pinned?.x ?? node.x;
+        node.y = pinned?.y ?? node.y;
+        node.fx = pinned?.x ?? null;
+        node.fy = pinned?.y ?? null;
+      });
+    }
+
+    const layoutNodes = initialNodes;
     const adjacency = buildAdjacency(layoutLinks.map((edge) => ({ source: edge.source.id, target: edge.target.id })));
     const degreeMap = buildDegreeMap(layoutLinks.map((edge) => ({ source: edge.source.id, target: edge.target.id })));
     const regionRanks = buildRegionRanks(layoutNodes, degreeMap);
@@ -958,20 +1160,36 @@ export default function NetworkView({
 
     const simulation = d3
       .forceSimulation(layoutNodes)
-      .alpha(0.7)
-      .alphaDecay(0.035)
+      .alpha(useConstellationLayout ? 0.85 : 0.7)
+      .alphaDecay(useConstellationLayout ? 0.045 : 0.035)
       .force(
         'link',
         d3
           .forceLink(layoutLinks)
           .id((datum) => datum.id)
           .distance((edge) => {
+            if (useConstellationLayout) {
+              const sourceDepth = focusDistanceMap.get(edge.source.id) ?? 1;
+              const targetDepth = focusDistanceMap.get(edge.target.id) ?? 1;
+              if (sourceDepth === 0 || targetDepth === 0) return 110;
+              if (sourceDepth === 1 && targetDepth === 1) return 118;
+              return 132;
+            }
+
             if (edge.source.region === edge.target.region) {
               return edge.source.laneLabel === edge.target.laneLabel ? 26 : 56;
             }
             return 110;
           })
           .strength((edge) => {
+            if (useConstellationLayout) {
+              const sourceDepth = focusDistanceMap.get(edge.source.id) ?? 1;
+              const targetDepth = focusDistanceMap.get(edge.target.id) ?? 1;
+              if (sourceDepth === 0 || targetDepth === 0) return 0.34;
+              if (sourceDepth === 1 && targetDepth === 1) return 0.08;
+              return 0.05;
+            }
+
             if (selectedNode && (edge.source.id === selectedNode.id || edge.target.id === selectedNode.id)) {
               return 0.18;
             }
@@ -981,23 +1199,23 @@ export default function NetworkView({
             return 0.02;
           })
       )
-      .force('charge', d3.forceManyBody().strength(-10))
+      .force('charge', d3.forceManyBody().strength(useConstellationLayout ? -58 : -10))
       .force(
         'collide',
         d3.forceCollide().radius((datum) => {
           const degree = degreeMap.get(datum.id) || 0;
-          return Math.min(11, 4.8 + degree * 0.08);
+          return useConstellationLayout ? Math.min(18, 12 + degree * 0.3) : Math.min(11, 4.8 + degree * 0.08);
         })
       )
-      .force('x', d3.forceX((datum) => datum.targetX).strength(1))
-      .force('y', d3.forceY((datum) => datum.targetY).strength(0.9));
+      .force('x', d3.forceX((datum) => datum.targetX).strength(useConstellationLayout ? 0.28 : 1))
+      .force('y', d3.forceY((datum) => datum.targetY).strength(useConstellationLayout ? 0.28 : 0.9));
 
-    for (let i = 0; i < 220; i += 1) simulation.tick();
+    for (let i = 0; i < (useConstellationLayout ? 260 : 220); i += 1) simulation.tick();
     simulation.stop();
 
     layoutNodes.forEach((node) => {
-      node.x = Math.max(leftPad + 26, Math.min(width - rightPad - 26, node.x));
-      node.y = Math.max(topPad + 24, Math.min(height - bottomPad - 24, node.y));
+      node.x = Math.max(leftPad + 30, Math.min(width - rightPad - 30, node.x));
+      node.y = Math.max(topPad + 28, Math.min(height - bottomPad - 28, node.y));
     });
 
     const bounds = getBounds(layoutNodes);
@@ -1053,11 +1271,50 @@ export default function NetworkView({
     const dealerCoreSelection = nodeSelection
       .filter((d) => isDealerNode(d))
       .append('circle')
-      .attr('r', (d) => Math.max(2.3, detailNodeRadius(d, degreeMap, selectedId, hoveredId) - 2.15))
+      .attr('r', (d) => Math.max(2.2, detailNodeRadius(d, degreeMap, selectedId, hoveredId) - 2.35))
       .attr('fill', (d) => dealerCategoryStyle(d).stroke)
-      .attr('fill-opacity', 0.78)
+      .attr('fill-opacity', 0.8)
       .attr('stroke', 'rgba(255,255,255,0.18)')
       .attr('stroke-width', 0.6)
+      .attr('pointer-events', 'none');
+
+    const dealerAccentSelection = nodeSelection
+      .filter((d) => isDealerNode(d))
+      .append('circle')
+      .attr('r', (d) => {
+        const base = detailNodeRadius(d, degreeMap, selectedId, hoveredId);
+        const style = dealerCategoryStyle(d);
+
+        switch (style.markerMode) {
+          case 'inner':
+            return Math.max(1.8, base - 1.55);
+          case 'outer':
+            return base + 0.85;
+          case 'outer-soft':
+            return base + 1.15;
+          case 'halo':
+            return base + 0.9;
+          case 'scale':
+            return base + 0.35;
+          default:
+            return base + 0.45;
+        }
+      })
+      .attr('fill', 'none')
+      .attr('stroke', (d) => dealerCategoryStyle(d).stroke)
+      .attr('stroke-width', (d) => {
+        const style = dealerCategoryStyle(d);
+        if (style.category === 'DMS') return 1.6;
+        if (style.category === 'Platform') return 1.25;
+        return 1.1;
+      })
+      .attr('stroke-opacity', (d) => dealerCategoryStyle(d).accentOpacity)
+      .attr('stroke-dasharray', (d) => {
+        const style = dealerCategoryStyle(d);
+        if (style.markerMode === 'dashed') return '2 2';
+        if (style.markerMode === 'halo') return '5 3';
+        return style.dashArray;
+      })
       .attr('pointer-events', 'none');
 
     const labelSelection = nodeSelection
@@ -1119,6 +1376,23 @@ export default function NetworkView({
           return 0.82;
         });
 
+      dealerAccentSelection
+        .attr('opacity', (d) => {
+          if (selectedId) {
+            return selectedFocusSet.has(d.id) ? 0.95 : 0.06;
+          }
+          if (hoveredId) {
+            return hoveredFocusSet.has(d.id) ? 0.92 : 0.1;
+          }
+          return 0.84;
+        })
+        .attr('stroke-opacity', (d) => {
+          const base = dealerCategoryStyle(d).accentOpacity;
+          if (selectedId && selectedFocusSet.has(d.id)) return Math.min(1, base + 0.12);
+          if (!selectedId && hoveredId && hoveredFocusSet.has(d.id)) return Math.min(1, base + 0.08);
+          return base;
+        });
+
       linkSelection
         .attr('opacity', (edge) => {
           if (selectedId) {
@@ -1132,7 +1406,7 @@ export default function NetworkView({
             return 0.035;
           }
 
-          return 0.14;
+          return isDealerRelatedEdge(edge) ? 0.19 : 0.14;
         })
         .attr('stroke', (edge) => {
           if (selectedId && selectedFocusSet.has(edge.source.id) && selectedFocusSet.has(edge.target.id)) {
@@ -1363,10 +1637,12 @@ export default function NetworkView({
     setLegendVisible(legendBeforeExpandRef.current);
   };
 
+  const activeFocusLabel = expandedClusterKey ? formatExpandedClusterLabel(expandedClusterKey) : '';
+
   const helpText =
     resolvedMode === 'overview'
       ? expandedClusterKey
-        ? 'A cluster has been expanded into local detail. Reset layout to return to the high-level overview.'
+        ? 'A cluster has been expanded into local detail. Use Back to return to the high-level overview.'
         : 'Overview mode clusters the network by region and layer so the unfiltered landscape stays readable.'
       : expandedClusterKey
         ? 'Detail mode is focused on one cluster and its immediate connected neighbourhood.'
@@ -1561,6 +1837,24 @@ export default function NetworkView({
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                 Drag nodes, zoom the graph, and inspect cross-region relationships as the network settles into readable clusters. Dealer nodes now surface as a controlled overlay with category-aware accents.
               </p>
+
+              {expandedClusterKey ? (
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setExpandedClusterKey(null);
+                      setSelectedId(null);
+                      setHoveredId(null);
+                      setHoveredClusterId(null);
+                    }}
+                    className="inline-flex items-center gap-1 rounded-md border border-border/40 bg-muted/20 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:text-blue-500"
+                  >
+                    ← Back
+                  </button>
+                  <div className="text-xs font-semibold text-foreground/80">{activeFocusLabel}</div>
+                </div>
+              ) : null}
             </div>
 
             <button
