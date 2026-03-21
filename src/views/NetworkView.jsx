@@ -292,6 +292,28 @@ function relationshipInsight(groups) {
   return `${strongest.label} is the clearest visible pattern (${count})${target}. ${evidence}.`;
 }
 
+
+function formatMetricDelta(value) {
+  if (!Number.isFinite(value) || value === 0) return null;
+  const prefix = value > 0 ? '+' : '';
+  return `${prefix}${value}`;
+}
+
+function globalObservationTone(kind) {
+  switch (kind) {
+    case 'control':
+      return 'border-sky-400/25 bg-sky-500/10 text-sky-100';
+    case 'evidence':
+      return 'border-emerald-400/25 bg-emerald-500/10 text-emerald-100';
+    case 'bridge':
+      return 'border-violet-400/25 bg-violet-500/10 text-violet-100';
+    case 'path':
+      return 'border-amber-400/25 bg-amber-500/10 text-amber-100';
+    default:
+      return 'border-border/30 bg-muted/10 text-foreground/80';
+  }
+}
+
 function relationshipGroupPriority(label) {
   const normalized = String(label || '').toLowerCase();
   if (normalized.includes('govern')) return 90;
@@ -2319,10 +2341,15 @@ export default function NetworkView({
 
   const activeFocusLabel = expandedClusterKey ? formatExpandedClusterLabel(expandedClusterKey) : '';
 
+  const canonicalNodeMap = useMemo(
+    () => new Map(scenarioData.nodes.map((item) => [item.id, item])),
+    [scenarioData.nodes]
+  );
+
+
   const buildNodeInsightDetail = (nodeId) => {
     if (!nodeId) return null;
 
-    const canonicalNodeMap = new Map(scenarioData.nodes.map((item) => [item.id, item]));
     const node = canonicalNodeMap.get(nodeId) || graph.nodes.find((item) => item.id === nodeId) || null;
     if (!node) return null;
 
@@ -2399,7 +2426,6 @@ export default function NetworkView({
   );
 
   const traceEndpoints = useMemo(() => {
-    const canonicalNodeMap = new Map(scenarioData.nodes.map((item) => [item.id, item]));
 
     if (selectedId) {
       const otherCompareId = compareIds.find((id) => id !== selectedId) || (!compareIds.includes(selectedId) ? compareIds[0] : null);
@@ -2423,13 +2449,12 @@ export default function NetworkView({
     }
 
     return null;
-  }, [selectedId, compareIds, scenarioData.nodes]);
+  }, [selectedId, compareIds, canonicalNodeMap]);
 
   const tracedPath = useMemo(() => {
     if (!traceActive || !traceEndpoints) return null;
-    const canonicalNodeMap = new Map(scenarioData.nodes.map((item) => [item.id, item]));
     return buildShortestPath(scenarioData.edges, traceEndpoints.startId, traceEndpoints.endId, canonicalNodeMap);
-  }, [traceActive, traceEndpoints, scenarioData.nodes, scenarioData.edges]);
+  }, [traceActive, traceEndpoints, canonicalNodeMap, scenarioData.edges]);
 
   const tracedNodeIds = useMemo(() => new Set(tracedPath?.nodeIds || []), [tracedPath]);
   const tracedEdgeKeys = useMemo(() => new Set(tracedPath?.edgeKeys || []), [tracedPath]);
@@ -2484,6 +2509,126 @@ export default function NetworkView({
     };
   }, [activeScenarioPreset, graph.nodes, graph.edges, scenarioData.nodes, scenarioData.edges, traceActive, tracedPath]);
 
+
+
+  const compareDeltas = useMemo(() => {
+    if (compareNodeDetails.length !== 2) return [];
+
+    const [left, right] = compareNodeDetails;
+    const leftMetrics = calculateControlPointMetrics(left.node, canonicalNodeMap, scenarioData.edges);
+    const rightMetrics = calculateControlPointMetrics(right.node, canonicalNodeMap, scenarioData.edges);
+    const leftEvidence = normalizeConfidenceRank(left.node.confidence || left.node.verification_status || left.node.evidence_status);
+    const rightEvidence = normalizeConfidenceRank(right.node.confidence || right.node.verification_status || right.node.evidence_status);
+
+    const deltas = [];
+
+    const relationshipDelta = left.relationshipCount - right.relationshipCount;
+    if (relationshipDelta !== 0) {
+      const stronger = relationshipDelta > 0 ? left.node.label : right.node.label;
+      deltas.push({
+        label: 'Connectivity',
+        value: `${stronger} has ${Math.abs(relationshipDelta)} more mapped link${Math.abs(relationshipDelta) === 1 ? '' : 's'}.`
+      });
+    } else {
+      deltas.push({
+        label: 'Connectivity',
+        value: `Both nodes show ${left.relationshipCount} mapped links in the current slice.`
+      });
+    }
+
+    if (leftMetrics.level !== rightMetrics.level || leftMetrics.score !== rightMetrics.score) {
+      const stronger = leftMetrics.score >= rightMetrics.score ? left.node.label : right.node.label;
+      deltas.push({
+        label: 'Control reach',
+        value: `${stronger} shows the stronger control signal across visible layers and regions.`
+      });
+    }
+
+    if (leftEvidence !== rightEvidence) {
+      const stronger = leftEvidence > rightEvidence ? left.node.label : right.node.label;
+      deltas.push({
+        label: 'Evidence',
+        value: `${stronger} is backed by the stronger visible evidence signal.`
+      });
+    } else {
+      deltas.push({
+        label: 'Evidence',
+        value: `Both nodes sit at a similar evidence strength in the current model.`
+      });
+    }
+
+    return deltas.slice(0, 3);
+  }, [compareNodeDetails, canonicalNodeMap, scenarioData.edges]);
+
+  const globalInsightStrip = useMemo(() => {
+    const visibleNodes = graph.nodes || [];
+    const visibleEdges = graph.edges || graph.links || [];
+    if (!visibleNodes.length) return [];
+
+    const layerCounts = new Map();
+    visibleNodes.forEach((node) => {
+      const label = toTitleCase(node.layer || 'Unknown');
+      layerCounts.set(label, (layerCounts.get(label) || 0) + 1);
+    });
+    const dominantLayer = [...layerCounts.entries()].sort((a, b) => b[1] - a[1])[0];
+
+    const controlSummaries = visibleNodes
+      .map((node) => ({
+        node,
+        metrics: calculateControlPointMetrics(node, canonicalNodeMap, visibleEdges)
+      }))
+      .sort((a, b) => b.metrics.score - a.metrics.score);
+
+    const topControl = controlSummaries[0];
+    const strongerEvidenceEdges = visibleEdges.filter(
+      (edge) => normalizeConfidenceRank(edge.confidence || edge.verification_status || edge.evidence_status) >= 2
+    ).length;
+    const evidencePct = visibleEdges.length ? Math.round((strongerEvidenceEdges / visibleEdges.length) * 100) : 0;
+    const crossLayerCount = controlSummaries.filter((item) => item.metrics.linkedLayers > 1).length;
+
+    const observations = [];
+    if (dominantLayer) {
+      observations.push({
+        kind: 'control',
+        kicker: 'Dominant layer',
+        value: `${dominantLayer[0]} · ${dominantLayer[1]} visible node${dominantLayer[1] === 1 ? '' : 's'}`,
+        summary: activeScenarioPreset === 'governance'
+          ? 'Governance remains foregrounded with immediate surrounding context.'
+          : `${dominantLayer[0]} currently anchors the visible slice.`
+      });
+    }
+    if (topControl?.node) {
+      observations.push({
+        kind: 'bridge',
+        kicker: 'Control point',
+        value: topControl.node.label,
+        summary: topControl.metrics.summary
+      });
+    }
+    observations.push({
+      kind: 'evidence',
+      kicker: 'Evidence density',
+      value: `${evidencePct}% stronger-evidence edges`,
+      summary: `${strongerEvidenceEdges} of ${visibleEdges.length} visible relationships are moderate or higher confidence.`
+    });
+    if (traceActive && tracedPath?.found) {
+      observations.push({
+        kind: 'path',
+        kicker: 'Trace active',
+        value: `${tracedPath.hops} ${tracedPath.hops === 1 ? 'hop' : 'hops'} · ${tracedPath.layers.length || 1} layers`,
+        summary: `${traceEndpoints?.startLabel || 'Start'} → ${traceEndpoints?.endLabel || 'End'}`
+      });
+    } else {
+      observations.push({
+        kind: 'control',
+        kicker: 'Cross-layer bridges',
+        value: `${crossLayerCount} bridge candidates`,
+        summary: 'Nodes touching multiple visible layers are surfaced as higher-value control signals.'
+      });
+    }
+
+    return observations.slice(0, 4);
+  }, [graph.nodes, graph.edges, graph.links, canonicalNodeMap, activeScenarioPreset, traceActive, tracedPath, traceEndpoints]);
 
   const toggleCompareNode = (nodeId) => {
     if (!nodeId) return;
@@ -2778,6 +2923,37 @@ export default function NetworkView({
         </div>
       </div>
 
+
+      {globalInsightStrip.length ? (
+        <div className="rounded-lg border border-border/25 bg-card/10 px-4 py-3 backdrop-blur-sm">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <CardKicker>Global Insight Strip</CardKicker>
+              <div className="mt-1 text-sm font-bold text-foreground">What stands out in the current slice</div>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                Live observations update from the visible graph, active preset, and current trace state.
+              </p>
+            </div>
+            <div className="rounded-md border border-border/30 bg-muted/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-foreground/65">
+              {graph.nodes.length} visible nodes
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-3 xl:grid-cols-4 md:grid-cols-2">
+            {globalInsightStrip.map((item) => (
+              <div
+                key={`${item.kicker}-${item.value}`}
+                className={`rounded-lg border px-3 py-3 ${globalObservationTone(item.kind)}`}
+              >
+                <div className="text-[10px] font-black uppercase tracking-widest">{item.kicker}</div>
+                <div className="mt-2 text-sm font-semibold text-foreground">{item.value}</div>
+                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{item.summary}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       <div className={`grid gap-4 ${legendVisible && !expanded ? 'xl:grid-cols-[1fr_260px]' : 'grid-cols-1'}`}>
         <div className="space-y-4">
           {compareNodeDetails.length ? (
@@ -2826,6 +3002,21 @@ export default function NetworkView({
                   </button>
                 </div>
               </div>
+
+
+              {compareDeltas.length ? (
+                <div className="mt-3 grid gap-2 xl:grid-cols-3">
+                  {compareDeltas.map((delta) => (
+                    <div
+                      key={`${delta.label}-${delta.value}`}
+                      className="rounded-lg border border-border/25 bg-black/10 px-3 py-3"
+                    >
+                      <div className="text-[10px] font-black uppercase tracking-widest text-foreground/55">{delta.label}</div>
+                      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{delta.value}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
 
               {traceActive && traceEndpoints ? (
                 <div className={`mt-3 rounded-lg border px-3 py-3 ${
