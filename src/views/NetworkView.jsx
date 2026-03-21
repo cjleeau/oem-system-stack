@@ -37,6 +37,41 @@ const DEALER_CATEGORY_OPTIONS = [
   { value: 'Platform', label: 'Platform' }
 ];
 
+
+const SCENARIO_PRESETS = [
+  {
+    value: 'default',
+    label: 'Default',
+    description: 'Balanced overview across the visible system.'
+  },
+  {
+    value: 'dealer',
+    label: 'Dealer Ecosystem',
+    description: 'Foreground dealer systems, marketplaces, and retail-enabling platforms.'
+  },
+  {
+    value: 'control',
+    label: 'Control Points',
+    description: 'Surfaces broad, cross-layer influence and likely control hubs.'
+  },
+  {
+    value: 'evidence',
+    label: 'Evidence Focus',
+    description: 'Reduces weaker mapping and foregrounds stronger evidence.'
+  },
+  {
+    value: 'governance',
+    label: 'Governance',
+    description: 'Brings governance, compliance, and regulatory structures into focus.'
+  },
+  {
+    value: 'pathways',
+    label: 'Pathways',
+    description: 'Optimised for tracing movement across layers and connected pathways.'
+  }
+];
+
+
 function normalizeDealerCategory(node) {
   const raw = String(node?.node_type || '').toLowerCase();
   const label = String(node?.label || '').toLowerCase();
@@ -652,49 +687,129 @@ function buildClusterGraph(nodes, edges, degreeMap, threshold) {
   };
 }
 
-function buildDetailGraph(nodes, edges, degreeMap, threshold, expandedClusterKey) {
+function buildDetailGraph(nodes, edges, degreeMap, threshold, expandedClusterKey, options = {}) {
   const keptIds = new Set(
     nodes
       .filter((node) => threshold === 0 || (degreeMap.get(node.id) || 0) >= threshold)
       .map((node) => node.id)
   );
 
-  if (!expandedClusterKey) {
-    const detailNodes = nodes.filter((node) => keptIds.has(node.id));
-    const detailIds = new Set(detailNodes.map((node) => node.id));
+  const keptNodes = nodes.filter((node) => keptIds.has(node.id));
+  const keptEdges = edges.filter((edge) => keptIds.has(edge.source) && keptIds.has(edge.target));
+  const adjacency = new Map();
+  keptNodes.forEach((node) => adjacency.set(node.id, new Set()));
+  keptEdges.forEach((edge) => {
+    if (!adjacency.has(edge.source)) adjacency.set(edge.source, new Set());
+    if (!adjacency.has(edge.target)) adjacency.set(edge.target, new Set());
+    adjacency.get(edge.source).add(edge.target);
+    adjacency.get(edge.target).add(edge.source);
+  });
 
-    return {
-      nodes: detailNodes,
-      edges: edges.filter((edge) => detailIds.has(edge.source) && detailIds.has(edge.target))
-    };
+  const {
+    selectedId = null,
+    compareIds = [],
+    activeScenarioPreset = 'default'
+  } = options;
+
+  const rankByDegree = (items) => [...items].sort((a, b) => (degreeMap.get(b.id) || 0) - (degreeMap.get(a.id) || 0));
+
+  const selectPresetSeeds = () => {
+    const byDegree = rankByDegree(keptNodes);
+    if (activeScenarioPreset === 'dealer') {
+      return byDegree.filter((node) => node.layer === DEALER_LAYER).slice(0, 5);
+    }
+    if (activeScenarioPreset === 'governance') {
+      return byDegree
+        .filter((node) => {
+          const layer = String(node.layer || '').toLowerCase();
+          const type = String(node.type || node.node_type || '').toLowerCase();
+          const boundary = String(node.control_boundary || '').toLowerCase();
+          return layer.includes('governance') || type.includes('governance') || boundary.includes('regulatory') || boundary.includes('government');
+        })
+        .slice(0, 6);
+    }
+    if (activeScenarioPreset === 'evidence') {
+      return byDegree
+        .filter((node) => ['verified', 'hard', 'referenced'].includes(String(node.verification_status || node.confidence || '').toLowerCase()))
+        .slice(0, 6);
+    }
+    if (activeScenarioPreset === 'control') {
+      const bridgeScores = keptNodes.map((node) => {
+        const neighborLayers = new Set([...(adjacency.get(node.id) || new Set())].map((id) => {
+          const match = keptNodes.find((item) => item.id === id);
+          return match?.layer || 'Unknown';
+        }));
+        return { node, score: neighborLayers.size * 10 + (degreeMap.get(node.id) || 0) };
+      });
+      return bridgeScores.sort((a, b) => b.score - a.score).slice(0, 5).map((item) => item.node);
+    }
+    if (activeScenarioPreset === 'pathways') {
+      return byDegree.slice(0, 4);
+    }
+    return byDegree.slice(0, 3);
+  };
+
+  let seedIds = new Set();
+
+  if (selectedId && keptIds.has(selectedId)) {
+    seedIds.add(selectedId);
   }
 
-  const [targetRegion, targetLayer] = expandedClusterKey.split('||');
+  compareIds.filter((id) => keptIds.has(id)).forEach((id) => seedIds.add(id));
 
-  const seedIds = new Set(
-    nodes
-      .filter(
+  if (expandedClusterKey) {
+    const [targetRegion, targetLayer] = expandedClusterKey.split('||');
+    rankByDegree(
+      keptNodes.filter(
         (node) =>
-          keptIds.has(node.id) &&
           (node.region || 'Unknown') === targetRegion &&
           (node.layer || 'Unknown') === targetLayer
       )
-      .map((node) => node.id)
-  );
+    )
+      .slice(0, 8)
+      .forEach((node) => seedIds.add(node.id));
+  }
+
+  if (seedIds.size === 0) {
+    selectPresetSeeds().forEach((node) => seedIds.add(node.id));
+  }
 
   const includedIds = new Set(seedIds);
+  const secondDegreeCandidates = new Map();
 
-  edges.forEach((edge) => {
-    if (seedIds.has(edge.source)) includedIds.add(edge.target);
-    if (seedIds.has(edge.target)) includedIds.add(edge.source);
+  seedIds.forEach((seedId) => {
+    (adjacency.get(seedId) || new Set()).forEach((neighborId) => {
+      includedIds.add(neighborId);
+      (adjacency.get(neighborId) || new Set()).forEach((nextId) => {
+        if (!includedIds.has(nextId) && !seedIds.has(nextId)) {
+          secondDegreeCandidates.set(
+            nextId,
+            Math.max(secondDegreeCandidates.get(nextId) || 0, degreeMap.get(nextId) || 0)
+          );
+        }
+      });
+    });
   });
 
-  const detailNodes = nodes.filter((node) => includedIds.has(node.id));
+  [...secondDegreeCandidates.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, activeScenarioPreset === 'governance' ? 16 : 12)
+    .forEach(([id]) => includedIds.add(id));
+
+  if (includedIds.size < 12) {
+    rankByDegree(keptNodes)
+      .filter((node) => !includedIds.has(node.id))
+      .slice(0, 12 - includedIds.size)
+      .forEach((node) => includedIds.add(node.id));
+  }
+
+  const detailNodes = keptNodes.filter((node) => includedIds.has(node.id));
   const detailIds = new Set(detailNodes.map((node) => node.id));
 
   return {
     nodes: detailNodes,
-    edges: edges.filter((edge) => detailIds.has(edge.source) && detailIds.has(edge.target))
+    edges: keptEdges.filter((edge) => detailIds.has(edge.source) && detailIds.has(edge.target)),
+    focusIds: [...seedIds]
   };
 }
 
@@ -1022,6 +1137,7 @@ export default function NetworkView({
   const [expandedRelationshipGroups, setExpandedRelationshipGroups] = useState({});
   const [compareIds, setCompareIds] = useState([]);
   const [traceActive, setTraceActive] = useState(false);
+  const [activeScenarioPreset, setActiveScenarioPreset] = useState('default');
 
   const getSafeHoverEvent = (event) => createSafeHoverEvent(event);
 
@@ -1046,45 +1162,112 @@ export default function NetworkView({
     };
   }, [nodes, edges, dealerLayerEnabled, dealerCategoryFilters]);
 
+  const scenarioData = useMemo(() => {
+    const canonicalNodeMap = new Map(dealerAwareData.nodes.map((node) => [node.id, node]));
+
+    if (activeScenarioPreset === 'evidence') {
+      const strongerEdges = dealerAwareData.edges.filter(
+        (edge) =>
+          normalizeConfidenceRank(edge.confidence || edge.verification_status || edge.evidence_status) >= 2
+      );
+      if (!strongerEdges.length) {
+        return dealerAwareData;
+      }
+      const visibleIds = new Set();
+      strongerEdges.forEach((edge) => {
+        visibleIds.add(edge.source);
+        visibleIds.add(edge.target);
+      });
+
+      return {
+        nodes: dealerAwareData.nodes.filter((node) => visibleIds.has(node.id)),
+        edges: strongerEdges
+      };
+    }
+
+    if (activeScenarioPreset === 'governance') {
+      const governanceMatch = (node) => {
+        const haystack = `${node?.layer || ''} ${node?.type || ''} ${node?.node_type || ''} ${node?.label || ''} ${node?.description || ''} ${node?.notes || ''}`.toLowerCase();
+        return (
+          haystack.includes('govern') ||
+          haystack.includes('regulat') ||
+          haystack.includes('compliance') ||
+          haystack.includes('policy') ||
+          haystack.includes('authority') ||
+          haystack.includes('standard')
+        );
+      };
+
+      const focusIds = new Set(dealerAwareData.nodes.filter(governanceMatch).map((node) => node.id));
+      if (!focusIds.size) {
+        return dealerAwareData;
+      }
+
+      dealerAwareData.edges.forEach((edge) => {
+        if (focusIds.has(edge.source) || focusIds.has(edge.target)) {
+          focusIds.add(edge.source);
+          focusIds.add(edge.target);
+        }
+      });
+
+      return {
+        nodes: dealerAwareData.nodes.filter((node) => focusIds.has(node.id)),
+        edges: dealerAwareData.edges.filter(
+          (edge) => focusIds.has(edge.source) && focusIds.has(edge.target)
+        )
+      };
+    }
+
+    return dealerAwareData;
+  }, [dealerAwareData, activeScenarioPreset]);
+
   const baseDegreeMap = useMemo(
     () =>
       buildDegreeMap(
-        dealerAwareData.edges.map((edge) => ({ source: edge.source, target: edge.target }))
+        scenarioData.edges.map((edge) => ({ source: edge.source, target: edge.target }))
       ),
-    [dealerAwareData.edges]
+    [scenarioData.edges]
   );
 
   const resolvedMode = useMemo(() => {
     if (renderMode === 'overview') return 'overview';
     if (renderMode === 'detail') return 'detail';
     if (expandedClusterKey) return 'detail';
-    return dealerAwareData.nodes.length > 320 ? 'overview' : 'detail';
-  }, [renderMode, expandedClusterKey, dealerAwareData.nodes.length]);
+    return scenarioData.nodes.length > 320 ? 'overview' : 'detail';
+  }, [renderMode, expandedClusterKey, scenarioData.nodes.length]);
 
   const graph = useMemo(() => {
     if (resolvedMode === 'overview') {
       return buildClusterGraph(
-        dealerAwareData.nodes,
-        dealerAwareData.edges,
+        scenarioData.nodes,
+        scenarioData.edges,
         baseDegreeMap,
         degreeThreshold
       );
     }
 
     return buildDetailGraph(
-      dealerAwareData.nodes,
-      dealerAwareData.edges,
+      scenarioData.nodes,
+      scenarioData.edges,
       baseDegreeMap,
       degreeThreshold,
-      expandedClusterKey
+      expandedClusterKey,
+      {
+        selectedId,
+        compareIds,
+        activeScenarioPreset
+      }
     );
   }, [
     resolvedMode,
-    dealerAwareData.nodes,
-    dealerAwareData.edges,
+    scenarioData.nodes,
+    scenarioData.edges,
     baseDegreeMap,
     degreeThreshold,
-    expandedClusterKey
+    expandedClusterKey,
+    selectedId,
+    compareIds,
+    activeScenarioPreset
   ]);
 
   const pinnedIds = useMemo(() => new Set(Object.keys(pinnedPositions)), [pinnedPositions]);
@@ -1387,20 +1570,13 @@ export default function NetworkView({
       };
     }
 
-    const detailSeedIds = new Set();
+    const detailSeedIds = new Set(graph.focusIds || []);
 
-    if (selectedId && graph.nodes.some((node) => node.id === selectedId)) {
+    if (!detailSeedIds.size && selectedId && graph.nodes.some((node) => node.id === selectedId)) {
       detailSeedIds.add(selectedId);
-    } else if (expandedClusterKey) {
-      const [detailRegion, detailLayer] = expandedClusterKey.split('||');
-      graph.nodes.forEach((node) => {
-        if ((node.region || 'Unknown') === detailRegion && (node.layer || 'Unknown') === detailLayer) {
-          detailSeedIds.add(node.id);
-        }
-      });
     }
 
-    const useConstellationLayout = Boolean(selectedId || expandedClusterKey);
+    const useConstellationLayout = detailSeedIds.size > 0 || Boolean(selectedId || expandedClusterKey || compareIds.length || activeScenarioPreset !== 'default');
     const sublaneTargets = useConstellationLayout
       ? null
       : buildDetailSublaneTargets(graph.nodes, regions, xScale, height, topPad, bottomPad);
@@ -1482,7 +1658,7 @@ export default function NetworkView({
     const controlPointMetricsMap = new Map(
       layoutNodes.map((node) => [
         node.id,
-        calculateControlPointMetrics(node, nodeMap, dealerAwareData.edges)
+        calculateControlPointMetrics(node, nodeMap, scenarioData.edges)
       ])
     );
     const regionRanks = buildRegionRanks(layoutNodes, degreeMap);
@@ -2005,6 +2181,19 @@ export default function NetworkView({
     setPinnedPositions({});
     setCompareIds([]);
     setTraceActive(false);
+    setActiveScenarioPreset('default');
+    setDealerLayerEnabled(false);
+    setDealerCategoryFilters({
+      DMS: true,
+      CRM: true,
+      Finance: true,
+      Service: true,
+      Marketplace: true,
+      Platform: true
+    });
+    setRenderMode('auto');
+    setLabelMode('balanced');
+    setDegreeThreshold(0);
     setSelectedId(null);
     hoveredIdRef.current = null;
     hoveredClusterIdRef.current = null;
@@ -2059,16 +2248,85 @@ export default function NetworkView({
     setLegendVisible(legendBeforeExpandRef.current);
   };
 
+  const applyScenarioPreset = (presetValue) => {
+    setActiveScenarioPreset(presetValue);
+    setTraceActive(false);
+    setCompareIds([]);
+    setSelectedId(null);
+    setHoveredId(null);
+    setHoveredClusterId(null);
+    setExpandedClusterKey(null);
+    onNodeSelect?.(null);
+    onLeave?.();
+
+    switch (presetValue) {
+      case 'dealer':
+        setDealerLayerEnabled(true);
+        setDealerCategoryFilters({
+          DMS: true,
+          CRM: true,
+          Finance: true,
+          Service: true,
+          Marketplace: true,
+          Platform: true
+        });
+        setLabelMode('focused');
+        setDegreeThreshold(0);
+        setRenderMode('auto');
+        break;
+      case 'control':
+        setDealerLayerEnabled(false);
+        setLabelMode('focused');
+        setDegreeThreshold(2);
+        setRenderMode('auto');
+        break;
+      case 'evidence':
+        setDealerLayerEnabled(false);
+        setLabelMode('balanced');
+        setDegreeThreshold(0);
+        setRenderMode('auto');
+        break;
+      case 'governance':
+        setDealerLayerEnabled(false);
+        setLabelMode('focused');
+        setDegreeThreshold(0);
+        setRenderMode('detail');
+        break;
+      case 'pathways':
+        setDealerLayerEnabled(true);
+        setLabelMode('focused');
+        setDegreeThreshold(2);
+        setRenderMode('detail');
+        break;
+      default:
+        setDealerLayerEnabled(false);
+        setDealerCategoryFilters({
+          DMS: true,
+          CRM: true,
+          Finance: true,
+          Service: true,
+          Marketplace: true,
+          Platform: true
+        });
+        setLabelMode('balanced');
+        setDegreeThreshold(0);
+        setRenderMode('auto');
+        break;
+    }
+
+    setLayoutVersion((current) => current + 1);
+  };
+
   const activeFocusLabel = expandedClusterKey ? formatExpandedClusterLabel(expandedClusterKey) : '';
 
   const buildNodeInsightDetail = (nodeId) => {
     if (!nodeId) return null;
 
-    const canonicalNodeMap = new Map(dealerAwareData.nodes.map((item) => [item.id, item]));
+    const canonicalNodeMap = new Map(scenarioData.nodes.map((item) => [item.id, item]));
     const node = canonicalNodeMap.get(nodeId) || graph.nodes.find((item) => item.id === nodeId) || null;
     if (!node) return null;
 
-    const relatedEdges = dealerAwareData.edges.filter((edge) => edge.source === nodeId || edge.target === nodeId);
+    const relatedEdges = scenarioData.edges.filter((edge) => edge.source === nodeId || edge.target === nodeId);
 
     const grouped = new Map();
     relatedEdges.forEach((edge) => {
@@ -2133,15 +2391,15 @@ export default function NetworkView({
     };
   };
 
-  const selectedNodeDetail = useMemo(() => buildNodeInsightDetail(selectedId), [selectedId, dealerAwareData.nodes, dealerAwareData.edges, graph.nodes]);
+  const selectedNodeDetail = useMemo(() => buildNodeInsightDetail(selectedId), [selectedId, scenarioData.nodes, scenarioData.edges, graph.nodes]);
 
   const compareNodeDetails = useMemo(
     () => compareIds.map((nodeId) => buildNodeInsightDetail(nodeId)).filter(Boolean),
-    [compareIds, dealerAwareData.nodes, dealerAwareData.edges, graph.nodes]
+    [compareIds, scenarioData.nodes, scenarioData.edges, graph.nodes]
   );
 
   const traceEndpoints = useMemo(() => {
-    const canonicalNodeMap = new Map(dealerAwareData.nodes.map((item) => [item.id, item]));
+    const canonicalNodeMap = new Map(scenarioData.nodes.map((item) => [item.id, item]));
 
     if (selectedId) {
       const otherCompareId = compareIds.find((id) => id !== selectedId) || (!compareIds.includes(selectedId) ? compareIds[0] : null);
@@ -2165,16 +2423,67 @@ export default function NetworkView({
     }
 
     return null;
-  }, [selectedId, compareIds, dealerAwareData.nodes]);
+  }, [selectedId, compareIds, scenarioData.nodes]);
 
   const tracedPath = useMemo(() => {
     if (!traceActive || !traceEndpoints) return null;
-    const canonicalNodeMap = new Map(dealerAwareData.nodes.map((item) => [item.id, item]));
-    return buildShortestPath(dealerAwareData.edges, traceEndpoints.startId, traceEndpoints.endId, canonicalNodeMap);
-  }, [traceActive, traceEndpoints, dealerAwareData.nodes, dealerAwareData.edges]);
+    const canonicalNodeMap = new Map(scenarioData.nodes.map((item) => [item.id, item]));
+    return buildShortestPath(scenarioData.edges, traceEndpoints.startId, traceEndpoints.endId, canonicalNodeMap);
+  }, [traceActive, traceEndpoints, scenarioData.nodes, scenarioData.edges]);
 
   const tracedNodeIds = useMemo(() => new Set(tracedPath?.nodeIds || []), [tracedPath]);
   const tracedEdgeKeys = useMemo(() => new Set(tracedPath?.edgeKeys || []), [tracedPath]);
+
+
+  const narrativeSummary = useMemo(() => {
+    const presetConfig = SCENARIO_PRESETS.find((preset) => preset.value === activeScenarioPreset) || SCENARIO_PRESETS[0];
+    const visibleNodeCount = graph.nodes.length;
+    const visibleEdgeCount = (graph.edges || graph.links || []).length;
+    const visibleDealerNodes = scenarioData.nodes.filter((node) => isDealerNode(node)).length;
+    const strongerEvidenceEdges = scenarioData.edges.filter(
+      (edge) => normalizeConfidenceRank(edge.confidence || edge.verification_status || edge.evidence_status) >= 2
+    ).length;
+    const governanceNodes = scenarioData.nodes.filter((node) => {
+      const haystack = `${node?.layer || ''} ${node?.type || ''} ${node?.node_type || ''} ${node?.label || ''} ${node?.description || ''} ${node?.notes || ''}`.toLowerCase();
+      return haystack.includes('govern') || haystack.includes('regulat') || haystack.includes('compliance') || haystack.includes('policy');
+    }).length;
+    const controlCandidates = graph.nodes.filter((node) => {
+      const metrics = calculateControlPointMetrics(node, new Map(graph.nodes.map((item) => [item.id, item])), graph.edges || graph.links || []);
+      return metrics.score >= 10;
+    }).length;
+
+    let summary = presetConfig.description;
+    if (activeScenarioPreset === 'dealer') {
+      summary = `${visibleDealerNodes} dealer-system node${visibleDealerNodes === 1 ? '' : 's'} visible across the current slice.`;
+    } else if (activeScenarioPreset === 'control') {
+      summary = `${controlCandidates} likely control point${controlCandidates === 1 ? '' : 's'} visible in the current graph.`;
+    } else if (activeScenarioPreset === 'evidence') {
+      summary = `${strongerEvidenceEdges} stronger-evidence relationship${strongerEvidenceEdges === 1 ? '' : 's'} remain in view.`;
+    } else if (activeScenarioPreset === 'governance') {
+      summary = `${governanceNodes} governance or regulatory node${governanceNodes === 1 ? '' : 's'} are foregrounded with their immediate context.`;
+    } else if (activeScenarioPreset === 'pathways') {
+      summary = traceActive && tracedPath?.found
+        ? `${tracedPath.hops} hop${tracedPath.hops === 1 ? '' : 's'} traced across ${tracedPath.layers.length || 1} layer${tracedPath.layers.length === 1 ? '' : 's'}.`
+        : 'Best used with selection, compare, and trace path to reveal cross-layer routes.';
+    }
+
+    return {
+      title: presetConfig.label,
+      summary,
+      metrics: [
+        `${visibleNodeCount} nodes`,
+        `${visibleEdgeCount} links`,
+        activeScenarioPreset === 'dealer'
+          ? `${visibleDealerNodes} dealer`
+          : activeScenarioPreset === 'evidence'
+            ? `${strongerEvidenceEdges} stronger-evidence`
+            : activeScenarioPreset === 'governance'
+              ? `${governanceNodes} governance`
+              : `${controlCandidates} control signals`
+      ]
+    };
+  }, [activeScenarioPreset, graph.nodes, graph.edges, scenarioData.nodes, scenarioData.edges, traceActive, tracedPath]);
+
 
   const toggleCompareNode = (nodeId) => {
     if (!nodeId) return;
@@ -2263,6 +2572,37 @@ export default function NetworkView({
                 Clear
               </button>
             ) : null}
+          </div>
+
+          <div className="mb-4 flex flex-col gap-2 rounded-lg border border-border/25 bg-black/10 px-4 py-3">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <CardKicker>Scenario Presets</CardKicker>
+                <div className="mt-1 text-xs text-muted-foreground">Saved narrative lenses for faster reading and comparison.</div>
+              </div>
+              {activeScenarioPreset !== 'default' ? (
+                <button
+                  type="button"
+                  onClick={() => applyScenarioPreset('default')}
+                  className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  Clear preset
+                </button>
+              ) : null}
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {SCENARIO_PRESETS.map((preset) => (
+                <ControlPill
+                  key={preset.value}
+                  active={activeScenarioPreset === preset.value}
+                  onClick={() => applyScenarioPreset(preset.value)}
+                >
+                  {preset.label}
+                </ControlPill>
+              ))}
+            </div>
           </div>
 
           <div className="flex flex-wrap items-start gap-3 xl:gap-4">
@@ -2417,6 +2757,23 @@ export default function NetworkView({
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-border/25 bg-card/10 px-4 py-3 backdrop-blur-sm">
+        <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+          <div>
+            <CardKicker>Narrative View</CardKicker>
+            <div className="mt-1 text-sm font-bold text-foreground">{narrativeSummary.title}</div>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{narrativeSummary.summary}</p>
+          </div>
+          <div className="flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-widest text-foreground/65">
+            {narrativeSummary.metrics.map((metric) => (
+              <span key={metric} className="rounded-md border border-border/30 bg-muted/10 px-2.5 py-1">
+                {metric}
+              </span>
+            ))}
           </div>
         </div>
       </div>
