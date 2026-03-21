@@ -287,7 +287,7 @@ function summarizeEvidenceStrength(value) {
   const rank = normalizeConfidenceRank(value);
   if (rank >= 3) return 'Higher-confidence mapping';
   if (rank == 2) return 'Moderate-confidence mapping';
-  if (rank == 1) return 'Illustrative / softer mapping';
+  if (rank == 1) return 'Illustrative relationship with lighter evidence';
   return 'Confidence not specified';
 }
 
@@ -300,30 +300,64 @@ function toTitleCase(value) {
     .replace(/\w/g, (char) => char.toUpperCase());
 }
 
+
+function getInsightNodeTitle(node) {
+  if (!node) return 'Unknown node';
+  const label = String(node.label || 'Unknown node').trim();
+  const region = node.region ? displayRegion(node.region) : null;
+  const oem = node.oem_group ? String(node.oem_group).trim() : null;
+  const layer = node.layer ? toTitleCase(node.layer) : null;
+
+  if (oem && label.toLowerCase() === 'dealer systems') {
+    return `${oem} — Dealer Systems${region ? ` (${region})` : ''}`;
+  }
+
+  if (oem && label.toLowerCase().includes('dealer systems')) {
+    return `${oem} — ${label}${region ? ` (${region})` : ''}`;
+  }
+
+  if (oem && !label.toLowerCase().includes(oem.toLowerCase())) {
+    return `${label} (${oem}${region ? ` · ${region}` : ''})`;
+  }
+
+  if (region && !label.toLowerCase().includes(region.toLowerCase())) {
+    return `${label} (${region})`;
+  }
+
+  return label;
+}
+
 function summarizeNodeRole(node, dealerCategory, relationshipCount, strongestGroupLabel = null) {
-  const layer = node?.layer ? toTitleCase(node.layer) : 'network';
+  const layer = node?.layer ? toTitleCase(node.layer) : 'Network';
   const boundary = node?.control_boundary ? toTitleCase(node.control_boundary) : null;
-  const type = node?.type || node?.node_type ? toTitleCase(node.type || node.node_type) : null;
+  const type = node?.type || node?.node_type ? toTitleCase(node.type || node.node_type) : 'Node';
+  const region = node?.region ? displayRegion(node.region) : null;
+  const relationships = `${relationshipCount} visible relationship${relationshipCount === 1 ? '' : 's'}`;
+  const strongestPattern = strongestGroupLabel ? ` Strongest visible pattern: ${strongestGroupLabel.toLowerCase()}.` : '';
 
   if (dealerCategory) {
     const oem = node?.oem_group ? ` for ${node.oem_group}` : '';
-    const relation = strongestGroupLabel ? ` Most visible pattern: ${strongestGroupLabel.toLowerCase()}.` : '';
-    return `${dealerCategory} node${oem} in ${layer.toLowerCase()}${boundary ? ` · ${boundary.toLowerCase()} boundary` : ''} · ${relationshipCount} connected relationship${relationshipCount === 1 ? '' : 's'}.${relation}`;
+    const regionText = region ? ` in ${region}` : '';
+    const boundaryText = boundary ? `, mapped at the ${boundary.toLowerCase()} boundary` : '';
+    return `${dealerCategory} dealer platform${oem}${regionText} within ${layer.toLowerCase()}${boundaryText}, with ${relationships}.${strongestPattern}`;
   }
 
-  const relation = strongestGroupLabel ? ` Most visible pattern: ${strongestGroupLabel.toLowerCase()}.` : '';
-  return `${type || 'Node'} in ${layer.toLowerCase()}${boundary ? ` · ${boundary.toLowerCase()} boundary` : ''} · ${relationshipCount} connected relationship${relationshipCount === 1 ? '' : 's'}.${relation}`;
+  const regionText = region ? ` in ${region}` : '';
+  const boundaryText = boundary ? ` at the ${boundary.toLowerCase()} boundary` : '';
+  return `${type}${regionText} within ${layer.toLowerCase()}${boundaryText ? `, ${boundaryText}` : ''}, with ${relationships}.${strongestPattern}`;
 }
 
+
 function relationshipInsight(groups) {
-  if (!groups?.length) return 'No connected relationships mapped yet.';
+  if (!groups?.length) return 'No visible relationships are mapped for this node.';
   const strongest = groups[0];
   const count = strongest.total || strongest.items?.length || 0;
   const strongestItem = strongest.items?.[0];
   const evidence = summarizeEvidenceStrength(strongestItem?.confidence || strongest.topConfidence);
   const target = strongestItem?.label ? ` with ${strongestItem.label}` : '';
-  return `${strongest.label} is the clearest visible pattern (${count})${target}. ${evidence}.`;
+  return `The strongest visible relationship is ${strongest.label.toLowerCase()}${target} (${count}). ${evidence}.`;
 }
+
 
 
 function formatMetricDelta(value) {
@@ -2603,7 +2637,7 @@ export default function NetworkView({
     } else if (activeScenarioPreset === 'control') {
       summary = `${controlCandidates} likely control point${controlCandidates === 1 ? '' : 's'} visible in the current graph.`;
     } else if (activeScenarioPreset === 'evidence') {
-      summary = `${strongerEvidenceEdges} stronger-evidence relationship${strongerEvidenceEdges === 1 ? '' : 's'} remain in view.`;
+      summary = `${strongerEvidenceEdges} higher-confidence relationship${strongerEvidenceEdges === 1 ? '' : 's'} remain visible in this slice.`;
     } else if (activeScenarioPreset === 'governance') {
       summary = `${governanceNodes} governance or regulatory node${governanceNodes === 1 ? '' : 's'} are foregrounded with their immediate context.`;
     } else if (activeScenarioPreset === 'pathways') {
@@ -2621,10 +2655,10 @@ export default function NetworkView({
         activeScenarioPreset === 'dealer'
           ? `${visibleDealerNodes} dealer`
           : activeScenarioPreset === 'evidence'
-            ? `${strongerEvidenceEdges} stronger-evidence`
+            ? `${strongerEvidenceEdges} stronger-evidence links`
             : activeScenarioPreset === 'governance'
               ? `${governanceNodes} governance`
-              : `${controlCandidates} control signals`
+              : `${controlCandidates} control-point candidates`
       ]
     };
   }, [activeScenarioPreset, graph.nodes, graph.edges, scenarioData.nodes, scenarioData.edges, traceActive, tracedPath]);
@@ -2743,7 +2777,7 @@ export default function NetworkView({
         kind: 'control',
         kicker: 'Cross-layer bridges',
         value: `${crossLayerCount} bridge candidates`,
-        summary: 'Nodes touching multiple visible layers are surfaced as higher-value control signals.'
+        summary: 'Nodes touching multiple visible layers are surfaced as higher-value control-point candidates.'
       });
     }
 
@@ -2765,7 +2799,7 @@ export default function NetworkView({
 
     if (selectedNodeDetail) {
       sections.push(formatExportBlock('Selected node', [
-        selectedNodeDetail.node.label,
+        getInsightNodeTitle(selectedNodeDetail.node),
         `${toTitleCase(selectedNodeDetail.node.layer || 'Unknown')} · ${displayRegion(selectedNodeDetail.node.region || 'Unknown')}`,
         selectedNodeDetail.roleSummary,
         selectedNodeDetail.relationshipSummary,
@@ -2780,7 +2814,7 @@ export default function NetworkView({
         const topSignal = detail.strongestRelationship
           ? `${detail.strongestRelationship.label} (${detail.strongestRelationship.total})`
           : 'No dominant relationship signal';
-        return `${detail.node.label} — ${detail.roleSummary} | ${detail.relationshipCount} links | ${topSignal}`;
+        return `${getInsightNodeTitle(detail.node)} — ${detail.roleSummary} | ${detail.relationshipCount} links | ${topSignal}`;
       })));
     }
 
@@ -3216,7 +3250,7 @@ export default function NetworkView({
                   </div>
                   <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                     {compareNodeDetails.length === 1
-                      ? `Pinned: ${compareNodeDetails[0].node.label}. Select another node, then use Pin to compare in Selection Detail.`
+                      ? `Pinned: ${getInsightNodeTitle(compareNodeDetails[0].node)}. Select another node, then use Pin in Selection Detail to compare.`
                       : 'Compare role, evidence, and strongest relationship signals across two selected nodes.'}
                   </p>
                 </div>
@@ -3317,7 +3351,7 @@ export default function NetworkView({
                     <div key={detail.node.id} className="rounded-lg border border-border/25 bg-black/10 px-4 py-4">
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <div className="text-base font-bold text-foreground">{detail.node.label}</div>
+                          <div className="text-base font-bold text-foreground">{getInsightNodeTitle(detail.node)}</div>
                           <div className="mt-2 flex flex-wrap gap-1.5 text-[10px] font-bold uppercase tracking-widest text-foreground/60">
                             <span className="rounded-md border border-border/30 bg-muted/10 px-2 py-0.5">{detail.node.layer || 'Unknown layer'}</span>
                             <span className="rounded-md border border-border/30 bg-muted/10 px-2 py-0.5">{displayRegion(detail.node.region || 'Unknown')}</span>
@@ -3380,7 +3414,7 @@ export default function NetworkView({
               {selectedNodeDetail ? (
                 <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-foreground/75">
                   <span className="rounded-full border border-border/40 bg-muted/20 px-2.5 py-1">Selected</span>
-                  <span className="text-foreground">{selectedNodeDetail.node.label}</span>
+                  <span className="text-foreground">{getInsightNodeTitle(selectedNodeDetail.node)}</span>
                   <span className="text-muted-foreground">{selectedNodeDetail.relationshipCount} links</span>
                 </div>
               ) : null}
