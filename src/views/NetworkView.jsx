@@ -81,6 +81,116 @@ function normalizeDealerCategory(node) {
 }
 
 
+function isDealerNode(node) {
+  return node?.layer === DEALER_LAYER;
+}
+
+function isDealerRelatedEdge(edge) {
+  if (!edge) return false;
+  if (edge.layer === DEALER_LAYER) return true;
+  if (edge.source?.layer === DEALER_LAYER || edge.target?.layer === DEALER_LAYER) return true;
+  if (edge.sourceNode?.layer === DEALER_LAYER || edge.targetNode?.layer === DEALER_LAYER) return true;
+  return false;
+}
+
+function dealerCategoryStyle(node) {
+  const category = normalizeDealerCategory(node);
+
+  switch (category) {
+    case 'DMS':
+      return {
+        category,
+        stroke: '#67d7ff',
+        halo: 'rgba(103,215,255,0.16)',
+        dashArray: null,
+        edgeStroke: 'rgba(103,215,255,0.56)'
+      };
+    case 'CRM':
+      return {
+        category,
+        stroke: '#8fe388',
+        halo: 'rgba(143,227,136,0.14)',
+        dashArray: null,
+        edgeStroke: 'rgba(143,227,136,0.54)'
+      };
+    case 'Finance':
+      return {
+        category,
+        stroke: '#f7c76a',
+        halo: 'rgba(247,199,106,0.14)',
+        dashArray: '2 2',
+        edgeStroke: 'rgba(247,199,106,0.52)'
+      };
+    case 'Service':
+      return {
+        category,
+        stroke: '#ffab73',
+        halo: 'rgba(255,171,115,0.14)',
+        dashArray: '4 2',
+        edgeStroke: 'rgba(255,171,115,0.52)'
+      };
+    case 'Marketplace':
+      return {
+        category,
+        stroke: '#d2a8ff',
+        halo: 'rgba(210,168,255,0.16)',
+        dashArray: null,
+        edgeStroke: 'rgba(210,168,255,0.52)'
+      };
+    default:
+      return {
+        category: 'Platform',
+        stroke: '#a7b3c7',
+        halo: 'rgba(167,179,199,0.14)',
+        dashArray: '1.5 2.5',
+        edgeStroke: 'rgba(167,179,199,0.48)'
+      };
+  }
+}
+
+function detailNodeRadius(node, degreeMap, selectedId, hoveredId) {
+  const degree = degreeMap.get(node.id) || 0;
+  const base = Math.min(6.2, 4 + degree * 0.16);
+  const dealerBonus = isDealerNode(node) ? 0.8 : 0;
+
+  if (selectedId === node.id) return base + dealerBonus + 2.4;
+  if (hoveredId === node.id) return base + dealerBonus + 1.6;
+  return base + dealerBonus;
+}
+
+function detailEdgeBaseStyle(edge) {
+  if (isDealerRelatedEdge(edge)) {
+    const dealerNode = isDealerNode(edge.source) ? edge.source : isDealerNode(edge.target) ? edge.target : null;
+    const categoryStyle = dealerCategoryStyle(dealerNode);
+    const relation = String(edge.relationship || edge.relation || '').toLowerCase();
+
+    if (relation.includes('host')) {
+      return {
+        stroke: 'rgba(167,179,199,0.46)',
+        dashArray: '2 3'
+      };
+    }
+
+    if (relation.includes('support')) {
+      return {
+        stroke: categoryStyle.edgeStroke,
+        dashArray: categoryStyle.dashArray
+      };
+    }
+
+    return {
+      stroke: categoryStyle.edgeStroke,
+      dashArray: categoryStyle.dashArray
+    };
+  }
+
+  return {
+    stroke: edgeStroke(edge),
+    dashArray: edgeDash(edge)
+  };
+}
+
+
 function EmptyState() {
   return (
     <div className="flex min-h-[900px] items-center justify-center rounded-xl border border-dashed border-border/40 bg-card/20 p-8 text-center text-sm text-muted-foreground">
@@ -411,8 +521,8 @@ function EyeIcon(props) {
   );
 }
 
-function CardKicker({ children }) {
-  return <div className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">{children}</div>;
+function CardKicker({ children, className = '' }) {
+  return <div className={`text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ${className}`}>{children}</div>;
 }
 
 function ControlPill({ active = false, children, onClick }) {
@@ -420,10 +530,10 @@ function ControlPill({ active = false, children, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className={`rounded px-3 py-1 text-[9px] font-bold uppercase tracking-widest transition-all ${
+      className={`flex h-7 items-center justify-center rounded-md px-3 text-[9px] font-bold uppercase tracking-[0.16em] transition-all ${
         active
-          ? 'bg-blue-600 text-white shadow-lg'
-          : 'text-muted-foreground hover:text-foreground'
+          ? 'bg-blue-600 text-white shadow-[0_8px_20px_rgba(37,99,235,0.24)]'
+          : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
       }`}
     >
       {children}
@@ -696,16 +806,16 @@ export default function NetworkView({
       nodeSelection
         .append('circle')
         .attr('r', (d) => Math.max(8, Math.min(28, 7 + d.memberCount * 0.72)))
-        .attr('fill', '#4da6ff')
-        .attr('fill-opacity', 0.2)
-        .attr('stroke', '#67d7ff')
-        .attr('stroke-width', 1.2);
+        .attr('fill', (d) => (d.layer === DEALER_LAYER ? '#214637' : '#4da6ff'))
+        .attr('fill-opacity', (d) => (d.layer === DEALER_LAYER ? 0.28 : 0.2))
+        .attr('stroke', (d) => (d.layer === DEALER_LAYER ? '#7cefd1' : '#67d7ff'))
+        .attr('stroke-width', (d) => (d.layer === DEALER_LAYER ? 1.5 : 1.2));
 
       nodeSelection
         .append('circle')
         .attr('r', (d) => Math.max(4, Math.min(18, 4 + d.memberCount * 0.34)))
-        .attr('fill', '#67d7ff')
-        .attr('fill-opacity', 0.82)
+        .attr('fill', (d) => (d.layer === DEALER_LAYER ? '#7cefd1' : '#67d7ff'))
+        .attr('fill-opacity', (d) => (d.layer === DEALER_LAYER ? 0.88 : 0.82))
         .attr('stroke', 'rgba(255,255,255,0.32)')
         .attr('stroke-width', 0.9);
 
@@ -903,13 +1013,14 @@ export default function NetworkView({
       .attr('y1', (d) => d.source.y)
       .attr('x2', (d) => d.target.x)
       .attr('y2', (d) => d.target.y)
-      .attr('stroke', (edge) => edgeStroke(edge))
+      .attr('stroke', (edge) => detailEdgeBaseStyle(edge).stroke)
       .attr('stroke-width', (edge) => {
-        if (selectedId && (edge.source.id === selectedId || edge.target.id === selectedId)) return 2.1;
-        return 0.95;
+        const dealerBoost = isDealerRelatedEdge(edge) ? 0.35 : 0;
+        if (selectedId && (edge.source.id === selectedId || edge.target.id === selectedId)) return 2.1 + dealerBoost;
+        return 0.95 + dealerBoost;
       })
-      .attr('stroke-dasharray', (edge) => edgeDash(edge))
-      .attr('opacity', 0.14)
+      .attr('stroke-dasharray', (edge) => detailEdgeBaseStyle(edge).dashArray)
+      .attr('opacity', (edge) => (isDealerRelatedEdge(edge) ? 0.2 : 0.14))
       .on('mousemove', (event, edge) => onEdgeHover?.(event, edge))
       .on('mouseleave', () => onLeave?.());
 
@@ -923,15 +1034,31 @@ export default function NetworkView({
 
     const circleSelection = nodeSelection
       .append('circle')
-      .attr('r', (d) => {
-        const degree = degreeMap.get(d.id) || 0;
-        if (selectedId === d.id) return 8.6;
-        if (hoveredId === d.id) return 7.8;
-        return Math.min(6.2, 4 + degree * 0.16);
+      .attr('r', (d) => detailNodeRadius(d, degreeMap, selectedId, hoveredId))
+      .attr('fill', (d) => {
+        if (isDealerNode(d)) {
+          return dealerCategoryStyle(d).halo;
+        }
+        return nodeFill(d);
       })
-      .attr('fill', (d) => nodeFill(d))
-      .attr('stroke', 'rgba(255,255,255,0.24)')
-      .attr('stroke-width', 0.8);
+      .attr('stroke', (d) => {
+        if (isDealerNode(d)) {
+          return dealerCategoryStyle(d).stroke;
+        }
+        return 'rgba(255,255,255,0.24)';
+      })
+      .attr('stroke-width', (d) => (isDealerNode(d) ? 1.1 : 0.8))
+      .attr('stroke-dasharray', (d) => (isDealerNode(d) ? dealerCategoryStyle(d).dashArray : null));
+
+    const dealerCoreSelection = nodeSelection
+      .filter((d) => isDealerNode(d))
+      .append('circle')
+      .attr('r', (d) => Math.max(2.3, detailNodeRadius(d, degreeMap, selectedId, hoveredId) - 2.15))
+      .attr('fill', (d) => dealerCategoryStyle(d).stroke)
+      .attr('fill-opacity', 0.78)
+      .attr('stroke', 'rgba(255,255,255,0.18)')
+      .attr('stroke-width', 0.6)
+      .attr('pointer-events', 'none');
 
     const labelSelection = nodeSelection
       .append('text')
@@ -947,8 +1074,9 @@ export default function NetworkView({
         .attr('fill', (d) => {
           if (selectedId === d.id) return '#7cefd1';
           if (hoveredId === d.id) return '#b8f8e7';
-          if (selectedId && selectedFocusSet.has(d.id)) return '#6dc0ff';
-          if (!selectedId && hoveredId && hoveredFocusSet.has(d.id)) return '#6dc0ff';
+          if (selectedId && selectedFocusSet.has(d.id)) return isDealerNode(d) ? dealerCategoryStyle(d).halo : '#6dc0ff';
+          if (!selectedId && hoveredId && hoveredFocusSet.has(d.id)) return isDealerNode(d) ? dealerCategoryStyle(d).halo : '#6dc0ff';
+          if (isDealerNode(d)) return dealerCategoryStyle(d).halo;
           return nodeFill(d);
         })
         .attr('opacity', (d) => {
@@ -968,14 +1096,27 @@ export default function NetworkView({
         .attr('stroke', (d) => {
           if (selectedId === d.id) return 'rgba(255,255,255,0.95)';
           if (hoveredId === d.id) return 'rgba(255,255,255,0.82)';
-          if (selectedId && selectedFocusSet.has(d.id)) return 'rgba(255,255,255,0.42)';
-          if (!selectedId && hoveredId && hoveredFocusSet.has(d.id)) return 'rgba(255,255,255,0.42)';
+          if (selectedId && selectedFocusSet.has(d.id)) return isDealerNode(d) ? dealerCategoryStyle(d).stroke : 'rgba(255,255,255,0.42)';
+          if (!selectedId && hoveredId && hoveredFocusSet.has(d.id)) return isDealerNode(d) ? dealerCategoryStyle(d).stroke : 'rgba(255,255,255,0.42)';
+          if (isDealerNode(d)) return dealerCategoryStyle(d).stroke;
           return 'rgba(255,255,255,0.16)';
         })
         .attr('stroke-width', (d) => {
           if (selectedId === d.id) return 1.8;
           if (hoveredId === d.id) return 1.4;
-          return 0.8;
+          return isDealerNode(d) ? 1.05 : 0.8;
+        })
+        .attr('stroke-dasharray', (d) => (isDealerNode(d) ? dealerCategoryStyle(d).dashArray : null));
+
+      dealerCoreSelection
+        .attr('opacity', (d) => {
+          if (selectedId) {
+            return selectedFocusSet.has(d.id) ? 0.92 : 0.08;
+          }
+          if (hoveredId) {
+            return hoveredFocusSet.has(d.id) ? 0.9 : 0.12;
+          }
+          return 0.82;
         });
 
       linkSelection
@@ -1000,7 +1141,20 @@ export default function NetworkView({
           if (!selectedId && hoveredId && hoveredFocusSet.has(edge.source.id) && hoveredFocusSet.has(edge.target.id)) {
             return '#7cefd1';
           }
-          return edgeStroke(edge);
+          return detailEdgeBaseStyle(edge).stroke;
+        })
+        .attr('stroke-dasharray', (edge) => detailEdgeBaseStyle(edge).dashArray)
+        .attr('stroke-width', (edge) => {
+          const dealerBoost = isDealerRelatedEdge(edge) ? 0.35 : 0;
+          if (selectedId) {
+            if (selectedFocusSet.has(edge.source.id) && selectedFocusSet.has(edge.target.id)) return 1.7 + dealerBoost;
+            return 0.75 + dealerBoost;
+          }
+          if (hoveredId) {
+            if (hoveredFocusSet.has(edge.source.id) && hoveredFocusSet.has(edge.target.id)) return 1.55 + dealerBoost;
+            return 0.72 + dealerBoost;
+          }
+          return 0.95 + dealerBoost;
         });
 
       labelSelection
@@ -1216,7 +1370,7 @@ export default function NetworkView({
         : 'Overview mode clusters the network by region and layer so the unfiltered landscape stays readable.'
       : expandedClusterKey
         ? 'Detail mode is focused on one cluster and its immediate connected neighbourhood.'
-        : `Detail mode uses region sublanes so dense columns separate into clearer internal lanes. Hover highlights local relationships. Zooming in reveals more labels.${dealerLayerEnabled ? ' Dealer overlay is active.' : ''}`;
+        : `Detail mode uses region sublanes so dense columns separate into clearer internal lanes. Hover highlights local relationships. Zooming in reveals more labels.${dealerLayerEnabled ? ' Dealer overlay is active and dealer nodes carry category accents for faster scanning.' : ''}`;
 
   if (!hasData) {
     return <EmptyState />;
@@ -1224,12 +1378,12 @@ export default function NetworkView({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border border-border/40 bg-card/20 p-4 backdrop-blur-sm">
-        <div className="flex flex-col gap-3">
+      <div className="rounded-lg border border-border/30 bg-card/10 px-4 py-3 backdrop-blur-sm">
+        <div className="flex flex-col gap-2">
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <div>
               <CardKicker>Network Controls</CardKicker>
-              <div className="mt-1 text-sm text-foreground">{helpText}</div>
+              <div className="mt-1 text-xs text-muted-foreground">{helpText}</div>
             </div>
 
             <button
@@ -1242,10 +1396,10 @@ export default function NetworkView({
             </button>
           </div>
 
-          <div className="flex flex-wrap items-end gap-5">
-            <div className="flex flex-col gap-1.5">
+          <div className="flex flex-wrap items-start gap-3 xl:gap-4">
+            <div className="flex min-w-[130px] flex-col gap-1.5">
               <CardKicker>Render Mode</CardKicker>
-              <div className="flex items-center rounded-lg border border-border/40 bg-muted/20 p-0.5">
+              <div className="flex items-center rounded-md border border-border/30 bg-muted/10 px-1.5 py-1">
                 {RENDER_MODES.map((mode) => (
                   <ControlPill
                     key={mode.value}
@@ -1264,9 +1418,9 @@ export default function NetworkView({
               </div>
             </div>
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex min-w-[130px] flex-col gap-1.5">
               <CardKicker>Label Density</CardKicker>
-              <div className="flex items-center rounded-lg border border-border/40 bg-muted/20 p-0.5">
+              <div className="flex items-center rounded-md border border-border/30 bg-muted/10 px-1.5 py-1">
                 {LABEL_MODES.map((mode) => (
                   <ControlPill
                     key={mode.value}
@@ -1279,9 +1433,9 @@ export default function NetworkView({
               </div>
             </div>
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex min-w-[130px] flex-col gap-1.5">
               <CardKicker>Node Floor</CardKicker>
-              <div className="flex items-center rounded-lg border border-border/40 bg-muted/20 p-0.5">
+              <div className="flex items-center rounded-md border border-border/30 bg-muted/10 px-1.5 py-1">
                 {DEGREE_OPTIONS.map((option) => (
                   <ControlPill
                     key={option.value}
@@ -1294,38 +1448,44 @@ export default function NetworkView({
               </div>
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <CardKicker>Dealer Layer</CardKicker>
-              <button
-                type="button"
-                onClick={() => {
-                  setDealerLayerEnabled((current) => !current);
-                  setSelectedId(null);
-                  setHoveredId(null);
-                  setHoveredClusterId(null);
-                  setExpandedClusterKey(null);
-                  onNodeSelect?.(null);
-                  onLeave?.();
-                }}
-                className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${
-                  dealerLayerEnabled
-                    ? 'border-emerald-500/40 bg-emerald-600/10 text-emerald-400'
-                    : 'border-border/40 bg-muted/20 text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <span
-                  className={`size-2 rounded-full ${
-                    dealerLayerEnabled ? 'bg-emerald-400' : 'bg-muted-foreground/40'
-                  }`}
-                />
-                {dealerLayerEnabled ? 'Enabled' : 'Disabled'}
-              </button>
+            <div className="flex min-w-[130px] flex-col gap-1.5">
+              <CardKicker>Dealer Overlay</CardKicker>
+              <div className="flex flex-wrap items-center gap-2 rounded-md border border-border/30 bg-muted/10 px-1.5 py-1">
+                <ControlPill
+                  active={!dealerLayerEnabled}
+                  onClick={() => {
+                    setDealerLayerEnabled(false);
+                    setSelectedId(null);
+                    setHoveredId(null);
+                    setHoveredClusterId(null);
+                    setExpandedClusterKey(null);
+                    onNodeSelect?.(null);
+                    onLeave?.();
+                  }}
+                >
+                  Off
+                </ControlPill>
+                <ControlPill
+                  active={dealerLayerEnabled}
+                  onClick={() => {
+                    setDealerLayerEnabled(true);
+                    setSelectedId(null);
+                    setHoveredId(null);
+                    setHoveredClusterId(null);
+                    setExpandedClusterKey(null);
+                    onNodeSelect?.(null);
+                    onLeave?.();
+                  }}
+                >
+                  On
+                </ControlPill>
+              </div>
             </div>
 
             {dealerLayerEnabled ? (
-              <div className="flex flex-col gap-1.5">
+              <div className="flex min-w-[240px] flex-col gap-1.5">
                 <CardKicker>Dealer Categories</CardKicker>
-                <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border/40 bg-muted/20 p-1.5">
+                <div className="flex flex-wrap items-center gap-2 rounded-md border border-border/30 bg-muted/10 px-1.5 py-1">
                   {DEALER_CATEGORY_OPTIONS.map((option) => (
                     <ControlPill
                       key={option.value}
@@ -1350,12 +1510,12 @@ export default function NetworkView({
               </div>
             ) : null}
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex min-w-[130px] flex-col gap-1.5">
               <CardKicker>Display</CardKicker>
               <button
                 type="button"
                 onClick={handleLegendToggle}
-                className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${
+                className={`flex h-8 items-center gap-2 rounded-md border px-3 text-[10px] font-black uppercase tracking-widest transition-all ${
                   legendVisible && !expanded
                     ? 'border-blue-500/40 bg-blue-600/10 text-blue-400'
                     : 'border-border/40 bg-muted/20 text-muted-foreground hover:text-foreground'
@@ -1366,9 +1526,9 @@ export default function NetworkView({
               </button>
             </div>
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex min-w-[130px] flex-col gap-1.5">
               <CardKicker>Zoom</CardKicker>
-              <div className="flex items-center rounded-lg border border-border/40 bg-muted/20 p-0.5">
+              <div className="flex items-center rounded-md border border-border/30 bg-muted/10 px-1.5 py-1">
                 <button
                   type="button"
                   onClick={() => stepZoom('out')}
@@ -1393,13 +1553,13 @@ export default function NetworkView({
       </div>
 
       <div className={`grid gap-4 ${legendVisible && !expanded ? 'xl:grid-cols-[1fr_260px]' : 'grid-cols-1'}`}>
-        <div className="rounded-xl border border-border/40 bg-card/20 p-4 backdrop-blur-sm">
+        <div className="rounded-lg border border-border/30 bg-card/10 px-4 py-3 backdrop-blur-sm">
           <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div>
               <CardKicker>Network Intelligence</CardKicker>
               <div className="mt-1 text-lg font-bold text-foreground">Interactive Ecosystem Network</div>
               <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-                Drag nodes, zoom the graph, and inspect cross-region relationships as the network settles into readable clusters.
+                Drag nodes, zoom the graph, and inspect cross-region relationships as the network settles into readable clusters. Dealer nodes now surface as a controlled overlay with category-aware accents.
               </p>
             </div>
 
@@ -1440,7 +1600,7 @@ export default function NetworkView({
 
         {legendVisible && !expanded ? (
           <aside className="space-y-4">
-            <div className="rounded-xl border border-border/40 bg-card/20 p-4 backdrop-blur-sm">
+            <div className="rounded-lg border border-border/30 bg-card/10 px-4 py-3 backdrop-blur-sm">
               <div className="flex items-center justify-between">
                 <CardKicker>Network Legend</CardKicker>
                 <span className="text-[10px] text-muted-foreground/40">ⓘ</span>
@@ -1459,27 +1619,41 @@ export default function NetworkView({
                   <span className="size-2.5 rounded-full border border-white shadow-[0_0_8px_rgba(249,115,22,0.4)]" style={{ backgroundColor: '#f97316' }} />
                   <span className="text-[10px] font-bold tracking-tight text-foreground/80">Regulatory node</span>
                 </div>
-                <div className="my-1 h-px bg-border/20" />
-                <div className="text-[10px] font-black uppercase tracking-widest text-foreground/50">
-                  Dealer Overlay
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-[10px] font-bold tracking-tight text-foreground/80">
-                  <span>DMS</span>
-                  <span>CRM</span>
-                  <span>Finance</span>
-                  <span>Service</span>
-                  <span>Marketplace</span>
-                  <span>Platform</span>
-                </div>
-                <div className="my-1 h-px bg-border/20" />
-                <div className="flex items-center gap-3">
-                  <span className="h-px w-6 bg-[#59c28a]" />
-                  <span className="text-[10px] font-bold tracking-tight text-foreground/80">L3 public/indirect edge</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="w-6 border-t border-dashed border-blue-500/40" />
-                  <span className="text-[10px] font-bold tracking-tight text-foreground/80">Modelled / assumed edge</span>
-                </div>
+                {dealerLayerEnabled ? (
+                  <>
+                    <div className="my-1 h-px bg-border/20" />
+                    <div className="text-[10px] font-black uppercase tracking-widest text-foreground/50">
+                      Dealer Overlay
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-[10px] font-bold tracking-tight text-foreground/80">
+                      {DEALER_CATEGORY_OPTIONS.map((option) => {
+                        const style = dealerCategoryStyle({ layer: DEALER_LAYER, node_type: option.value, label: option.label });
+                        return (
+                          <div key={option.value} className="flex items-center gap-2">
+                            <span
+                              className="size-2.5 rounded-full border"
+                              style={{
+                                borderColor: style.stroke,
+                                backgroundColor: style.halo,
+                                borderStyle: style.dashArray ? 'dashed' : 'solid'
+                              }}
+                            />
+                            <span>{option.label}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="my-1 h-px bg-border/20" />
+                    <div className="flex items-center gap-3">
+                      <span className="h-px w-6 bg-[#59c28a]" />
+                      <span className="text-[10px] font-bold tracking-tight text-foreground/80">L3 public/indirect edge</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="w-6 border-t border-dashed border-blue-500/40" />
+                      <span className="text-[10px] font-bold tracking-tight text-foreground/80">Modelled / assumed edge</span>
+                    </div>
+                  </>
+                ) : null}
               </div>
             </div>
 
