@@ -521,8 +521,8 @@ function EyeIcon(props) {
   );
 }
 
-function CardKicker({ children }) {
-  return <div className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">{children}</div>;
+function CardKicker({ children, className = '' }) {
+  return <div className={`text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground ${className}`}>{children}</div>;
 }
 
 function ControlPill({ active = false, children, onClick }) {
@@ -530,7 +530,7 @@ function ControlPill({ active = false, children, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-md px-3.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.16em] transition-all ${
+      className={`flex h-7 items-center justify-center rounded-md px-3 text-[9px] font-bold uppercase tracking-[0.16em] transition-all ${
         active
           ? 'bg-blue-600 text-white shadow-[0_8px_20px_rgba(37,99,235,0.24)]'
           : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
@@ -1378,12 +1378,12 @@ export default function NetworkView({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-xl border border-border/40 bg-card/20 p-4 backdrop-blur-sm">
-        <div className="flex flex-col gap-3">
+      <div className="rounded-lg border border-border/30 bg-card/10 px-4 py-3 backdrop-blur-sm">
+        <div className="flex flex-col gap-2">
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <div>
               <CardKicker>Network Controls</CardKicker>
-              <div className="mt-1 text-sm text-foreground">{helpText}</div>
+              <div className="mt-1 text-xs text-muted-foreground">{helpText}</div>
             </div>
 
             <button
@@ -1396,10 +1396,10 @@ export default function NetworkView({
             </button>
           </div>
 
-          <div className="flex flex-wrap items-end gap-5">
-            <div className="flex flex-col gap-1.5">
+          <div className="flex flex-wrap items-start gap-3 xl:gap-4">
+            <div className="flex min-w-[130px] flex-col gap-1.5">
               <CardKicker>Render Mode</CardKicker>
-              <div className="flex items-center rounded-lg border border-border/40 bg-muted/20 p-1">
+              <div className="flex items-center rounded-md border border-border/30 bg-muted/10 px-1.5 py-1">
                 {RENDER_MODES.map((mode) => (
                   <ControlPill
                     key={mode.value}
@@ -1418,9 +1418,9 @@ export default function NetworkView({
               </div>
             </div>
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex min-w-[130px] flex-col gap-1.5">
               <CardKicker>Label Density</CardKicker>
-              <div className="flex items-center rounded-lg border border-border/40 bg-muted/20 p-1">
+              <div className="flex items-center rounded-md border border-border/30 bg-muted/10 px-1.5 py-1">
                 {LABEL_MODES.map((mode) => (
                   <ControlPill
                     key={mode.value}
@@ -1433,9 +1433,9 @@ export default function NetworkView({
               </div>
             </div>
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex min-w-[130px] flex-col gap-1.5">
               <CardKicker>Node Floor</CardKicker>
-              <div className="flex items-center rounded-lg border border-border/40 bg-muted/20 p-1">
+              <div className="flex items-center rounded-md border border-border/30 bg-muted/10 px-1.5 py-1">
                 {DEGREE_OPTIONS.map((option) => (
                   <ControlPill
                     key={option.value}
@@ -1448,38 +1448,44 @@ export default function NetworkView({
               </div>
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <CardKicker>Dealer Layer</CardKicker>
-              <button
-                type="button"
-                onClick={() => {
-                  setDealerLayerEnabled((current) => !current);
-                  setSelectedId(null);
-                  setHoveredId(null);
-                  setHoveredClusterId(null);
-                  setExpandedClusterKey(null);
-                  onNodeSelect?.(null);
-                  onLeave?.();
-                }}
-                className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${
-                  dealerLayerEnabled
-                    ? 'border-emerald-500/40 bg-emerald-600/10 text-emerald-400'
-                    : 'border-border/40 bg-muted/20 text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <span
-                  className={`size-2 rounded-full ${
-                    dealerLayerEnabled ? 'bg-emerald-400' : 'bg-muted-foreground/40'
-                  }`}
-                />
-                {dealerLayerEnabled ? 'Enabled' : 'Disabled'}
-              </button>
+            <div className="flex min-w-[130px] flex-col gap-1.5">
+              <CardKicker>Dealer Overlay</CardKicker>
+              <div className="flex flex-wrap items-center gap-2 rounded-md border border-border/30 bg-muted/10 px-1.5 py-1">
+                <ControlPill
+                  active={!dealerLayerEnabled}
+                  onClick={() => {
+                    setDealerLayerEnabled(false);
+                    setSelectedId(null);
+                    setHoveredId(null);
+                    setHoveredClusterId(null);
+                    setExpandedClusterKey(null);
+                    onNodeSelect?.(null);
+                    onLeave?.();
+                  }}
+                >
+                  Off
+                </ControlPill>
+                <ControlPill
+                  active={dealerLayerEnabled}
+                  onClick={() => {
+                    setDealerLayerEnabled(true);
+                    setSelectedId(null);
+                    setHoveredId(null);
+                    setHoveredClusterId(null);
+                    setExpandedClusterKey(null);
+                    onNodeSelect?.(null);
+                    onLeave?.();
+                  }}
+                >
+                  On
+                </ControlPill>
+              </div>
             </div>
 
             {dealerLayerEnabled ? (
-              <div className="flex flex-col gap-1.5">
+              <div className="flex min-w-[240px] flex-col gap-1.5">
                 <CardKicker>Dealer Categories</CardKicker>
-                <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border/40 bg-muted/20 p-1.5">
+                <div className="flex flex-wrap items-center gap-2 rounded-md border border-border/30 bg-muted/10 px-1.5 py-1">
                   {DEALER_CATEGORY_OPTIONS.map((option) => (
                     <ControlPill
                       key={option.value}
@@ -1504,12 +1510,12 @@ export default function NetworkView({
               </div>
             ) : null}
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex min-w-[130px] flex-col gap-1.5">
               <CardKicker>Display</CardKicker>
               <button
                 type="button"
                 onClick={handleLegendToggle}
-                className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${
+                className={`flex h-8 items-center gap-2 rounded-md border px-3 text-[10px] font-black uppercase tracking-widest transition-all ${
                   legendVisible && !expanded
                     ? 'border-blue-500/40 bg-blue-600/10 text-blue-400'
                     : 'border-border/40 bg-muted/20 text-muted-foreground hover:text-foreground'
@@ -1520,9 +1526,9 @@ export default function NetworkView({
               </button>
             </div>
 
-            <div className="flex flex-col gap-1.5">
+            <div className="flex min-w-[130px] flex-col gap-1.5">
               <CardKicker>Zoom</CardKicker>
-              <div className="flex items-center rounded-lg border border-border/40 bg-muted/20 p-1">
+              <div className="flex items-center rounded-md border border-border/30 bg-muted/10 px-1.5 py-1">
                 <button
                   type="button"
                   onClick={() => stepZoom('out')}
@@ -1547,7 +1553,7 @@ export default function NetworkView({
       </div>
 
       <div className={`grid gap-4 ${legendVisible && !expanded ? 'xl:grid-cols-[1fr_260px]' : 'grid-cols-1'}`}>
-        <div className="rounded-xl border border-border/40 bg-card/20 p-4 backdrop-blur-sm">
+        <div className="rounded-lg border border-border/30 bg-card/10 px-4 py-3 backdrop-blur-sm">
           <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div>
               <CardKicker>Network Intelligence</CardKicker>
@@ -1594,7 +1600,7 @@ export default function NetworkView({
 
         {legendVisible && !expanded ? (
           <aside className="space-y-4">
-            <div className="rounded-xl border border-border/40 bg-card/20 p-4 backdrop-blur-sm">
+            <div className="rounded-lg border border-border/30 bg-card/10 px-4 py-3 backdrop-blur-sm">
               <div className="flex items-center justify-between">
                 <CardKicker>Network Legend</CardKicker>
                 <span className="text-[10px] text-muted-foreground/40">ⓘ</span>
@@ -1613,37 +1619,41 @@ export default function NetworkView({
                   <span className="size-2.5 rounded-full border border-white shadow-[0_0_8px_rgba(249,115,22,0.4)]" style={{ backgroundColor: '#f97316' }} />
                   <span className="text-[10px] font-bold tracking-tight text-foreground/80">Regulatory node</span>
                 </div>
-                <div className="my-1 h-px bg-border/20" />
-                <div className="text-[10px] font-black uppercase tracking-widest text-foreground/50">
-                  Dealer Overlay
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-[10px] font-bold tracking-tight text-foreground/80">
-                  {DEALER_CATEGORY_OPTIONS.map((option) => {
-                    const style = dealerCategoryStyle({ layer: DEALER_LAYER, node_type: option.value, label: option.label });
-                    return (
-                      <div key={option.value} className="flex items-center gap-2">
-                        <span
-                          className="size-2.5 rounded-full border"
-                          style={{
-                            borderColor: style.stroke,
-                            backgroundColor: style.halo,
-                            borderStyle: style.dashArray ? 'dashed' : 'solid'
-                          }}
-                        />
-                        <span>{option.label}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="my-1 h-px bg-border/20" />
-                <div className="flex items-center gap-3">
-                  <span className="h-px w-6 bg-[#59c28a]" />
-                  <span className="text-[10px] font-bold tracking-tight text-foreground/80">L3 public/indirect edge</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="w-6 border-t border-dashed border-blue-500/40" />
-                  <span className="text-[10px] font-bold tracking-tight text-foreground/80">Modelled / assumed edge</span>
-                </div>
+                {dealerLayerEnabled ? (
+                  <>
+                    <div className="my-1 h-px bg-border/20" />
+                    <div className="text-[10px] font-black uppercase tracking-widest text-foreground/50">
+                      Dealer Overlay
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-[10px] font-bold tracking-tight text-foreground/80">
+                      {DEALER_CATEGORY_OPTIONS.map((option) => {
+                        const style = dealerCategoryStyle({ layer: DEALER_LAYER, node_type: option.value, label: option.label });
+                        return (
+                          <div key={option.value} className="flex items-center gap-2">
+                            <span
+                              className="size-2.5 rounded-full border"
+                              style={{
+                                borderColor: style.stroke,
+                                backgroundColor: style.halo,
+                                borderStyle: style.dashArray ? 'dashed' : 'solid'
+                              }}
+                            />
+                            <span>{option.label}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div className="my-1 h-px bg-border/20" />
+                    <div className="flex items-center gap-3">
+                      <span className="h-px w-6 bg-[#59c28a]" />
+                      <span className="text-[10px] font-bold tracking-tight text-foreground/80">L3 public/indirect edge</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="w-6 border-t border-dashed border-blue-500/40" />
+                      <span className="text-[10px] font-bold tracking-tight text-foreground/80">Modelled / assumed edge</span>
+                    </div>
+                  </>
+                ) : null}
               </div>
             </div>
 
