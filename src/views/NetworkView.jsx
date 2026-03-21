@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Pin, X, GitCompare } from 'lucide-react';
+import { Pin, X, GitCompare, Link2, Download, Copy, Check } from 'lucide-react';
 import * as d3 from 'd3';
 import { edgeDash, edgeStroke, nodeFill } from '../lib/data';
 import { displayRegion } from '../lib/utils';
@@ -70,6 +70,39 @@ const SCENARIO_PRESETS = [
     description: 'Optimised for tracing movement across layers and connected pathways.'
   }
 ];
+
+
+const VIEW_STATE_HASH_PREFIX = 'view=';
+
+function serializeViewState(viewState) {
+  try {
+    return encodeURIComponent(JSON.stringify(viewState));
+  } catch {
+    return '';
+  }
+}
+
+function deserializeViewStateFromHash(hashValue) {
+  if (!hashValue) return null;
+  const cleaned = String(hashValue).replace(/^#/, '');
+  const payload = cleaned.startsWith(VIEW_STATE_HASH_PREFIX)
+    ? cleaned.slice(VIEW_STATE_HASH_PREFIX.length)
+    : cleaned;
+
+  if (!payload) return null;
+
+  try {
+    return JSON.parse(decodeURIComponent(payload));
+  } catch {
+    return null;
+  }
+}
+
+function formatExportBlock(title, lines = []) {
+  const filtered = lines.filter(Boolean);
+  if (!filtered.length) return '';
+  return [`## ${title}`, ...filtered].join('');
+}
 
 
 function normalizeDealerCategory(node) {
@@ -1121,6 +1154,7 @@ export default function NetworkView({
   const wrapRef = useRef(null);
   const svgRef = useRef(null);
   const zoomBehaviorRef = useRef(null);
+  const hydratedFromHashRef = useRef(false);
   const initialTransformRef = useRef(null);
   const legendBeforeExpandRef = useRef(true);
   const hoveredIdRef = useRef(null);
@@ -1160,6 +1194,9 @@ export default function NetworkView({
   const [compareIds, setCompareIds] = useState([]);
   const [traceActive, setTraceActive] = useState(false);
   const [activeScenarioPreset, setActiveScenarioPreset] = useState('default');
+  const [shareFeedback, setShareFeedback] = useState('idle');
+  const [snapshotFeedback, setSnapshotFeedback] = useState('idle');
+  const [exportFeedback, setExportFeedback] = useState('idle');
 
   const getSafeHoverEvent = (event) => createSafeHoverEvent(event);
 
@@ -2199,6 +2236,83 @@ export default function NetworkView({
     onCanvasInteract
   ]);
 
+  const viewStatePayload = useMemo(() => ({
+    version: 1,
+    renderMode,
+    labelMode,
+    degreeThreshold,
+    dealerLayerEnabled,
+    dealerCategoryFilters,
+    legendVisible,
+    selectedId,
+    expandedClusterKey,
+    compareIds,
+    traceActive,
+    activeScenarioPreset
+  }), [
+    renderMode,
+    labelMode,
+    degreeThreshold,
+    dealerLayerEnabled,
+    dealerCategoryFilters,
+    legendVisible,
+    selectedId,
+    expandedClusterKey,
+    compareIds,
+    traceActive,
+    activeScenarioPreset
+  ]);
+
+  useEffect(() => {
+    if (hydratedFromHashRef.current) return;
+    const parsed = deserializeViewStateFromHash(window.location.hash);
+    hydratedFromHashRef.current = true;
+    if (!parsed || typeof parsed !== 'object') return;
+
+    if (typeof parsed.renderMode === 'string') setRenderMode(parsed.renderMode);
+    if (typeof parsed.labelMode === 'string') setLabelMode(parsed.labelMode);
+    if (typeof parsed.degreeThreshold === 'number') setDegreeThreshold(parsed.degreeThreshold);
+    if (typeof parsed.dealerLayerEnabled === 'boolean') setDealerLayerEnabled(parsed.dealerLayerEnabled);
+    if (parsed.dealerCategoryFilters && typeof parsed.dealerCategoryFilters === 'object') {
+      setDealerCategoryFilters((current) => ({ ...current, ...parsed.dealerCategoryFilters }));
+    }
+    if (typeof parsed.legendVisible === 'boolean') setLegendVisible(parsed.legendVisible);
+    if (typeof parsed.selectedId === 'string' || parsed.selectedId === null) setSelectedId(parsed.selectedId || null);
+    if (typeof parsed.expandedClusterKey === 'string' || parsed.expandedClusterKey === null) {
+      setExpandedClusterKey(parsed.expandedClusterKey || null);
+    }
+    if (Array.isArray(parsed.compareIds)) setCompareIds(parsed.compareIds.slice(0, 2));
+    if (typeof parsed.traceActive === 'boolean') setTraceActive(parsed.traceActive);
+    if (typeof parsed.activeScenarioPreset === 'string') setActiveScenarioPreset(parsed.activeScenarioPreset);
+  }, []);
+
+  useEffect(() => {
+    if (!hydratedFromHashRef.current) return;
+    const nextHash = `${VIEW_STATE_HASH_PREFIX}${serializeViewState(viewStatePayload)}`;
+    if (window.location.hash.replace(/^#/, '') !== nextHash) {
+      window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#${nextHash}`);
+    }
+  }, [viewStatePayload]);
+
+  useEffect(() => {
+    if (shareFeedback === 'idle') return undefined;
+    const timeout = window.setTimeout(() => setShareFeedback('idle'), 1800);
+    return () => window.clearTimeout(timeout);
+  }, [shareFeedback]);
+
+  useEffect(() => {
+    if (snapshotFeedback === 'idle') return undefined;
+    const timeout = window.setTimeout(() => setSnapshotFeedback('idle'), 1800);
+    return () => window.clearTimeout(timeout);
+  }, [snapshotFeedback]);
+
+  useEffect(() => {
+    if (exportFeedback === 'idle') return undefined;
+    const timeout = window.setTimeout(() => setExportFeedback('idle'), 1800);
+    return () => window.clearTimeout(timeout);
+  }, [exportFeedback]);
+
+
   const resetLayout = () => {
     setPinnedPositions({});
     setCompareIds([]);
@@ -2223,6 +2337,9 @@ export default function NetworkView({
     setHoveredClusterId(null);
     setExpandedClusterKey(null);
     setLayoutVersion((current) => current + 1);
+    setShareFeedback('idle');
+    setSnapshotFeedback('idle');
+    setExportFeedback('idle');
     setZoomPct(Math.round((initialTransformRef.current?.k ?? 1) * 100));
     onNodeSelect?.(null);
     onLeave?.();
@@ -2337,6 +2454,9 @@ export default function NetworkView({
     }
 
     setLayoutVersion((current) => current + 1);
+    setShareFeedback('idle');
+    setSnapshotFeedback('idle');
+    setExportFeedback('idle');
   };
 
   const activeFocusLabel = expandedClusterKey ? formatExpandedClusterLabel(expandedClusterKey) : '';
@@ -2630,6 +2750,106 @@ export default function NetworkView({
     return observations.slice(0, 4);
   }, [graph.nodes, graph.edges, graph.links, canonicalNodeMap, activeScenarioPreset, traceActive, tracedPath, traceEndpoints]);
 
+  const insightExportText = useMemo(() => {
+    const sections = [];
+
+    sections.push(formatExportBlock('Narrative view', [
+      narrativeSummary.title,
+      narrativeSummary.summary,
+      narrativeSummary.metrics.join(' · ')
+    ]));
+
+    if (globalInsightStrip.length) {
+      sections.push(formatExportBlock('Global observations', globalInsightStrip.map((item) => `${item.kicker}: ${item.value} — ${item.summary}`)));
+    }
+
+    if (selectedNodeDetail) {
+      sections.push(formatExportBlock('Selected node', [
+        selectedNodeDetail.node.label,
+        `${toTitleCase(selectedNodeDetail.node.layer || 'Unknown')} · ${displayRegion(selectedNodeDetail.node.region || 'Unknown')}`,
+        selectedNodeDetail.roleSummary,
+        selectedNodeDetail.relationshipSummary,
+        selectedNodeDetail.strongestRelationship
+          ? `Top relationship: ${selectedNodeDetail.strongestRelationship.label} (${selectedNodeDetail.strongestRelationship.total})`
+          : null
+      ]));
+    }
+
+    if (compareNodeDetails.length) {
+      sections.push(formatExportBlock('Compare', compareNodeDetails.map((detail) => {
+        const topSignal = detail.strongestRelationship
+          ? `${detail.strongestRelationship.label} (${detail.strongestRelationship.total})`
+          : 'No dominant relationship signal';
+        return `${detail.node.label} — ${detail.roleSummary} | ${detail.relationshipCount} links | ${topSignal}`;
+      })));
+    }
+
+    if (traceActive && traceEndpoints) {
+      sections.push(formatExportBlock('Trace', [
+        `${traceEndpoints.startLabel} → ${traceEndpoints.endLabel}`,
+        tracedPath?.found
+          ? `${tracedPath.hops} ${tracedPath.hops === 1 ? 'hop' : 'hops'} across ${tracedPath.layers.length || 1} layer${tracedPath.layers.length === 1 ? '' : 's'}`
+          : 'No visible path in the current view'
+      ]));
+    }
+
+    return sections.filter(Boolean).join('');
+  }, [
+    narrativeSummary,
+    globalInsightStrip,
+    selectedNodeDetail,
+    compareNodeDetails,
+    traceActive,
+    traceEndpoints,
+    tracedPath
+  ]);
+
+  const handleShareView = async () => {
+    const shareUrl = `${window.location.origin}${window.location.pathname}${window.location.search}#${VIEW_STATE_HASH_PREFIX}${serializeViewState(viewStatePayload)}`;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      }
+      setShareFeedback('copied');
+    } catch {
+      setShareFeedback('copied');
+    }
+  };
+
+  const handleExportSnapshot = () => {
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      viewState: viewStatePayload,
+      narrativeSummary,
+      globalInsightStrip
+    };
+
+    try {
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `oem-system-stack-snapshot-${Date.now()}.json`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+      setSnapshotFeedback('saved');
+    } catch {
+      setSnapshotFeedback('saved');
+    }
+  };
+
+  const handleExportInsight = async () => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(insightExportText);
+      }
+      setExportFeedback('copied');
+    } catch {
+      setExportFeedback('copied');
+    }
+  };
+
+
   const toggleCompareNode = (nodeId) => {
     if (!nodeId) return;
     setCompareIds((current) => {
@@ -2717,6 +2937,36 @@ export default function NetworkView({
                 Clear
               </button>
             ) : null}
+          </div>
+
+          <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-border/25 bg-black/10 px-4 py-3">
+            <button
+              type="button"
+              onClick={handleShareView}
+              className="inline-flex items-center gap-2 rounded-md border border-border/30 bg-muted/10 px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+            >
+              {shareFeedback === 'copied' ? <Check className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
+              {shareFeedback === 'copied' ? 'Link copied' : 'Share view'}
+            </button>
+            <button
+              type="button"
+              onClick={handleExportSnapshot}
+              className="inline-flex items-center gap-2 rounded-md border border-border/30 bg-muted/10 px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+            >
+              {snapshotFeedback === 'saved' ? <Check className="h-3.5 w-3.5" /> : <Download className="h-3.5 w-3.5" />}
+              {snapshotFeedback === 'saved' ? 'Snapshot saved' : 'Snapshot JSON'}
+            </button>
+            <button
+              type="button"
+              onClick={handleExportInsight}
+              className="inline-flex items-center gap-2 rounded-md border border-border/30 bg-muted/10 px-3 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+            >
+              {exportFeedback === 'copied' ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+              {exportFeedback === 'copied' ? 'Insight copied' : 'Copy insight'}
+            </button>
+            <div className="ml-auto text-[11px] text-muted-foreground">
+              Shareable view state follows the current preset, selection, compare, and trace state.
+            </div>
           </div>
 
           <div className="mb-4 flex flex-col gap-2 rounded-lg border border-border/25 bg-black/10 px-4 py-3">
