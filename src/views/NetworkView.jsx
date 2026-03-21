@@ -24,6 +24,9 @@ const DEGREE_OPTIONS = [
 
 const DEALER_LAYER = 'Dealer Systems';
 
+
+const INTERACTION_EASE = 'opacity 160ms ease, stroke 160ms ease, stroke-width 160ms ease, fill 160ms ease';
+
 const DEALER_CATEGORY_OPTIONS = [
   { value: 'DMS', label: 'DMS' },
   { value: 'CRM', label: 'CRM' },
@@ -166,17 +169,186 @@ function dealerCategoryStyle(node) {
   }
 }
 
-function detailNodeRadius(node, degreeMap, selectedId, hoveredId) {
+
+function formatRelationshipLabel(value) {
+  const raw = String(value || 'Connected').trim();
+  const normalized = raw.toLowerCase().replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim();
+
+  const mapping = {
+    'supplies': 'Supplies',
+    'supply': 'Supplies',
+    'integrates with': 'Integrates with',
+    'integrates': 'Integrates with',
+    'hosts': 'Hosts',
+    'hosts on': 'Hosted on',
+    'hosted on': 'Hosted on',
+    'supports': 'Supports',
+    'connects': 'Connects to',
+    'connected': 'Connected to',
+    'connects to': 'Connects to',
+    'manages relationship': 'Manages relationship',
+    'manages relationships': 'Manages relationship',
+    'manages service': 'Manages service',
+    'owns': 'Owns',
+    'regulated by': 'Regulated by',
+    'governs': 'Governs',
+    'depends on': 'Depends on'
+  };
+
+  if (mapping[normalized]) return mapping[normalized];
+
+  return normalized.replace(/\w/g, (char) => char.toUpperCase());
+}
+
+function summarizeVerification(node) {
+  const status = node?.verification_status || node?.evidence_status || 'Unknown';
+  const level = node?.verification_level ? `L${node.verification_level}` : null;
+  return level ? `${level} · ${status}` : status;
+}
+
+function normalizeConfidenceRank(value) {
+  const raw = String(value || '').toLowerCase();
+  if (raw.includes('hard') || raw.includes('high') || raw.includes('verified')) return 3;
+  if (raw.includes('medium') || raw.includes('moderate')) return 2;
+  if (raw.includes('soft') || raw.includes('low') || raw.includes('assumed') || raw.includes('model')) return 1;
+  return 0;
+}
+
+function summarizeEvidenceStrength(value) {
+  const rank = normalizeConfidenceRank(value);
+  if (rank >= 3) return 'Higher-confidence mapping';
+  if (rank == 2) return 'Moderate-confidence mapping';
+  if (rank == 1) return 'Illustrative / softer mapping';
+  return 'Confidence not specified';
+}
+
+function toTitleCase(value) {
+  if (!value) return 'Unknown';
+  return String(value)
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/\w/g, (char) => char.toUpperCase());
+}
+
+function summarizeNodeRole(node, dealerCategory, relationshipCount, strongestGroupLabel = null) {
+  const layer = node?.layer ? toTitleCase(node.layer) : 'network';
+  const boundary = node?.control_boundary ? toTitleCase(node.control_boundary) : null;
+  const type = node?.type || node?.node_type ? toTitleCase(node.type || node.node_type) : null;
+
+  if (dealerCategory) {
+    const oem = node?.oem_group ? ` for ${node.oem_group}` : '';
+    const relation = strongestGroupLabel ? ` Most visible pattern: ${strongestGroupLabel.toLowerCase()}.` : '';
+    return `${dealerCategory} node${oem} in ${layer.toLowerCase()}${boundary ? ` · ${boundary.toLowerCase()} boundary` : ''} · ${relationshipCount} connected relationship${relationshipCount === 1 ? '' : 's'}.${relation}`;
+  }
+
+  const relation = strongestGroupLabel ? ` Most visible pattern: ${strongestGroupLabel.toLowerCase()}.` : '';
+  return `${type || 'Node'} in ${layer.toLowerCase()}${boundary ? ` · ${boundary.toLowerCase()} boundary` : ''} · ${relationshipCount} connected relationship${relationshipCount === 1 ? '' : 's'}.${relation}`;
+}
+
+function relationshipInsight(groups) {
+  if (!groups?.length) return 'No connected relationships mapped yet.';
+  const strongest = groups[0];
+  const count = strongest.total || strongest.items?.length || 0;
+  const strongestItem = strongest.items?.[0];
+  const evidence = summarizeEvidenceStrength(strongestItem?.confidence || strongest.topConfidence);
+  const target = strongestItem?.label ? ` with ${strongestItem.label}` : '';
+  return `${strongest.label} is the clearest visible pattern (${count})${target}. ${evidence}.`;
+}
+
+function relationshipGroupPriority(label) {
+  const normalized = String(label || '').toLowerCase();
+  if (normalized.includes('govern')) return 90;
+  if (normalized.includes('regulat')) return 88;
+  if (normalized.includes('owns')) return 84;
+  if (normalized.includes('integrates')) return 80;
+  if (normalized.includes('supports')) return 76;
+  if (normalized.includes('supplies')) return 72;
+  if (normalized.includes('hosts')) return 68;
+  if (normalized.includes('manages')) return 66;
+  if (normalized.includes('connects')) return 64;
+  return 50;
+}
+
+function confidenceVisualTone(value) {
+  const rank = normalizeConfidenceRank(value);
+  if (rank >= 3) {
+    return { label: "Higher confidence", chip: "border-emerald-400/35 bg-emerald-500/10 text-emerald-200", edgeOpacity: 0.22, edgeBoost: 0.34 };
+  }
+  if (rank === 2) {
+    return { label: "Moderate confidence", chip: "border-sky-400/30 bg-sky-500/10 text-sky-200", edgeOpacity: 0.18, edgeBoost: 0.2 };
+  }
+  return { label: "Modelled / softer", chip: "border-amber-300/25 bg-amber-500/10 text-amber-200", edgeOpacity: 0.14, edgeBoost: 0.08 };
+}
+
+function calculateControlPointMetrics(node, canonicalNodeMap, edges) {
+  if (!node) return {
+    degree: 0,
+    linkedLayers: 0,
+    linkedRegions: 0,
+    bridgeScore: 0,
+    score: 0,
+    level: 'Standard',
+    summary: 'Local node with limited mapped control reach.'
+  };
+
+  const relatedEdges = edges.filter((edge) => edge.source === node.id || edge.target === node.id);
+  const linkedNodes = relatedEdges
+    .map((edge) => canonicalNodeMap.get(edge.source === node.id ? edge.target : edge.source))
+    .filter(Boolean);
+
+  const degree = relatedEdges.length;
+  const linkedLayers = new Set(linkedNodes.map((item) => item.layer).filter(Boolean)).size;
+  const linkedRegions = new Set(linkedNodes.map((item) => item.region).filter(Boolean)).size;
+  const bridgeScore = (node.layer === DEALER_LAYER ? 2 : 0) + (linkedLayers > 1 ? linkedLayers - 1 : 0) + (linkedRegions > 1 ? linkedRegions - 1 : 0);
+  const confidenceBoost = normalizeConfidenceRank(node.confidence || node.verification_status || node.evidence_status);
+  const score = degree * 1.6 + linkedLayers * 3 + linkedRegions * 2 + bridgeScore * 2.2 + confidenceBoost * 1.2;
+
+  let level = 'Standard';
+  if (score >= 24) level = 'Primary control point';
+  else if (score >= 16) level = 'Cross-layer control point';
+  else if (score >= 10) level = 'Emerging control point';
+
+  let summary = 'Local node with limited mapped control reach.';
+  if (level === 'Primary control point') {
+    summary = `High-connectivity node spanning ${Math.max(1, linkedLayers)} layer${linkedLayers === 1 ? '' : 's'} and ${Math.max(1, linkedRegions)} region${linkedRegions === 1 ? '' : 's'}.`;
+  } else if (level === 'Cross-layer control point') {
+    summary = `Acts as a bridge across ${Math.max(1, linkedLayers)} layer${linkedLayers === 1 ? '' : 's'} with visible cross-system dependencies.`;
+  } else if (level === 'Emerging control point') {
+    summary = `Shows early control characteristics through ${degree} mapped relationship${degree === 1 ? '' : 's'} and multi-context links.`;
+  }
+
+  return { degree, linkedLayers, linkedRegions, bridgeScore, score, level, summary };
+}
+
+function controlPointVisualState(metrics) {
+  if (!metrics) return { radiusBoost: 0, strokeBoost: 0, haloOpacity: 0, ringOpacity: 0, badge: null };
+  if (metrics.level === 'Primary control point') {
+    return { radiusBoost: 1.4, strokeBoost: 0.65, haloOpacity: 0.22, ringOpacity: 0.9, badge: 'Primary control point' };
+  }
+  if (metrics.level === 'Cross-layer control point') {
+    return { radiusBoost: 0.95, strokeBoost: 0.4, haloOpacity: 0.16, ringOpacity: 0.72, badge: 'Cross-layer control point' };
+  }
+  if (metrics.level === 'Emerging control point') {
+    return { radiusBoost: 0.55, strokeBoost: 0.2, haloOpacity: 0.1, ringOpacity: 0.5, badge: 'Emerging control point' };
+  }
+  return { radiusBoost: 0, strokeBoost: 0, haloOpacity: 0, ringOpacity: 0, badge: null };
+}
+
+function detailNodeRadius(node, degreeMap, selectedId, hoveredId, controlPointMetrics = null) {
   const degree = degreeMap.get(node.id) || 0;
   const base = Math.min(6.2, 4 + degree * 0.16);
   const dealerBonus = isDealerNode(node) ? dealerCategoryStyle(node).radiusBonus : 0;
+  const controlPointBonus = controlPointVisualState(controlPointMetrics).radiusBoost;
 
-  if (selectedId === node.id) return base + dealerBonus + 2.4;
-  if (hoveredId === node.id) return base + dealerBonus + 1.6;
-  return base + dealerBonus;
+  if (selectedId === node.id) return base + dealerBonus + controlPointBonus + 2.4;
+  if (hoveredId === node.id) return base + dealerBonus + controlPointBonus + 1.6;
+  return base + dealerBonus + controlPointBonus;
 }
 
 function detailEdgeBaseStyle(edge) {
+  const confidenceTone = confidenceVisualTone(edge.confidence || edge.verification_status || edge.evidence_status);
+
   if (isDealerRelatedEdge(edge)) {
     const dealerNode = isDealerNode(edge.source) ? edge.source : isDealerNode(edge.target) ? edge.target : null;
     const categoryStyle = dealerCategoryStyle(dealerNode);
@@ -185,28 +357,64 @@ function detailEdgeBaseStyle(edge) {
     if (relation.includes('host')) {
       return {
         stroke: 'rgba(167,179,199,0.46)',
-        dashArray: '2 3'
-      };
-    }
-
-    if (relation.includes('support')) {
-      return {
-        stroke: categoryStyle.edgeStroke,
-        dashArray: categoryStyle.dashArray
+        dashArray: '2 3',
+        baseOpacity: Math.max(0.16, confidenceTone.edgeOpacity),
+        widthBoost: confidenceTone.edgeBoost
       };
     }
 
     return {
       stroke: categoryStyle.edgeStroke,
-      dashArray: categoryStyle.dashArray
+      dashArray: categoryStyle.dashArray,
+      baseOpacity: Math.max(0.16, confidenceTone.edgeOpacity + 0.03),
+      widthBoost: confidenceTone.edgeBoost
     };
   }
 
   return {
     stroke: edgeStroke(edge),
-    dashArray: edgeDash(edge)
+    dashArray: edgeDash(edge),
+    baseOpacity: confidenceTone.edgeOpacity,
+    widthBoost: confidenceTone.edgeBoost
   };
 }
+
+function createSafeHoverEvent(event, tooltipWidth = 280, tooltipHeight = 160, padding = 16) {
+  const sourceClientX = Number.isFinite(event?.clientX) ? event.clientX : 0;
+  const sourceClientY = Number.isFinite(event?.clientY) ? event.clientY : 0;
+
+  const viewportWidth =
+    typeof window !== 'undefined' && Number.isFinite(window.innerWidth) ? window.innerWidth : 1440;
+  const viewportHeight =
+    typeof window !== 'undefined' && Number.isFinite(window.innerHeight) ? window.innerHeight : 900;
+  const scrollX =
+    typeof window !== 'undefined' && Number.isFinite(window.scrollX) ? window.scrollX : 0;
+  const scrollY =
+    typeof window !== 'undefined' && Number.isFinite(window.scrollY) ? window.scrollY : 0;
+
+  let clientX = sourceClientX + 14;
+  let clientY = sourceClientY + 14;
+
+  if (clientX + tooltipWidth > viewportWidth - padding) {
+    clientX = sourceClientX - tooltipWidth - 14;
+  }
+
+  if (clientY + tooltipHeight > viewportHeight - padding) {
+    clientY = sourceClientY - tooltipHeight - 14;
+  }
+
+  clientX = Math.max(padding, Math.min(clientX, viewportWidth - tooltipWidth - padding));
+  clientY = Math.max(padding, Math.min(clientY, viewportHeight - tooltipHeight - padding));
+
+  return {
+    ...event,
+    clientX,
+    clientY,
+    pageX: clientX + scrollX,
+    pageY: clientY + scrollY
+  };
+}
+
 
 
 function EmptyState() {
@@ -699,6 +907,8 @@ export default function NetworkView({
   const zoomBehaviorRef = useRef(null);
   const initialTransformRef = useRef(null);
   const legendBeforeExpandRef = useRef(true);
+  const hoveredIdRef = useRef(null);
+  const hoveredClusterIdRef = useRef(null);
 
   const [labelMode, setLabelMode] = useState('balanced');
   const [renderMode, setRenderMode] = useState('auto');
@@ -723,6 +933,16 @@ export default function NetworkView({
     Platform: true
   });
 
+  const [insightSections, setInsightSections] = useState({
+    why: true,
+    relationships: true,
+    metadata: false,
+    evidence: false,
+    description: false
+  });
+  const [expandedRelationshipGroups, setExpandedRelationshipGroups] = useState({});
+
+  const getSafeHoverEvent = (event) => createSafeHoverEvent(event);
 
   const dealerAwareData = useMemo(() => {
     const visibleNodes = nodes.filter((node) => {
@@ -930,6 +1150,7 @@ export default function NetworkView({
         .selectAll('line')
         .data(layoutLinks)
         .join('line')
+        .style('transition', INTERACTION_EASE)
         .attr('x1', (d) => d.source.x)
         .attr('y1', (d) => d.source.y)
         .attr('x2', (d) => d.target.x)
@@ -948,6 +1169,7 @@ export default function NetworkView({
 
       nodeSelection
         .append('circle')
+        .style('transition', INTERACTION_EASE)
         .attr('r', (d) => Math.max(8, Math.min(28, 7 + d.memberCount * 0.72)))
         .attr('fill', (d) => (d.layer === DEALER_LAYER ? '#214637' : '#4da6ff'))
         .attr('fill-opacity', (d) => (d.layer === DEALER_LAYER ? 0.28 : 0.2))
@@ -956,6 +1178,7 @@ export default function NetworkView({
 
       nodeSelection
         .append('circle')
+        .style('transition', INTERACTION_EASE)
         .attr('r', (d) => Math.max(4, Math.min(18, 4 + d.memberCount * 0.34)))
         .attr('fill', (d) => (d.layer === DEALER_LAYER ? '#7cefd1' : '#67d7ff'))
         .attr('fill-opacity', (d) => (d.layer === DEALER_LAYER ? 0.88 : 0.82))
@@ -964,6 +1187,7 @@ export default function NetworkView({
 
       const labelSelection = nodeSelection
         .append('text')
+        .style('transition', 'opacity 160ms ease, fill 160ms ease')
         .attr('x', 12)
         .attr('y', 4)
         .attr('class', 'svg-text')
@@ -972,35 +1196,58 @@ export default function NetworkView({
         .text((d) => `${truncateLabel(d.label, 24)} (${d.memberCount})`);
 
       const refreshOverviewStyles = () => {
-        nodeSelection.selectAll('circle').attr('opacity', (d, i) => {
-          if (!hoveredClusterId) return i === 0 ? 0.9 : 1;
-          if (d.id === hoveredClusterId) return 1;
-          if ((adjacency.get(hoveredClusterId) || new Set()).has(d.id)) return 0.88;
-          return 0.18;
-        });
+        const activeHoveredClusterId = hoveredClusterIdRef.current;
+        nodeSelection.selectAll('circle')
+          .attr('opacity', (d, i) => {
+            if (!activeHoveredClusterId) return i === 0 ? 0.9 : 1;
+            if (d.id === activeHoveredClusterId) return 1;
+            if ((adjacency.get(activeHoveredClusterId) || new Set()).has(d.id)) return 0.9;
+            return 0.16;
+          })
+          .attr('stroke-width', (d, i) => {
+            const base = i === 0 ? (d.layer === DEALER_LAYER ? 1.8 : 1.45) : (d.layer === DEALER_LAYER ? 1.2 : 0.9);
+            if (!activeHoveredClusterId) return base;
+            if (d.id === activeHoveredClusterId) return base + 0.7;
+            if ((adjacency.get(activeHoveredClusterId) || new Set()).has(d.id)) return base + 0.25;
+            return Math.max(0.75, base - 0.2);
+          });
 
         linkSelection
           .attr('opacity', (edge) => {
-            if (!hoveredClusterId) return 0.22;
-            if (edge.source.id === hoveredClusterId || edge.target.id === hoveredClusterId) return 0.9;
-            return 0.05;
+            if (!activeHoveredClusterId) return 0.22;
+            if (edge.source.id === activeHoveredClusterId || edge.target.id === activeHoveredClusterId) return 0.92;
+            if ((adjacency.get(activeHoveredClusterId) || new Set()).has(edge.source.id) || (adjacency.get(activeHoveredClusterId) || new Set()).has(edge.target.id)) return 0.14;
+            return 0.04;
           })
           .attr('stroke', (edge) => {
-            if (hoveredClusterId && (edge.source.id === hoveredClusterId || edge.target.id === hoveredClusterId)) {
+            if (activeHoveredClusterId && (edge.source.id === activeHoveredClusterId || edge.target.id === activeHoveredClusterId)) {
               return '#7cefd1';
             }
             return 'rgba(106,165,255,0.42)';
           });
 
-        labelSelection.style('opacity', (d) =>
-          shouldShowOverviewLabel(d, zoomK, labelMode, hoveredClusterId, expandedClusterKey) ? 0.96 : 0
-        );
+        labelSelection
+          .style('opacity', (d) => {
+            const visible = shouldShowOverviewLabel(d, zoomK, labelMode, activeHoveredClusterId, expandedClusterKey);
+            if (!visible) return 0;
+            if (!activeHoveredClusterId) return 0.96;
+            if (d.id === activeHoveredClusterId) return 1;
+            if ((adjacency.get(activeHoveredClusterId) || new Set()).has(d.id)) return 0.72;
+            return 0.08;
+          })
+          .style('font-weight', (d) => {
+            if (!activeHoveredClusterId) return '600';
+            if (d.id === activeHoveredClusterId) return '700';
+            if ((adjacency.get(activeHoveredClusterId) || new Set()).has(d.id)) return '600';
+            return '500';
+          });
       };
 
       nodeSelection
         .on('mousemove', (event, d) => {
+          hoveredClusterIdRef.current = d.id;
           setHoveredClusterId(d.id);
-          onNodeHover?.(event, {
+          onNodeHover?.(getSafeHoverEvent(event), {
             ...d,
             notes: d.preview?.length ? `Representative members: ${d.preview.join(', ')}` : '',
             oem_group: d.region,
@@ -1009,14 +1256,22 @@ export default function NetworkView({
           refreshOverviewStyles();
         })
         .on('mouseleave', () => {
+          hoveredClusterIdRef.current = null;
           setHoveredClusterId(null);
           onLeave?.();
           refreshOverviewStyles();
         })
         .on('click', (_, d) => {
+          const representative = [...(d.members || [])]
+            .sort((a, b) => {
+              const degreeDiff = (baseDegreeMap.get(b.id) || 0) - (baseDegreeMap.get(a.id) || 0);
+              if (degreeDiff !== 0) return degreeDiff;
+              return String(a.label || '').localeCompare(String(b.label || ''));
+            })[0] || null;
+
           setExpandedClusterKey(d.id);
-          setSelectedId(null);
-          onNodeSelect?.(null);
+          setSelectedId(representative?.id ?? null);
+          onNodeSelect?.(representative ?? null);
         });
 
       const zoom = d3
@@ -1036,6 +1291,7 @@ export default function NetworkView({
       setZoomPct(Math.round(initialTransform.k * 100));
 
       svg.on('mouseleave', () => {
+        hoveredClusterIdRef.current = null;
         setHoveredClusterId(null);
         onLeave?.();
       });
@@ -1142,6 +1398,12 @@ export default function NetworkView({
     const layoutNodes = initialNodes;
     const adjacency = buildAdjacency(layoutLinks.map((edge) => ({ source: edge.source.id, target: edge.target.id })));
     const degreeMap = buildDegreeMap(layoutLinks.map((edge) => ({ source: edge.source.id, target: edge.target.id })));
+    const controlPointMetricsMap = new Map(
+      layoutNodes.map((node) => [
+        node.id,
+        calculateControlPointMetrics(node, nodeMap, dealerAwareData.edges)
+      ])
+    );
     const regionRanks = buildRegionRanks(layoutNodes, degreeMap);
 
     const selectedNode = selectedId ? nodeMap.get(selectedId) : null;
@@ -1153,9 +1415,9 @@ export default function NetworkView({
       (adjacency.get(selectedNode.id) || new Set()).forEach((id) => selectedFocusSet.add(id));
     }
 
-    if (hoveredId) {
-      hoveredFocusSet.add(hoveredId);
-      (adjacency.get(hoveredId) || new Set()).forEach((id) => hoveredFocusSet.add(id));
+    if (hoveredIdRef.current) {
+      hoveredFocusSet.add(hoveredIdRef.current);
+      (adjacency.get(hoveredIdRef.current) || new Set()).forEach((id) => hoveredFocusSet.add(id));
     }
 
     const simulation = d3
@@ -1227,19 +1489,21 @@ export default function NetworkView({
       .selectAll('line')
       .data(layoutLinks)
       .join('line')
+      .style('transition', INTERACTION_EASE)
       .attr('x1', (d) => d.source.x)
       .attr('y1', (d) => d.source.y)
       .attr('x2', (d) => d.target.x)
       .attr('y2', (d) => d.target.y)
       .attr('stroke', (edge) => detailEdgeBaseStyle(edge).stroke)
       .attr('stroke-width', (edge) => {
+        const style = detailEdgeBaseStyle(edge);
         const dealerBoost = isDealerRelatedEdge(edge) ? 0.35 : 0;
-        if (selectedId && (edge.source.id === selectedId || edge.target.id === selectedId)) return 2.1 + dealerBoost;
-        return 0.95 + dealerBoost;
+        if (selectedId && (edge.source.id === selectedId || edge.target.id === selectedId)) return 2.1 + dealerBoost + style.widthBoost;
+        return 0.95 + dealerBoost + style.widthBoost * 0.35;
       })
       .attr('stroke-dasharray', (edge) => detailEdgeBaseStyle(edge).dashArray)
-      .attr('opacity', (edge) => (isDealerRelatedEdge(edge) ? 0.2 : 0.14))
-      .on('mousemove', (event, edge) => onEdgeHover?.(event, edge))
+      .attr('opacity', (edge) => detailEdgeBaseStyle(edge).baseOpacity)
+      .on('mousemove', (event, edge) => onEdgeHover?.(getSafeHoverEvent(event), edge))
       .on('mouseleave', () => onLeave?.());
 
     const nodeSelection = root
@@ -1248,11 +1512,33 @@ export default function NetworkView({
       .data(layoutNodes)
       .join('g')
       .attr('transform', (d) => `translate(${d.x},${d.y})`)
-      .style('cursor', 'grab');
+      .style('cursor', 'pointer');
+
+    const controlPointHaloSelection = nodeSelection
+      .append('circle')
+      .style('transition', INTERACTION_EASE)
+      .attr('r', (d) => {
+        const metrics = controlPointMetricsMap.get(d.id);
+        const state = controlPointVisualState(metrics);
+        return detailNodeRadius(d, degreeMap, selectedId, hoveredId, metrics) + 2.8 + state.radiusBoost;
+      })
+      .attr('fill', 'none')
+      .attr('stroke', 'rgba(124,239,209,0.7)')
+      .attr('stroke-width', (d) => controlPointVisualState(controlPointMetricsMap.get(d.id)).strokeBoost)
+      .attr('stroke-opacity', (d) => controlPointVisualState(controlPointMetricsMap.get(d.id)).ringOpacity)
+      .attr('stroke-dasharray', (d) => {
+        const metrics = controlPointMetricsMap.get(d.id);
+        if (metrics?.level === 'Primary control point') return null;
+        if (metrics?.level === 'Cross-layer control point') return '4 3';
+        if (metrics?.level === 'Emerging control point') return '2 3';
+        return null;
+      })
+      .attr('pointer-events', 'none');
 
     const circleSelection = nodeSelection
       .append('circle')
-      .attr('r', (d) => detailNodeRadius(d, degreeMap, selectedId, hoveredId))
+      .style('transition', INTERACTION_EASE)
+      .attr('r', (d) => detailNodeRadius(d, degreeMap, selectedId, hoveredId, controlPointMetricsMap.get(d.id)))
       .attr('fill', (d) => {
         if (isDealerNode(d)) {
           return dealerCategoryStyle(d).halo;
@@ -1271,7 +1557,8 @@ export default function NetworkView({
     const dealerCoreSelection = nodeSelection
       .filter((d) => isDealerNode(d))
       .append('circle')
-      .attr('r', (d) => Math.max(2.2, detailNodeRadius(d, degreeMap, selectedId, hoveredId) - 2.35))
+      .style('transition', INTERACTION_EASE)
+      .attr('r', (d) => Math.max(2.2, detailNodeRadius(d, degreeMap, selectedId, hoveredId, controlPointMetricsMap.get(d.id)) - 2.35))
       .attr('fill', (d) => dealerCategoryStyle(d).stroke)
       .attr('fill-opacity', 0.8)
       .attr('stroke', 'rgba(255,255,255,0.18)')
@@ -1281,8 +1568,9 @@ export default function NetworkView({
     const dealerAccentSelection = nodeSelection
       .filter((d) => isDealerNode(d))
       .append('circle')
+      .style('transition', INTERACTION_EASE)
       .attr('r', (d) => {
-        const base = detailNodeRadius(d, degreeMap, selectedId, hoveredId);
+        const base = detailNodeRadius(d, degreeMap, selectedId, hoveredId, controlPointMetricsMap.get(d.id));
         const style = dealerCategoryStyle(d);
 
         switch (style.markerMode) {
@@ -1317,33 +1605,56 @@ export default function NetworkView({
       })
       .attr('pointer-events', 'none');
 
+    const hitAreaSelection = nodeSelection
+      .append('circle')
+      .attr('r', (d) => Math.max(14, detailNodeRadius(d, degreeMap, selectedId, hoveredId, controlPointMetricsMap.get(d.id)) + 7))
+      .attr('fill', 'transparent')
+      .attr('stroke', 'none')
+      .style('pointer-events', 'all');
+
     const labelSelection = nodeSelection
       .append('text')
+      .style('transition', 'opacity 160ms ease, fill 160ms ease, font-weight 160ms ease')
       .attr('x', 9)
       .attr('y', 4)
       .attr('class', 'svg-text')
       .style('font-size', '10px')
       .style('font-weight', '500')
+      .style('cursor', 'pointer')
       .text((d) => truncateLabel(d.label, 26));
 
+    const handleDetailNodeSelect = (d, shouldRaise = false, target = null) => {
+      if (shouldRaise && target) {
+        d3.select(target).raise();
+      }
+
+      const nextId = selectedId === d.id ? null : d.id;
+      setSelectedId(nextId);
+      hoveredIdRef.current = null;
+      setHoveredId(null);
+      onNodeSelect?.(nextId ? d : null);
+      refreshDetailStyles();
+    };
+
     const refreshDetailStyles = () => {
+      const activeHoveredId = hoveredIdRef.current;
       circleSelection
         .attr('fill', (d) => {
           if (selectedId === d.id) return '#7cefd1';
-          if (hoveredId === d.id) return '#b8f8e7';
+          if (activeHoveredId === d.id) return '#b8f8e7';
           if (selectedId && selectedFocusSet.has(d.id)) return isDealerNode(d) ? dealerCategoryStyle(d).halo : '#6dc0ff';
-          if (!selectedId && hoveredId && hoveredFocusSet.has(d.id)) return isDealerNode(d) ? dealerCategoryStyle(d).halo : '#6dc0ff';
+          if (!selectedId && activeHoveredId && hoveredFocusSet.has(d.id)) return isDealerNode(d) ? dealerCategoryStyle(d).halo : '#6dc0ff';
           if (isDealerNode(d)) return dealerCategoryStyle(d).halo;
           return nodeFill(d);
         })
         .attr('opacity', (d) => {
           if (selectedId) {
             if (selectedFocusSet.has(d.id)) return 1;
-            if (hoveredId && hoveredFocusSet.has(d.id) && d.id !== hoveredId) return 0.22;
+            if (activeHoveredId && hoveredFocusSet.has(d.id) && d.id !== activeHoveredId) return 0.22;
             return 0.1;
           }
 
-          if (hoveredId) {
+          if (activeHoveredId) {
             if (hoveredFocusSet.has(d.id)) return 1;
             return 0.12;
           }
@@ -1352,25 +1663,41 @@ export default function NetworkView({
         })
         .attr('stroke', (d) => {
           if (selectedId === d.id) return 'rgba(255,255,255,0.95)';
-          if (hoveredId === d.id) return 'rgba(255,255,255,0.82)';
+          if (activeHoveredId === d.id) return 'rgba(255,255,255,0.82)';
           if (selectedId && selectedFocusSet.has(d.id)) return isDealerNode(d) ? dealerCategoryStyle(d).stroke : 'rgba(255,255,255,0.42)';
-          if (!selectedId && hoveredId && hoveredFocusSet.has(d.id)) return isDealerNode(d) ? dealerCategoryStyle(d).stroke : 'rgba(255,255,255,0.42)';
+          if (!selectedId && activeHoveredId && hoveredFocusSet.has(d.id)) return isDealerNode(d) ? dealerCategoryStyle(d).stroke : 'rgba(255,255,255,0.42)';
           if (isDealerNode(d)) return dealerCategoryStyle(d).stroke;
           return 'rgba(255,255,255,0.16)';
         })
         .attr('stroke-width', (d) => {
-          if (selectedId === d.id) return 1.8;
-          if (hoveredId === d.id) return 1.4;
-          return isDealerNode(d) ? 1.05 : 0.8;
+          const controlPointBoost = controlPointVisualState(controlPointMetricsMap.get(d.id)).strokeBoost;
+          if (selectedId === d.id) return 1.8 + controlPointBoost;
+          if (activeHoveredId === d.id) return 1.4 + controlPointBoost * 0.8;
+          return (isDealerNode(d) ? 1.05 : 0.8) + controlPointBoost * 0.7;
         })
         .attr('stroke-dasharray', (d) => (isDealerNode(d) ? dealerCategoryStyle(d).dashArray : null));
+
+      controlPointHaloSelection
+        .attr('opacity', (d) => {
+          const state = controlPointVisualState(controlPointMetricsMap.get(d.id));
+          if (!state.badge) return 0;
+          if (selectedId) return selectedFocusSet.has(d.id) ? state.ringOpacity : 0.05;
+          if (activeHoveredId) return hoveredFocusSet.has(d.id) ? state.ringOpacity * 0.95 : 0.05;
+          return state.ringOpacity * 0.9;
+        })
+        .attr('stroke-opacity', (d) => {
+          const state = controlPointVisualState(controlPointMetricsMap.get(d.id));
+          if (!state.badge) return 0;
+          if (selectedId === d.id || activeHoveredId === d.id) return Math.min(1, state.ringOpacity + 0.12);
+          return state.ringOpacity;
+        });
 
       dealerCoreSelection
         .attr('opacity', (d) => {
           if (selectedId) {
             return selectedFocusSet.has(d.id) ? 0.92 : 0.08;
           }
-          if (hoveredId) {
+          if (activeHoveredId) {
             return hoveredFocusSet.has(d.id) ? 0.9 : 0.12;
           }
           return 0.82;
@@ -1381,7 +1708,7 @@ export default function NetworkView({
           if (selectedId) {
             return selectedFocusSet.has(d.id) ? 0.95 : 0.06;
           }
-          if (hoveredId) {
+          if (activeHoveredId) {
             return hoveredFocusSet.has(d.id) ? 0.92 : 0.1;
           }
           return 0.84;
@@ -1389,7 +1716,7 @@ export default function NetworkView({
         .attr('stroke-opacity', (d) => {
           const base = dealerCategoryStyle(d).accentOpacity;
           if (selectedId && selectedFocusSet.has(d.id)) return Math.min(1, base + 0.12);
-          if (!selectedId && hoveredId && hoveredFocusSet.has(d.id)) return Math.min(1, base + 0.08);
+          if (!selectedId && activeHoveredId && hoveredFocusSet.has(d.id)) return Math.min(1, base + 0.08);
           return base;
         });
 
@@ -1397,38 +1724,39 @@ export default function NetworkView({
         .attr('opacity', (edge) => {
           if (selectedId) {
             if (selectedFocusSet.has(edge.source.id) && selectedFocusSet.has(edge.target.id)) return 0.82;
-            if (hoveredId && hoveredFocusSet.has(edge.source.id) && hoveredFocusSet.has(edge.target.id)) return 0.08;
+            if (activeHoveredId && hoveredFocusSet.has(edge.source.id) && hoveredFocusSet.has(edge.target.id)) return 0.08;
             return 0.03;
           }
 
-          if (hoveredId) {
+          if (activeHoveredId) {
             if (hoveredFocusSet.has(edge.source.id) && hoveredFocusSet.has(edge.target.id)) return 0.82;
             return 0.035;
           }
 
-          return isDealerRelatedEdge(edge) ? 0.19 : 0.14;
+          return detailEdgeBaseStyle(edge).baseOpacity + (isDealerRelatedEdge(edge) ? 0.04 : 0);
         })
         .attr('stroke', (edge) => {
           if (selectedId && selectedFocusSet.has(edge.source.id) && selectedFocusSet.has(edge.target.id)) {
             return '#7cefd1';
           }
-          if (!selectedId && hoveredId && hoveredFocusSet.has(edge.source.id) && hoveredFocusSet.has(edge.target.id)) {
+          if (!selectedId && activeHoveredId && hoveredFocusSet.has(edge.source.id) && hoveredFocusSet.has(edge.target.id)) {
             return '#7cefd1';
           }
           return detailEdgeBaseStyle(edge).stroke;
         })
         .attr('stroke-dasharray', (edge) => detailEdgeBaseStyle(edge).dashArray)
         .attr('stroke-width', (edge) => {
+          const style = detailEdgeBaseStyle(edge);
           const dealerBoost = isDealerRelatedEdge(edge) ? 0.35 : 0;
           if (selectedId) {
-            if (selectedFocusSet.has(edge.source.id) && selectedFocusSet.has(edge.target.id)) return 1.7 + dealerBoost;
-            return 0.75 + dealerBoost;
+            if (selectedFocusSet.has(edge.source.id) && selectedFocusSet.has(edge.target.id)) return 1.7 + dealerBoost + style.widthBoost;
+            return 0.75 + dealerBoost + style.widthBoost * 0.2;
           }
-          if (hoveredId) {
-            if (hoveredFocusSet.has(edge.source.id) && hoveredFocusSet.has(edge.target.id)) return 1.55 + dealerBoost;
-            return 0.72 + dealerBoost;
+          if (activeHoveredId) {
+            if (hoveredFocusSet.has(edge.source.id) && hoveredFocusSet.has(edge.target.id)) return 1.55 + dealerBoost + style.widthBoost;
+            return 0.72 + dealerBoost + style.widthBoost * 0.2;
           }
-          return 0.95 + dealerBoost;
+          return 0.95 + dealerBoost + style.widthBoost * 0.35;
         });
 
       labelSelection
@@ -1440,7 +1768,7 @@ export default function NetworkView({
             degreeMap,
             regionRanks,
             selectedId,
-            hoveredId,
+            hoveredId: activeHoveredId,
             selectedFocusSet,
             hoveredFocusSet,
             pinnedIds
@@ -1450,86 +1778,60 @@ export default function NetworkView({
 
           if (selectedId) {
             if (selectedFocusSet.has(d.id)) return 1;
-            if (hoveredId === d.id) return 0.6;
+            if (activeHoveredId === d.id) return 0.6;
             return 0.06;
           }
 
-          if (hoveredId) {
+          if (activeHoveredId) {
             return hoveredFocusSet.has(d.id) ? 1 : 0.07;
           }
 
           return 0.94;
         })
         .style('font-weight', (d) => {
-          if (selectedId === d.id || hoveredId === d.id) return '700';
+          if (selectedId === d.id || activeHoveredId === d.id) return '700';
           if (selectedId && selectedFocusSet.has(d.id)) return '600';
-          if (!selectedId && hoveredId && hoveredFocusSet.has(d.id)) return '600';
+          if (!selectedId && activeHoveredId && hoveredFocusSet.has(d.id)) return '600';
           return '500';
         });
     };
 
-    nodeSelection
-      .on('mousemove', (event, d) => {
-        setHoveredId(d.id);
-        onNodeHover?.(event, d);
-        refreshDetailStyles();
-      })
-      .on('mouseleave', () => {
-        setHoveredId(null);
-        onLeave?.();
-        refreshDetailStyles();
-      })
-      .on('click', (_, d) => {
-        const nextId = selectedId === d.id ? null : d.id;
-        setSelectedId(nextId);
-        setHoveredId(null);
-        onNodeSelect?.(nextId ? d : null);
-      })
-      .on('dblclick', (_, d) => {
-        setPinnedPositions((current) => {
-          const next = { ...current };
-          delete next[d.id];
-          return next;
+    const bindDetailSelectionInteractions = (selection) =>
+      selection
+        .on('mousemove', function (event, d) {
+          d3.select(this.parentNode || this).raise();
+          hoveredIdRef.current = d.id;
+          setHoveredId(d.id);
+          onNodeHover?.(getSafeHoverEvent(event), d);
+          refreshDetailStyles();
+        })
+        .on('mouseleave', () => {
+          hoveredIdRef.current = null;
+          setHoveredId(null);
+          onLeave?.();
+          refreshDetailStyles();
+        })
+        .on('click', function (event, d) {
+          event.stopPropagation?.();
+          handleDetailNodeSelect(d, true, this.parentNode || this);
         });
+
+    bindDetailSelectionInteractions(nodeSelection);
+    bindDetailSelectionInteractions(hitAreaSelection);
+    bindDetailSelectionInteractions(labelSelection);
+
+    nodeSelection.on('dblclick', (_, d) => {
+      setPinnedPositions((current) => {
+        const next = { ...current };
+        delete next[d.id];
+        return next;
       });
+    });
 
-    const drag = d3
-      .drag()
-      .on('start', (event, d) => {
-        onCanvasInteract?.();
-        onLeave?.();
-        d.fx = d.x;
-        d.fy = d.y;
-        d3.select(event.sourceEvent?.target).style('cursor', 'grabbing');
-      })
-      .on('drag', (event, d) => {
-        d.fx = Math.max(leftPad + 26, Math.min(width - rightPad - 26, event.x));
-        d.fy = Math.max(topPad + 24, Math.min(height - bottomPad - 24, event.y));
-        d.x = d.fx;
-        d.y = d.fy;
-
-        nodeSelection
-          .filter((item) => item.id === d.id)
-          .attr('transform', `translate(${d.x},${d.y})`);
-
-        linkSelection
-          .filter((edge) => edge.source.id === d.id || edge.target.id === d.id)
-          .attr('x1', (edge) => edge.source.x)
-          .attr('y1', (edge) => edge.source.y)
-          .attr('x2', (edge) => edge.target.x)
-          .attr('y2', (edge) => edge.target.y);
-      })
-      .on('end', (_, d) => {
-        const x = Math.max(leftPad + 26, Math.min(width - rightPad - 26, d.fx ?? d.x));
-        const y = Math.max(topPad + 24, Math.min(height - bottomPad - 24, d.fy ?? d.y));
-
-        setPinnedPositions((current) => ({
-          ...current,
-          [d.id]: { x, y }
-        }));
-      });
-
-    nodeSelection.call(drag);
+    // Detail view prioritises reliable selection over free dragging.
+    // Drag was causing clicks to be interpreted as grab gestures, which made
+    // re-selecting nodes after clearing selection feel broken.
+    nodeSelection.on('mousedown.drag', null).on('touchstart.drag', null);
 
     const zoom = d3
       .zoom()
@@ -1551,6 +1853,7 @@ export default function NetworkView({
     setZoomPct(Math.round(initialTransform.k * 100));
 
     svg.on('mouseleave', () => {
+      hoveredIdRef.current = null;
       setHoveredId(null);
       onLeave?.();
     });
@@ -1570,8 +1873,6 @@ export default function NetworkView({
     labelMode,
     degreeThreshold,
     selectedId,
-    hoveredId,
-    hoveredClusterId,
     expandedClusterKey,
     layoutVersion,
     pinnedPositions,
@@ -1586,6 +1887,8 @@ export default function NetworkView({
   const resetLayout = () => {
     setPinnedPositions({});
     setSelectedId(null);
+    hoveredIdRef.current = null;
+    hoveredClusterIdRef.current = null;
     setHoveredId(null);
     setHoveredClusterId(null);
     setExpandedClusterKey(null);
@@ -1638,6 +1941,98 @@ export default function NetworkView({
   };
 
   const activeFocusLabel = expandedClusterKey ? formatExpandedClusterLabel(expandedClusterKey) : '';
+
+  const selectedNodeDetail = useMemo(() => {
+    if (!selectedId) return null;
+
+    const canonicalNodeMap = new Map(dealerAwareData.nodes.map((item) => [item.id, item]));
+    const node = canonicalNodeMap.get(selectedId) || graph.nodes.find((item) => item.id === selectedId) || null;
+    if (!node) return null;
+
+    const relatedEdges = dealerAwareData.edges.filter((edge) => edge.source === selectedId || edge.target === selectedId);
+
+    const grouped = new Map();
+    relatedEdges.forEach((edge) => {
+      const otherId = edge.source === selectedId ? edge.target : edge.source;
+      const otherNode = canonicalNodeMap.get(otherId) || graph.nodes.find((item) => item.id === otherId) || null;
+      const key = edge.relationship || edge.relation || 'Connected';
+      if (!grouped.has(key)) grouped.set(key, []);
+      grouped.get(key).push({
+        edge,
+        node: otherNode,
+        label: otherNode?.label || otherId,
+        region: displayRegion(otherNode?.region || edge.region || 'Unknown'),
+        layer: otherNode?.layer || edge.layer || 'Unknown',
+        confidence: edge.confidence || 'Unknown',
+        verification: edge.verification_status || edge.evidence_status || 'Unknown'
+      });
+    });
+
+    const relationshipGroups = [...grouped.entries()]
+      .map(([key, items]) => {
+        const sortedItems = [...items].sort((a, b) => {
+          const confidenceDelta = normalizeConfidenceRank(b.confidence) - normalizeConfidenceRank(a.confidence);
+          if (confidenceDelta !== 0) return confidenceDelta;
+          const verificationDelta = String(b.verification || '').localeCompare(String(a.verification || ''));
+          if (verificationDelta !== 0) return verificationDelta;
+          return String(a.label || '').localeCompare(String(b.label || ''));
+        });
+        const label = formatRelationshipLabel(key);
+        const topConfidence = sortedItems[0]?.confidence || 'Unknown';
+        const priority = relationshipGroupPriority(label) + sortedItems.length * 2 + normalizeConfidenceRank(topConfidence) * 3;
+        return {
+          key,
+          label,
+          items: sortedItems,
+          total: sortedItems.length,
+          topConfidence,
+          priority,
+          preview: sortedItems.slice(0, 3).map((item) => item.label).filter(Boolean).join(', ')
+        };
+      })
+      .sort((a, b) => b.priority - a.priority || b.total - a.total || a.label.localeCompare(b.label));
+
+    const dealerCategory = isDealerNode(node) ? normalizeDealerCategory(node) : null;
+    const verificationSummary = summarizeVerification(node);
+    const uniqueRegions = [...new Set(relatedEdges.map((edge) => canonicalNodeMap.get(edge.source === selectedId ? edge.target : edge.source)?.region || edge.region).filter(Boolean))]
+      .slice(0, 4)
+      .map((region) => displayRegion(region));
+    const strongestRelationship = relationshipGroups[0] || null;
+    const controlPointMetrics = calculateControlPointMetrics(node, canonicalNodeMap, dealerAwareData.edges);
+    const confidenceTone = confidenceVisualTone(node.confidence || node.verification_status || node.evidence_status);
+
+    return {
+      node,
+      dealerCategory,
+      verificationSummary,
+      controlPointMetrics,
+      confidenceTone,
+      roleSummary: summarizeNodeRole(node, dealerCategory, relatedEdges.length, strongestRelationship?.label || null),
+      relationshipSummary: relationshipInsight(relationshipGroups),
+      strongestRelationship,
+      relationshipGroups,
+      relationshipCount: relatedEdges.length,
+      connectedRegionSummary: uniqueRegions.length ? uniqueRegions.join(' · ') : 'No linked regions recorded',
+      evidenceSource: node.source_name || node.provenance_parent || 'Not specified',
+      evidenceDate: node.source_date || node.last_validated_date || 'Not specified'
+    };
+  }, [selectedId, dealerAwareData.nodes, dealerAwareData.edges, graph.nodes]);
+
+  useEffect(() => {
+    setExpandedRelationshipGroups({});
+    setInsightSections((current) => ({
+      ...current,
+      why: true,
+      relationships: true,
+      metadata: false,
+      evidence: false,
+      description: false
+    }));
+  }, [selectedId]);
+
+  const toggleInsightSection = (key) => {
+    setInsightSections((current) => ({ ...current, [key]: !current[key] }));
+  };
 
   const helpText =
     resolvedMode === 'overview'
@@ -1838,6 +2233,14 @@ export default function NetworkView({
                 Drag nodes, zoom the graph, and inspect cross-region relationships as the network settles into readable clusters. Dealer nodes now surface as a controlled overlay with category-aware accents.
               </p>
 
+              {selectedNodeDetail ? (
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-foreground/75">
+                  <span className="rounded-full border border-border/40 bg-muted/20 px-2.5 py-1">Selected</span>
+                  <span className="text-foreground">{selectedNodeDetail.node.label}</span>
+                  <span className="text-muted-foreground">{selectedNodeDetail.relationshipCount} links</span>
+                </div>
+              ) : null}
+
               {expandedClusterKey ? (
                 <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
                   <button
@@ -1896,6 +2299,239 @@ export default function NetworkView({
           <aside className="space-y-4">
             <div className="rounded-lg border border-border/30 bg-card/10 px-4 py-3 backdrop-blur-sm">
               <div className="flex items-center justify-between">
+                <CardKicker>Selection Detail</CardKicker>
+                {selectedNodeDetail ? (
+                  <span className="text-[10px] text-emerald-300/80">Active</span>
+                ) : (
+                  <span className="text-[10px] text-muted-foreground/40">Idle</span>
+                )}
+              </div>
+
+              {selectedNodeDetail ? (
+                <div className="mt-4 max-h-[calc(100vh-11rem)] overflow-y-auto overflow-x-hidden pr-1">
+                  <div className="sticky top-0 z-10 rounded-t-lg border-b border-border/20 bg-card/80 px-3 pb-3 pt-2 backdrop-blur-md">
+                    <div className="flex flex-wrap items-start justify-between gap-2">
+                      <div>
+                        <div className="text-base font-bold text-foreground">{selectedNodeDetail.node.label}</div>
+                        <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-widest text-foreground/65">
+                          <span className="rounded-md border border-border/35 bg-muted/15 px-2 py-0.5">{selectedNodeDetail.node.layer || 'Unknown layer'}</span>
+                          <span className="rounded-md border border-border/35 bg-muted/15 px-2 py-0.5">{displayRegion(selectedNodeDetail.node.region || 'Unknown')}</span>
+                          {selectedNodeDetail.dealerCategory ? (
+                            <span
+                              className="rounded-full border px-2 py-1"
+                              style={{
+                                borderColor: dealerCategoryStyle(selectedNodeDetail.node).stroke,
+                                backgroundColor: dealerCategoryStyle(selectedNodeDetail.node).halo,
+                                color: dealerCategoryStyle(selectedNodeDetail.node).stroke
+                              }}
+                            >
+                              {selectedNodeDetail.dealerCategory}
+                            </span>
+                          ) : null}
+                        </div>
+                      </div>
+                      <div className="rounded-md border border-emerald-500/20 bg-emerald-500/5 px-2 py-1 text-right">
+                        <div className="text-[9px] font-black uppercase tracking-widest text-emerald-300/75">Links</div>
+                        <div className="mt-0.5 text-sm font-bold text-emerald-200">{selectedNodeDetail.relationshipCount}</div>
+                      </div>
+                    </div>
+                    <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{selectedNodeDetail.roleSummary}</p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedId(null);
+                        hoveredIdRef.current = null;
+                        setHoveredId(null);
+                        onNodeSelect?.(null);
+                        onLeave?.();
+                      }}
+                      className="mt-3 w-full rounded-md border border-emerald-500/25 bg-emerald-500/5 px-3 py-2 text-[10px] font-bold uppercase tracking-widest text-emerald-300 transition-colors hover:border-emerald-400/40 hover:text-emerald-200"
+                    >
+                      Clear selection
+                    </button>
+                  </div>
+
+                  <div className="mt-3 space-y-3 pb-2">
+                    <div className="grid grid-cols-2 gap-2 text-[11px] text-muted-foreground">
+                      <div className="rounded-md border border-border/25 bg-muted/10 px-2.5 py-2">
+                        <div className="text-[10px] font-black uppercase tracking-widest text-foreground/50">Boundary</div>
+                        <div className="mt-1 text-foreground/80">{toTitleCase(selectedNodeDetail.node.control_boundary || 'Unknown')}</div>
+                      </div>
+                      <div className="rounded-md border border-border/25 bg-muted/10 px-2.5 py-2">
+                        <div className="text-[10px] font-black uppercase tracking-widest text-foreground/50">Confidence</div>
+                        <div className="mt-1 text-foreground/80">{toTitleCase(selectedNodeDetail.node.confidence || 'Unknown')}</div>
+                      </div>
+                    </div>
+
+                    {selectedNodeDetail.strongestRelationship ? (
+                      <div className="rounded-md border border-emerald-500/20 bg-emerald-500/5 px-3 py-2.5">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <div className="text-[10px] font-black uppercase tracking-widest text-emerald-300/80">Top relationship signal</div>
+                            <div className="mt-1 text-sm font-semibold text-foreground/90">{selectedNodeDetail.strongestRelationship.label}</div>
+                            <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                              {selectedNodeDetail.strongestRelationship.preview
+                                ? `Most visible with ${selectedNodeDetail.strongestRelationship.preview}${selectedNodeDetail.strongestRelationship.total > 3 ? ' and others' : ''}.`
+                                : 'Most visible relationship group in the current mapped context.'}
+                            </p>
+                          </div>
+                          <div className="rounded-md border border-emerald-500/20 bg-black/10 px-2 py-1 text-right">
+                            <div className="text-[9px] font-black uppercase tracking-widest text-emerald-300/70">Signal</div>
+                            <div className="mt-0.5 text-[11px] font-semibold text-foreground/85">{summarizeEvidenceStrength(selectedNodeDetail.strongestRelationship.topConfidence)}</div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    <div className="rounded-md border border-border/25 bg-muted/10">
+                      <button
+                        type="button"
+                        onClick={() => toggleInsightSection('why')}
+                        className="group flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors hover:bg-white/5"
+                      >
+                        <span className="text-[10px] font-black uppercase tracking-widest text-foreground/60">Why it matters</span>
+                        <span className="ml-auto inline-flex items-center rounded-md px-2 py-1 text-[11px] font-semibold tracking-wide text-muted-foreground transition-colors group-hover:text-foreground">{insightSections.why ? 'Hide' : 'Show'}</span>
+                      </button>
+                      {insightSections.why ? (
+                        <div className="border-t border-border/20 px-3 pb-3 pt-2">
+                          <p className="text-[11px] leading-relaxed text-muted-foreground">{selectedNodeDetail.relationshipSummary}</p>
+                        </div>
+                      ) : null}
+                    </div>
+
+                    {selectedNodeDetail.node.description ? (
+                      <div className="rounded-md border border-border/25 bg-muted/10">
+                        <button
+                          type="button"
+                          onClick={() => toggleInsightSection('description')}
+                          className="group flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors hover:bg-white/5"
+                        >
+                          <span className="text-[10px] font-black uppercase tracking-widest text-foreground/60">Description</span>
+                          <span className="ml-auto inline-flex items-center rounded-md px-2 py-1 text-[11px] font-semibold tracking-wide text-muted-foreground transition-colors group-hover:text-foreground">{insightSections.description ? 'Hide' : 'Show'}</span>
+                        </button>
+                        {insightSections.description ? (
+                          <div className="border-t border-border/20 px-3 pb-3 pt-2">
+                            <p className="text-[11px] leading-relaxed text-muted-foreground">{selectedNodeDetail.node.description}</p>
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
+
+                    <div className="rounded-md border border-border/25 bg-muted/10">
+                      <button
+                        type="button"
+                        onClick={() => toggleInsightSection('relationships')}
+                        className="group flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors hover:bg-white/5"
+                      >
+                        <div className="flex min-w-0 items-center gap-2">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-foreground/60">Connected relationships</span>
+                          <span className="text-[10px] text-muted-foreground">{selectedNodeDetail.relationshipGroups.length} groups</span>
+                        </div>
+                        <span className="ml-auto inline-flex items-center rounded-md px-2 py-1 text-[11px] font-semibold tracking-wide text-muted-foreground transition-colors group-hover:text-foreground">{insightSections.relationships ? 'Hide' : 'Show'}</span>
+                      </button>
+                      {insightSections.relationships ? (
+                        <div className="border-t border-border/20 px-3 pb-3 pt-2 space-y-3">
+                          {selectedNodeDetail.relationshipGroups.length ? selectedNodeDetail.relationshipGroups.map((group) => {
+                            const expandedGroup = Boolean(expandedRelationshipGroups[group.key]);
+                            const visibleItems = expandedGroup ? group.items : group.items.slice(0, 3);
+                            return (
+                              <div key={group.key}>
+                                <div className="mb-1.5 flex items-center justify-between gap-2">
+                                  <div className="text-[10px] font-bold uppercase tracking-widest text-foreground/65">{group.label}</div>
+                                  <div className="text-[10px] text-muted-foreground">{group.total}</div>
+                                </div>
+                                <div className="space-y-1.5">
+                                  {visibleItems.map((item, index) => (
+                                    <div key={`${group.key}-${item.label}-${index}`} className="rounded-md border border-border/30 bg-black/10 px-2.5 py-2">
+                                      <div className="flex items-start justify-between gap-2">
+                                        <div className="text-[11px] font-semibold text-foreground/85">{item.label}</div>
+                                        <div className="text-[9px] uppercase tracking-widest text-muted-foreground/70">{toTitleCase(item.confidence)}</div>
+                                      </div>
+                                      <div className="mt-0.5 text-[10px] text-muted-foreground">{item.region} · {item.layer}</div>
+                                      <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[9px] uppercase tracking-widest text-muted-foreground/75">
+                                        <span className="rounded-full border border-border/30 bg-muted/10 px-1.5 py-0.5">{formatRelationshipLabel(group.key)}</span>
+                                        <span className="rounded-full border border-border/30 bg-muted/10 px-1.5 py-0.5">{summarizeEvidenceStrength(item.confidence)}</span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                                {group.total > 3 ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => setExpandedRelationshipGroups((current) => ({ ...current, [group.key]: !current[group.key] }))}
+                                    className="mt-1.5 inline-flex items-center rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-blue-400 transition-colors hover:bg-white/5 hover:text-blue-300"
+                                  >
+                                    {expandedGroup ? 'Show less' : `View all ${group.total}`}
+                                  </button>
+                                ) : null}
+                              </div>
+                            );
+                          }) : (
+                            <div className="rounded-md border border-border/30 bg-black/10 px-2.5 py-2 text-[11px] text-muted-foreground">No connected relationships found.</div>
+                          )}
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <div className="rounded-md border border-border/25 bg-muted/10">
+                      <button
+                        type="button"
+                        onClick={() => toggleInsightSection('metadata')}
+                        className="group flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors hover:bg-white/5"
+                      >
+                        <span className="text-[10px] font-black uppercase tracking-widest text-foreground/60">Metadata</span>
+                        <span className="ml-auto inline-flex items-center rounded-md px-2 py-1 text-[11px] font-semibold tracking-wide text-muted-foreground transition-colors group-hover:text-foreground">{insightSections.metadata ? 'Hide' : 'Show'}</span>
+                      </button>
+                      {insightSections.metadata ? (
+                        <div className="grid grid-cols-2 gap-2 border-t border-border/20 px-3 pb-3 pt-2 text-[11px] text-muted-foreground">
+                          <div className="rounded-md border border-border/25 bg-black/10 px-2.5 py-2">
+                            <div className="text-[10px] font-black uppercase tracking-widest text-foreground/50">Verification</div>
+                            <div className="mt-1 text-foreground/80">{selectedNodeDetail.verificationSummary}</div>
+                          </div>
+                          <div className="rounded-md border border-border/25 bg-black/10 px-2.5 py-2">
+                            <div className="text-[10px] font-black uppercase tracking-widest text-foreground/50">Linked Regions</div>
+                            <div className="mt-1 text-foreground/80">{selectedNodeDetail.connectedRegionSummary}</div>
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <div className="rounded-md border border-border/25 bg-muted/10">
+                      <button
+                        type="button"
+                        onClick={() => toggleInsightSection('evidence')}
+                        className="group flex w-full items-center gap-3 rounded-md px-3 py-2 text-left transition-colors hover:bg-white/5"
+                      >
+                        <span className="text-[10px] font-black uppercase tracking-widest text-foreground/60">Evidence & validation</span>
+                        <span className="ml-auto inline-flex items-center rounded-md px-2 py-1 text-[11px] font-semibold tracking-wide text-muted-foreground transition-colors group-hover:text-foreground">{insightSections.evidence ? 'Hide' : 'Show'}</span>
+                      </button>
+                      {insightSections.evidence ? (
+                        <div className="grid grid-cols-2 gap-2 border-t border-border/20 px-3 pb-3 pt-2 text-[11px] text-muted-foreground">
+                          <div className="rounded-md border border-border/25 bg-black/10 px-2.5 py-2">
+                            <div className="text-[10px] font-black uppercase tracking-widest text-foreground/50">Evidence source</div>
+                            <div className="mt-1 text-foreground/80">{selectedNodeDetail.evidenceSource}</div>
+                          </div>
+                          <div className="rounded-md border border-border/25 bg-black/10 px-2.5 py-2">
+                            <div className="text-[10px] font-black uppercase tracking-widest text-foreground/50">Evidence date</div>
+                            <div className="mt-1 text-foreground/80">{selectedNodeDetail.evidenceDate}</div>
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-4 rounded-lg border border-border/20 bg-black/10 px-4 py-6 text-center">
+                  <div className="text-sm font-semibold text-foreground/80">Select a node to inspect it</div>
+                  <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">
+                    Click any node to lock selection, review its metadata, and see connected relationships grouped by type.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-lg border border-border/30 bg-card/10 px-4 py-3 backdrop-blur-sm">
+              <div className="flex items-center justify-between">
                 <CardKicker>Network Legend</CardKicker>
                 <span className="text-[10px] text-muted-foreground/40">ⓘ</span>
               </div>
@@ -1916,22 +2552,13 @@ export default function NetworkView({
                 {dealerLayerEnabled ? (
                   <>
                     <div className="my-1 h-px bg-border/20" />
-                    <div className="text-[10px] font-black uppercase tracking-widest text-foreground/50">
-                      Dealer Overlay
-                    </div>
+                    <div className="text-[10px] font-black uppercase tracking-widest text-foreground/50">Dealer Overlay</div>
                     <div className="grid grid-cols-2 gap-2 text-[10px] font-bold tracking-tight text-foreground/80">
                       {DEALER_CATEGORY_OPTIONS.map((option) => {
                         const style = dealerCategoryStyle({ layer: DEALER_LAYER, node_type: option.value, label: option.label });
                         return (
                           <div key={option.value} className="flex items-center gap-2">
-                            <span
-                              className="size-2.5 rounded-full border"
-                              style={{
-                                borderColor: style.stroke,
-                                backgroundColor: style.halo,
-                                borderStyle: style.dashArray ? 'dashed' : 'solid'
-                              }}
-                            />
+                            <span className="size-2.5 rounded-full border" style={{ borderColor: style.stroke, backgroundColor: style.halo, borderStyle: style.dashArray ? 'dashed' : 'solid' }} />
                             <span>{option.label}</span>
                           </div>
                         );
