@@ -21,6 +21,66 @@ const DEGREE_OPTIONS = [
   { value: 4, label: 'Degree 4+' }
 ];
 
+
+const DEALER_LAYER = 'Dealer Systems';
+
+const DEALER_CATEGORY_OPTIONS = [
+  { value: 'DMS', label: 'DMS' },
+  { value: 'CRM', label: 'CRM' },
+  { value: 'Finance', label: 'Finance' },
+  { value: 'Service', label: 'Service' },
+  { value: 'Marketplace', label: 'Marketplace' },
+  { value: 'Platform', label: 'Platform' }
+];
+
+function normalizeDealerCategory(node) {
+  const raw = String(node?.node_type || '').toLowerCase();
+  const label = String(node?.label || '').toLowerCase();
+  const description = String(node?.description || '').toLowerCase();
+  const notes = String(node?.notes || '').toLowerCase();
+  const haystack = `${raw} ${label} ${description} ${notes}`;
+
+  if (haystack.includes('dms')) return 'DMS';
+  if (haystack.includes('crm') || haystack.includes('salesforce')) return 'CRM';
+
+  if (
+    haystack.includes('finance') ||
+    haystack.includes('f&i') ||
+    haystack.includes('autofi') ||
+    haystack.includes('dealertrack') ||
+    haystack.includes('routeone')
+  ) {
+    return 'Finance';
+  }
+
+  if (
+    haystack.includes('service') ||
+    haystack.includes('aftersales') ||
+    haystack.includes('after-sales') ||
+    haystack.includes('xtime') ||
+    haystack.includes('solera') ||
+    haystack.includes('repair')
+  ) {
+    return 'Service';
+  }
+
+  if (
+    haystack.includes('marketplace') ||
+    haystack.includes('cargurus') ||
+    haystack.includes('carsales') ||
+    haystack.includes('autotrader')
+  ) {
+    return 'Marketplace';
+  }
+
+  if (haystack.includes('platform') || haystack.includes('ecosystem')) {
+    return 'Platform';
+  }
+
+  return 'Platform';
+}
+
+
 function EmptyState() {
   return (
     <div className="flex min-h-[900px] items-center justify-center rounded-xl border border-dashed border-border/40 bg-card/20 p-8 text-center text-sm text-muted-foreground">
@@ -400,24 +460,78 @@ export default function NetworkView({
   const [expanded, setExpanded] = useState(false);
   const [zoomPct, setZoomPct] = useState(100);
 
+  const [dealerLayerEnabled, setDealerLayerEnabled] = useState(false);
+  const [dealerCategoryFilters, setDealerCategoryFilters] = useState({
+    DMS: true,
+    CRM: true,
+    Finance: true,
+    Service: true,
+    Marketplace: true,
+    Platform: true
+  });
+
+
+  const dealerAwareData = useMemo(() => {
+    const visibleNodes = nodes.filter((node) => {
+      if (node.layer !== DEALER_LAYER) return true;
+      if (!dealerLayerEnabled) return false;
+
+      const category = normalizeDealerCategory(node);
+      return Boolean(dealerCategoryFilters[category]);
+    });
+
+    const visibleIds = new Set(visibleNodes.map((node) => node.id));
+
+    const visibleEdges = edges.filter(
+      (edge) => visibleIds.has(edge.source) && visibleIds.has(edge.target)
+    );
+
+    return {
+      nodes: visibleNodes,
+      edges: visibleEdges
+    };
+  }, [nodes, edges, dealerLayerEnabled, dealerCategoryFilters]);
+
   const baseDegreeMap = useMemo(
-    () => buildDegreeMap(edges.map((edge) => ({ source: edge.source, target: edge.target }))),
-    [edges]
+    () =>
+      buildDegreeMap(
+        dealerAwareData.edges.map((edge) => ({ source: edge.source, target: edge.target }))
+      ),
+    [dealerAwareData.edges]
   );
 
   const resolvedMode = useMemo(() => {
     if (renderMode === 'overview') return 'overview';
     if (renderMode === 'detail') return 'detail';
     if (expandedClusterKey) return 'detail';
-    return nodes.length > 320 ? 'overview' : 'detail';
-  }, [renderMode, expandedClusterKey, nodes.length]);
+    return dealerAwareData.nodes.length > 320 ? 'overview' : 'detail';
+  }, [renderMode, expandedClusterKey, dealerAwareData.nodes.length]);
 
   const graph = useMemo(() => {
     if (resolvedMode === 'overview') {
-      return buildClusterGraph(nodes, edges, baseDegreeMap, degreeThreshold);
+      return buildClusterGraph(
+        dealerAwareData.nodes,
+        dealerAwareData.edges,
+        baseDegreeMap,
+        degreeThreshold
+      );
     }
-    return buildDetailGraph(nodes, edges, baseDegreeMap, degreeThreshold, expandedClusterKey);
-  }, [resolvedMode, nodes, edges, baseDegreeMap, degreeThreshold, expandedClusterKey]);
+
+    return buildDetailGraph(
+      dealerAwareData.nodes,
+      dealerAwareData.edges,
+      baseDegreeMap,
+      degreeThreshold,
+      expandedClusterKey
+    );
+  }, [
+    resolvedMode,
+    dealerAwareData.nodes,
+    dealerAwareData.edges,
+    baseDegreeMap,
+    degreeThreshold,
+    expandedClusterKey
+  ]);
 
   const pinnedIds = useMemo(() => new Set(Object.keys(pinnedPositions)), [pinnedPositions]);
 
@@ -426,6 +540,15 @@ export default function NetworkView({
       setSelectedId(null);
     }
   }, [graph.nodes, selectedId]);
+
+  useEffect(() => {
+    if (expandedClusterKey && resolvedMode === 'overview') {
+      const clusterStillExists = graph.nodes.some((node) => node.id === expandedClusterKey);
+      if (!clusterStillExists) {
+        setExpandedClusterKey(null);
+      }
+    }
+  }, [expandedClusterKey, graph.nodes, resolvedMode]);
 
   useEffect(() => {
     if (expanded && legendVisible) {
@@ -1093,7 +1216,7 @@ export default function NetworkView({
         : 'Overview mode clusters the network by region and layer so the unfiltered landscape stays readable.'
       : expandedClusterKey
         ? 'Detail mode is focused on one cluster and its immediate connected neighbourhood.'
-        : 'Detail mode uses region sublanes so dense columns separate into clearer internal lanes. Hover highlights local relationships. Zooming in reveals more labels.';
+        : `Detail mode uses region sublanes so dense columns separate into clearer internal lanes. Hover highlights local relationships. Zooming in reveals more labels.${dealerLayerEnabled ? ' Dealer overlay is active.' : ''}`;
 
   if (!hasData) {
     return <EmptyState />;
@@ -1170,6 +1293,62 @@ export default function NetworkView({
                 ))}
               </div>
             </div>
+
+            <div className="flex flex-col gap-1.5">
+              <CardKicker>Dealer Layer</CardKicker>
+              <button
+                type="button"
+                onClick={() => {
+                  setDealerLayerEnabled((current) => !current);
+                  setSelectedId(null);
+                  setHoveredId(null);
+                  setHoveredClusterId(null);
+                  setExpandedClusterKey(null);
+                  onNodeSelect?.(null);
+                  onLeave?.();
+                }}
+                className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-[10px] font-black uppercase tracking-widest transition-all ${
+                  dealerLayerEnabled
+                    ? 'border-emerald-500/40 bg-emerald-600/10 text-emerald-400'
+                    : 'border-border/40 bg-muted/20 text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <span
+                  className={`size-2 rounded-full ${
+                    dealerLayerEnabled ? 'bg-emerald-400' : 'bg-muted-foreground/40'
+                  }`}
+                />
+                {dealerLayerEnabled ? 'Enabled' : 'Disabled'}
+              </button>
+            </div>
+
+            {dealerLayerEnabled ? (
+              <div className="flex flex-col gap-1.5">
+                <CardKicker>Dealer Categories</CardKicker>
+                <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border/40 bg-muted/20 p-1.5">
+                  {DEALER_CATEGORY_OPTIONS.map((option) => (
+                    <ControlPill
+                      key={option.value}
+                      active={dealerCategoryFilters[option.value]}
+                      onClick={() => {
+                        setDealerCategoryFilters((current) => ({
+                          ...current,
+                          [option.value]: !current[option.value]
+                        }));
+                        setSelectedId(null);
+                        setHoveredId(null);
+                        setHoveredClusterId(null);
+                        setExpandedClusterKey(null);
+                        onNodeSelect?.(null);
+                        onLeave?.();
+                      }}
+                    >
+                      {option.label}
+                    </ControlPill>
+                  ))}
+                </div>
+              </div>
+            ) : null}
 
             <div className="flex flex-col gap-1.5">
               <CardKicker>Display</CardKicker>
@@ -1279,6 +1458,18 @@ export default function NetworkView({
                 <div className="flex items-center gap-3">
                   <span className="size-2.5 rounded-full border border-white shadow-[0_0_8px_rgba(249,115,22,0.4)]" style={{ backgroundColor: '#f97316' }} />
                   <span className="text-[10px] font-bold tracking-tight text-foreground/80">Regulatory node</span>
+                </div>
+                <div className="my-1 h-px bg-border/20" />
+                <div className="text-[10px] font-black uppercase tracking-widest text-foreground/50">
+                  Dealer Overlay
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-[10px] font-bold tracking-tight text-foreground/80">
+                  <span>DMS</span>
+                  <span>CRM</span>
+                  <span>Finance</span>
+                  <span>Service</span>
+                  <span>Marketplace</span>
+                  <span>Platform</span>
                 </div>
                 <div className="my-1 h-px bg-border/20" />
                 <div className="flex items-center gap-3">
