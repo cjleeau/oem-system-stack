@@ -1175,6 +1175,154 @@ function ControlPill({ active = false, children, onClick }) {
   );
 }
 
+function MicroBandCard({ kicker, title, summary, children }) {
+  return (
+    <div className="rounded-lg border border-border/25 bg-card/10 px-4 py-3 backdrop-blur-sm">
+      <CardKicker>{kicker}</CardKicker>
+      <div className="mt-1 text-sm font-bold text-foreground">{title}</div>
+      {summary ? <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{summary}</p> : null}
+      <div className="mt-3">{children}</div>
+    </div>
+  );
+}
+
+function MicroTooltip({ tooltip }) {
+  if (!tooltip) return null;
+  return (
+    <div
+      className="pointer-events-none absolute z-20 min-w-[130px] max-w-[220px] rounded-md border border-border/40 bg-background/95 px-2.5 py-2 text-[11px] leading-relaxed text-foreground shadow-[0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur-sm"
+      style={{ left: tooltip.x, top: tooltip.y, transform: 'translate(-50%, calc(-100% - 10px))' }}
+    >
+      <div className="font-semibold text-foreground">{tooltip.label}</div>
+      {tooltip.value ? <div className="mt-0.5 text-muted-foreground">{tooltip.value}</div> : null}
+    </div>
+  );
+}
+
+function StackedBarMicrochart({ segments, formatValue = (value) => `${value}` }) {
+  const [tooltip, setTooltip] = useState(null);
+  const total = segments.reduce((sum, segment) => sum + (segment.value || 0), 0) || 1;
+
+  return (
+    <div className="relative stacked-bar-micro-root">
+      <div className="overflow-hidden rounded-md border border-border/30 bg-black/20">
+        <div className="flex h-3 w-full items-stretch">
+          {segments.map((segment) => {
+            const pct = Math.max(0, (segment.value || 0) / total * 100);
+            return (
+              <button
+                key={segment.label}
+                type="button"
+                aria-label={`${segment.label}: ${segment.value}`}
+                onMouseEnter={(event) => {
+                  setTooltip({
+                    label: segment.label,
+                    value: `${formatValue(segment.value)} · ${Math.round(pct)}%`,
+                    x: event.currentTarget.offsetLeft + event.currentTarget.offsetWidth / 2,
+                    y: 0
+                  });
+                }}
+                onMouseLeave={() => setTooltip(null)}
+                className="h-3 transition-[width,filter,opacity] duration-300 ease-out hover:brightness-110"
+                style={{ width: `${pct}%`, background: segment.color, opacity: pct > 0 ? 0.95 : 0 }}
+                title={`${segment.label}: ${formatValue(segment.value)} (${Math.round(pct)}%)`}
+              />
+            );
+          })}
+        </div>
+      </div>
+      <div className="mt-2 grid gap-2 sm:grid-cols-2">
+        {segments.map((segment) => (
+          <div key={segment.label} className="flex items-center justify-between gap-3 text-[11px] text-muted-foreground">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: segment.color }} />
+              <span className="truncate">{segment.label}</span>
+            </div>
+            <span className="font-semibold text-foreground/80">{formatValue(segment.value)}</span>
+          </div>
+        ))}
+      </div>
+      <MicroTooltip tooltip={tooltip} />
+    </div>
+  );
+}
+
+function RadarMicrochart({ metrics }) {
+  const [tooltip, setTooltip] = useState(null);
+  const size = 180;
+  const center = size / 2;
+  const radius = 58;
+  const levels = 4;
+  const points = metrics.map((metric, index) => {
+    const angle = (Math.PI * 2 * index) / metrics.length - Math.PI / 2;
+    const valueRadius = radius * Math.max(0, Math.min(1, metric.value / 100));
+    return {
+      ...metric,
+      angle,
+      x: center + Math.cos(angle) * valueRadius,
+      y: center + Math.sin(angle) * valueRadius,
+      lx: center + Math.cos(angle) * (radius + 18),
+      ly: center + Math.sin(angle) * (radius + 18)
+    };
+  });
+  const polygon = points.map((point) => `${point.x},${point.y}`).join(' ');
+
+  return (
+    <div className="relative flex items-center justify-center">
+      <svg viewBox={`0 0 ${size} ${size}`} className="h-[180px] w-[180px] overflow-visible">
+        {Array.from({ length: levels }).map((_, index) => {
+          const levelRadius = (radius * (index + 1)) / levels;
+          const ring = metrics
+            .map((_, metricIndex) => {
+              const angle = (Math.PI * 2 * metricIndex) / metrics.length - Math.PI / 2;
+              return `${center + Math.cos(angle) * levelRadius},${center + Math.sin(angle) * levelRadius}`;
+            })
+            .join(' ');
+          return <polygon key={levelRadius} points={ring} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />;
+        })}
+        {points.map((point) => (
+          <line key={`${point.label}-axis`} x1={center} y1={center} x2={point.lx} y2={point.ly} stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+        ))}
+        <polygon
+          points={polygon}
+          fill="rgba(76,175,115,0.14)"
+          stroke="rgba(76,175,115,0.8)"
+          strokeWidth="1.5"
+          style={{ transition: 'all 220ms ease' }}
+        />
+        {points.map((point) => (
+          <g key={point.label}>
+            <circle
+              cx={point.x}
+              cy={point.y}
+              r="4"
+              fill="rgba(76,175,115,0.95)"
+              stroke="rgba(11,15,20,0.9)"
+              strokeWidth="1.5"
+              onMouseEnter={() => setTooltip({ label: point.label, value: `${Math.round(point.value)}/100`, x: point.x, y: point.y })}
+              onMouseLeave={() => setTooltip(null)}
+              style={{ cursor: 'help', transition: 'transform 180ms ease, opacity 180ms ease' }}
+            />
+            <text
+              x={point.lx}
+              y={point.ly}
+              textAnchor={point.lx < center - 8 ? 'end' : point.lx > center + 8 ? 'start' : 'middle'}
+              dominantBaseline={point.ly < center ? 'baseline' : 'hanging'}
+              fill="rgba(255,255,255,0.72)"
+              fontSize="10"
+              fontWeight="700"
+              letterSpacing="0.08em"
+            >
+              {point.label}
+            </text>
+          </g>
+        ))}
+      </svg>
+      <MicroTooltip tooltip={tooltip ? { ...tooltip, x: tooltip.x, y: tooltip.y } : null} />
+    </div>
+  );
+}
+
 export default function NetworkView({
   nodes,
   edges,
@@ -1231,6 +1379,7 @@ export default function NetworkView({
   const [shareFeedback, setShareFeedback] = useState('idle');
   const [snapshotFeedback, setSnapshotFeedback] = useState('idle');
   const [exportFeedback, setExportFeedback] = useState('idle');
+  const [analysisExpanded, setAnalysisExpanded] = useState(false);
 
   const getSafeHoverEvent = (event) => createSafeHoverEvent(event);
 
@@ -2784,6 +2933,62 @@ export default function NetworkView({
     return observations.slice(0, 4);
   }, [graph.nodes, graph.edges, graph.links, canonicalNodeMap, activeScenarioPreset, traceActive, tracedPath, traceEndpoints]);
 
+  const dynamicInsightSystem = useMemo(() => {
+    const visibleNodes = graph.nodes || [];
+    const visibleEdges = graph.edges || graph.links || [];
+
+    const layerCounts = new Map();
+    visibleNodes.forEach((node) => {
+      const key = toTitleCase(node.layer || 'Unknown');
+      layerCounts.set(key, (layerCounts.get(key) || 0) + 1);
+    });
+    const layerSegments = [...layerCounts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([label, value], index) => ({
+        label,
+        value,
+        color: ['#4CAF73', '#67d7ff', '#f7c76a', '#d2a8ff', '#ffab73'][index % 5]
+      }));
+
+    const evidenceBuckets = {
+      'Higher confidence': 0,
+      'Moderate confidence': 0,
+      'Illustrative / softer': 0
+    };
+    visibleEdges.forEach((edge) => {
+      const rank = normalizeConfidenceRank(edge.confidence || edge.verification_status || edge.evidence_status);
+      if (rank >= 3) evidenceBuckets['Higher confidence'] += 1;
+      else if (rank === 2) evidenceBuckets['Moderate confidence'] += 1;
+      else evidenceBuckets['Illustrative / softer'] += 1;
+    });
+    const evidenceSegments = [
+      { label: 'Higher confidence', value: evidenceBuckets['Higher confidence'], color: '#4CAF73' },
+      { label: 'Moderate confidence', value: evidenceBuckets['Moderate confidence'], color: '#67d7ff' },
+      { label: 'Illustrative / softer', value: evidenceBuckets['Illustrative / softer'], color: '#6b7280' }
+    ];
+
+    const controlSummaries = visibleNodes
+      .map((node) => ({ node, metrics: calculateControlPointMetrics(node, canonicalNodeMap, visibleEdges) }))
+      .sort((a, b) => b.metrics.score - a.metrics.score);
+
+    const avgDegree = visibleNodes.length ? (visibleEdges.length * 2) / visibleNodes.length : 0;
+    const strongestEvidenceEdges = evidenceBuckets['Higher confidence'] + evidenceBuckets['Moderate confidence'];
+    const multiLayerNodes = controlSummaries.filter((item) => item.metrics.linkedLayers > 1).length;
+    const topControlScore = controlSummaries[0]?.metrics?.score || 0;
+    const linkedLayerPeak = controlSummaries[0]?.metrics?.linkedLayers || 0;
+
+    const radarMetrics = [
+      { label: 'Connectivity', value: Math.min(100, (avgDegree / 6) * 100) },
+      { label: 'Layer Reach', value: Math.min(100, (linkedLayerPeak / Math.max(1, layerCounts.size || 1)) * 100) },
+      { label: 'Evidence', value: visibleEdges.length ? (strongestEvidenceEdges / visibleEdges.length) * 100 : 0 },
+      { label: 'Control', value: Math.min(100, (topControlScore / 18) * 100) },
+      { label: 'Bridge', value: visibleNodes.length ? (multiLayerNodes / visibleNodes.length) * 100 : 0 }
+    ];
+
+    return { layerSegments, evidenceSegments, radarMetrics };
+  }, [graph.nodes, graph.edges, graph.links, canonicalNodeMap]);
+
   const insightExportText = useMemo(() => {
     const sections = [];
 
@@ -3207,7 +3412,6 @@ export default function NetworkView({
         </div>
       </div>
 
-
       {globalInsightStrip.length ? (
         <div className="rounded-lg border border-border/25 bg-card/10 px-4 py-3 backdrop-blur-sm">
           <div className="flex items-start justify-between gap-3">
@@ -3237,6 +3441,65 @@ export default function NetworkView({
           </div>
         </div>
       ) : null}
+
+      <div className="rounded-lg border border-border/20 bg-card/5 px-4 py-3 backdrop-blur-sm">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <CardKicker>Supporting Analysis</CardKicker>
+            <div className="mt-1 text-sm font-bold text-foreground">Composition and signal breakdown</div>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+              Supporting charts sit below the primary summaries so the graph remains the hero while this section adds extra shape to the current slice.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setAnalysisExpanded((current) => !current)}
+            className="inline-flex items-center gap-2 self-start rounded-md border border-border/30 bg-muted/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+          >
+            <span>{analysisExpanded ? 'Hide analysis' : 'Show analysis'}</span>
+          </button>
+        </div>
+
+        {analysisExpanded ? (
+          <div className="mt-4 grid gap-3 xl:grid-cols-[1.15fr_1.15fr_1fr]">
+            <MicroBandCard
+              kicker="Layer composition"
+              title="Which layers currently dominate"
+              summary="A compact view of the visible slice, helping the summary cards read as structure rather than just counts."
+            >
+              <StackedBarMicrochart
+                segments={dynamicInsightSystem.layerSegments}
+                formatValue={(value) => `${value} node${value === 1 ? '' : 's'}`}
+              />
+            </MicroBandCard>
+
+            <MicroBandCard
+              kicker="Evidence mix"
+              title="How grounded the visible relationships are"
+              summary="Higher-confidence and moderate-confidence links are separated from illustrative mapping so the slice reads with the right level of trust."
+            >
+              <StackedBarMicrochart
+                segments={dynamicInsightSystem.evidenceSegments}
+                formatValue={(value) => `${value} link${value === 1 ? '' : 's'}`}
+              />
+            </MicroBandCard>
+
+            <MicroBandCard
+              kicker="System fingerprint"
+              title="Current slice behaviour"
+              summary="A compact radar of connectivity, evidence, layer reach, control strength, and bridge potential for the visible graph."
+            >
+              <RadarMicrochart metrics={dynamicInsightSystem.radarMetrics} />
+            </MicroBandCard>
+          </div>
+        ) : (
+          <div className="mt-4 flex flex-wrap gap-2 text-[10px] font-bold uppercase tracking-widest text-foreground/60">
+            <span className="rounded-md border border-border/25 bg-muted/10 px-2.5 py-1">Layer composition</span>
+            <span className="rounded-md border border-border/25 bg-muted/10 px-2.5 py-1">Evidence mix</span>
+            <span className="rounded-md border border-border/25 bg-muted/10 px-2.5 py-1">System fingerprint</span>
+          </div>
+        )}
+      </div>
 
       <div className={`grid gap-4 ${legendVisible && !expanded ? 'xl:grid-cols-[1fr_260px]' : 'grid-cols-1'}`}>
         <div className="space-y-4">
