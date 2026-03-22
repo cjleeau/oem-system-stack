@@ -63,9 +63,11 @@ function trackView(view) {
   }
 }
 
+const INITIAL_APP_STATE = { ...DEFAULT_STATE, view: 'network' };
+
 export default function App() {
   const [data, setData] = useState({ nodes: [], edges: [] });
-  const [state, setState] = useState(DEFAULT_STATE);
+  const [state, setState] = useState(INITIAL_APP_STATE);
   const [tooltip, setTooltip] = useState({ visible: false, x: 0, y: 0, data: null, kind: 'node' });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -135,7 +137,7 @@ export default function App() {
   }, []);
 
   const onReset = useCallback(() => {
-    setState((current) => ({ ...DEFAULT_STATE, view: current.view }));
+    setState((current) => ({ ...INITIAL_APP_STATE, view: current.view }));
   }, []);
 
   const clearTooltip = useCallback(() => {
